@@ -13,7 +13,7 @@ private:
     float mLightDis = 2.0f;
 
     float mAngle = 0.0f;
-    float mSpeed = 1.0f;
+    float mSpeed = 0.0f;
 
 private:
     glow::SharedProgram mShaderOutput;
