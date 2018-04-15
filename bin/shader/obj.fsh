@@ -6,10 +6,11 @@ uniform sampler2D uTexNormal;
 
 in vec3 vWorldPosition;
 in vec3 vNormal;
+in vec4 vColor;
 in vec3 vTangent;
 in vec2 vTexCoord;
 
-out vec3 fColor;
+out vec4 fColor;
 
 void main()
 {
@@ -40,5 +41,6 @@ void main()
     float albedo = ka;
     float diffuse = kd * max(0, dot(N, L));
     float specular = ks * pow(max(0, dot(N, H)), shininess);
-    fColor = color * (albedo + diffuse + specular);
+//    fColor = color * (albedo + diffuse + specular);
+    fColor = vColor;
 }

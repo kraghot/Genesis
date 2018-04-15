@@ -7,6 +7,7 @@
 class GlowApp : public glow::glfw::GlfwApp
 {
 private:
+    glow::SharedVertexArray createPerlinTerrain();
     glm::vec3 mClearColor = {0 / 255.0f, 85 / 255.0f, 159 / 255.0f};
     glm::vec3 mLightDir = normalize(glm::vec3(.2, .7, .7));
     float mLightDis = 2.0f;
@@ -23,6 +24,7 @@ private:
 
     glow::SharedProgram mShaderObj;
     glow::SharedVertexArray mMeshCube;
+    glow::SharedVertexArray mPerlinTest;
     glow::SharedTexture2D mTextureColor;
     glow::SharedTexture2D mTextureNormal;
 

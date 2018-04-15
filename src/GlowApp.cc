@@ -1,4 +1,5 @@
 #include "GlowApp.hh"
+#include "PerlinNoise.hh"
 
 #include <AntTweakBar.h>
 
@@ -17,8 +18,69 @@
 #include <glow-extras/assimp/Importer.hh>
 #include <glow-extras/camera/GenericCamera.hh>
 #include <glow-extras/geometry/Quad.hh>
+#include <glow/objects/ElementArrayBuffer.hh>
 
 using namespace glow;
+
+SharedVertexArray GlowApp::createPerlinTerrain()
+{
+    std::vector<glm::vec3> positions;
+    std::vector<glm::vec3> normals;
+    std::vector<glm::vec4> colors;
+    std::vector<uint32_t> indices;
+
+    PerlinNoise perlin(1);
+
+    const int dim = 20;
+    const uint32_t restart = 65535;
+    constexpr unsigned int numberOfVertices = dim * dim;
+    positions.resize(numberOfVertices);
+    normals.resize(numberOfVertices);
+    colors.resize(numberOfVertices);
+
+    for(int i = 0; i < dim; i++)
+    {
+//        indices.push_back(dim * i);
+        indices.push_back(dim * (i+1));
+        for(int j = 0; j < dim; j++)
+        {
+            float noise = perlin.noise((double)i/dim, (double)j/dim, 0);
+            positions.at(i*dim + j) = {i, 5 * noise, j};
+            normals.at(i*dim + j) = {0, 1, 0};
+            colors.at(i*dim + j) = {noise, noise, noise, 1.0f};
+            if(i != dim - 1)
+                !(j % 2) ? indices.push_back((dim * i) + j) : indices.push_back(((dim) * (i +1)) + j);
+        }
+        indices.push_back((dim * (i)) + dim-1);
+        indices.push_back(restart);
+    }
+
+    std::vector<SharedArrayBuffer> abs;
+
+    auto ab = ArrayBuffer::create();
+    ab->defineAttribute<glm::vec3>("aPosition");
+    ab->bind().setData(positions);
+    abs.push_back(ab);
+
+    ab = ArrayBuffer::create();
+    ab->defineAttribute<glm::vec3>("aNormal");
+    ab->bind().setData(normals);
+    abs.push_back(ab);
+
+    ab = ArrayBuffer::create();
+    ab->defineAttribute<glm::vec4>("aColor");
+    ab->bind().setData(colors);
+    abs.push_back(ab);
+
+    for (auto const& ab : abs)
+        ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Perlin");
+
+    auto eab = ElementArrayBuffer::create(indices);
+    eab->setObjectLabel("Perlin");
+    auto va = VertexArray::create(abs, eab, GL_TRIANGLE_STRIP);
+    va->setObjectLabel("Perlin");
+    return va;
+}
 
 void GlowApp::init()
 {
@@ -45,6 +107,7 @@ void GlowApp::init()
     mShaderObj = Program::createFromFile("shader/obj");
     mTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
     mTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
+    mPerlinTest = createPerlinTerrain();
 
     // set up framebuffer and output
     mShaderOutput = Program::createFromFile("shader/output");
@@ -85,8 +148,10 @@ void GlowApp::render(float elapsedSeconds)
     // render to framebuffer
     {
         auto fb = mFramebuffer->bind();
-        GLOW_SCOPED(enable, GL_CULL_FACE);  // use backface culling
+//        GLOW_SCOPED(enable, GL_CULL_FACE);  // use backface culling
         GLOW_SCOPED(enable, GL_DEPTH_TEST); // use z-Buffer
+        GLOW_SCOPED(enable, GL_PRIMITIVE_RESTART);
+        glPrimitiveRestartIndex(65535);
 
         // clear buffer (color + depth)
         {
@@ -110,7 +175,8 @@ void GlowApp::render(float elapsedSeconds)
             shader.setTexture("uTexColor", mTextureColor);
             shader.setTexture("uTexNormal", mTextureNormal);
 
-            mMeshCube->bind().draw();
+//            mMeshCube->bind().draw();
+            mPerlinTest->bind().draw();
         }
     }
 
