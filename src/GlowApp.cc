@@ -81,6 +81,22 @@ SharedVertexArray GlowApp::createPerlinTerrain()
     eab->setObjectLabel("Perlin");
     auto va = VertexArray::create(abs, eab, GL_TRIANGLE_STRIP);
     va->setObjectLabel("Perlin");
+
+    // manually flip in order to export to bitmap
+    if(false)
+    {
+        std::ostringstream filename;
+        filename << "terrain-8bbp-" << dim << "x" << dim << ".raw";
+        std::ofstream file (filename.str(), std::ios::out | std::ios::binary);
+        std::vector<uint8_t> byteField;
+        byteField.resize(numberOfVertices);
+        for(auto it : positions)
+        {
+            byteField.push_back(it.y * (255/5));
+        }
+        file.write((char *)byteField.data(), byteField.size());
+    }
+
     return va;
 }
 
