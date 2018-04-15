@@ -29,7 +29,7 @@ SharedVertexArray GlowApp::createPerlinTerrain()
     std::vector<glm::vec4> colors;
     std::vector<uint32_t> indices;
 
-    PerlinNoise perlin(9812739841790);
+    PerlinNoise perlin(39841790);
 
     const int dim = 100;
     const uint32_t restart = 65535;
@@ -40,18 +40,20 @@ SharedVertexArray GlowApp::createPerlinTerrain()
 
     for(int i = 0; i < dim; i++)
     {
-//        indices.push_back(dim * i);
-        indices.push_back(dim * (i+1));
         for(int j = 0; j < dim; j++)
         {
-            float noise = perlin.noise(i, j, 0.8);
-            positions.at(i*dim + j) = {i, 10 * noise, j};
+            float x = 10 * ((float)i / dim), y = 10 * ((float)j/dim);
+            float noise = perlin.noise(x, y, 0.8);
+            positions.at(i*dim + j) = {i, 5 * noise, j};
             normals.at(i*dim + j) = {0, 1, 0};
-            colors.at(i*dim + j) = {noise, noise, noise, 1.0f};
+            float colornoise = noise + 1.0f / 2.0f;
+            colors.at(i*dim + j) = {colornoise, colornoise, colornoise, 1.0f};
             if(i != dim - 1)
-                !(j % 2) ? indices.push_back((dim * i) + j) : indices.push_back(((dim) * (i +1)) + j);
+            {
+                indices.push_back(i* dim + j);
+                indices.push_back((i+1) * dim + j);
+            }
         }
-        indices.push_back((dim * (i)) + dim-1);
         indices.push_back(restart);
     }
 
