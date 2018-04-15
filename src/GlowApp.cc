@@ -89,7 +89,7 @@ SharedVertexArray GlowApp::createPerlinTerrain()
         filename << "terrain-8bbp-" << dim << "x" << dim << ".raw";
         std::ofstream file (filename.str(), std::ios::out | std::ios::binary);
         std::vector<uint8_t> byteField;
-        byteField.resize(numberOfVertices);
+        byteField.reserve(numberOfVertices);
         for(auto it : positions)
         {
             byteField.push_back(it.y * (255/5));
