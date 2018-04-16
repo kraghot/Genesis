@@ -23,6 +23,17 @@
 #include<glow/objects/ArrayBuffer.hh>
 #include<glow/objects/ElementArrayBuffer.hh>
 
+enum ETextureFiltering
+{
+    TEXTURE_FILTER_MAG_NEAREST = 0, // Nearest criterion for magnification
+    TEXTURE_FILTER_MAG_BILINEAR, // Bilinear criterion for magnification
+    TEXTURE_FILTER_MIN_NEAREST, // Nearest criterion for minification
+    TEXTURE_FILTER_MIN_BILINEAR, // Bilinear criterion for minification
+    TEXTURE_FILTER_MIN_NEAREST_MIPMAP, // Nearest criterion for minification, but on closest mipmap
+    TEXTURE_FILTER_MIN_BILINEAR_MIPMAP, // Bilinear criterion for minification, but on closest mipmap
+    TEXTURE_FILTER_MIN_TRILINEAR, // Bilinear criterion for minification on two closest mipmaps, then averaged
+};
+
 inline long getFileSize(FILE *file)
     {
         long lCurPos, lEndPos;
@@ -62,18 +73,22 @@ public:
     float getHeightAt(const glm::vec3& position);
 
     //Load textures into 1 of 3 texture stages (3 stages supported; 0 1 and 2
-    bool LoadTexture(std::string& filename, unsigned int textureStage);
+    void LoadTexture(const char *filename, unsigned int textureStage);
+
+    void BindTerrainTexture(glow::SharedTexture2D uiTexture, GLuint uiSampler, int unit);
 
    static const unsigned int numLayers = 2; //2+1
 
-   glow::SharedTexture2DArray terrainColor[numLayers];
-   glow::SharedTexture2DArray terrainNormal[numLayers];
+   glow::SharedTexture2D terrainColor[numLayers];
+   glow::SharedTexture2D terrainNormal[numLayers];
 
    std::vector<glm::vec3> positions;
    std::vector<glm::vec3> normals;
    std::vector<glm::vec4> colors;
    std::vector<uint32_t> indices;
    std::vector<glm::vec2> tex0buffer;
+
+   GLuint uiSampler;
 
 
 
@@ -107,6 +122,9 @@ public:
             return 0.0f;
     }
 
+    float m_fHeightScale;
+    float m_fBlockScale;
+
 
 
 
@@ -116,8 +134,6 @@ private:
     // The dimensions of the heightmap texture
     glm::uvec2 m_HeightmapDimensions;
 
-    float m_fHeightScale;
-    float m_fBlockScale;
 
 
 

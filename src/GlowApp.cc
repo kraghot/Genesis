@@ -21,6 +21,8 @@
 #include <glow-extras/geometry/Quad.hh>
 #include <glow/objects/ElementArrayBuffer.hh>
 
+MultiLayeredHeightmap test(30, 2);
+
 using namespace glow;
 
 SharedVertexArray GlowApp::createPerlinTerrain()
@@ -105,13 +107,18 @@ void GlowApp::init()
     TwAddVarRW(tweakbar(), "light distance", TW_TYPE_FLOAT, &mLightDis, "group=scene step=0.1 min=1 max=100");
     TwAddVarRW(tweakbar(), "rotation speed", TW_TYPE_FLOAT, &mSpeed, "group=scene step=0.1");
 
-   MultiLayeredHeightmap test(30, 2);
+
 
     // load object
     mMeshCube = assimp::Importer().load("mesh/cube.obj");
     mShaderObj = Program::createFromFile("shader/obj");
     mTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
     mTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
+
+    test.LoadTexture("texture/sand_grass_02.jpg", 0); // samo ovo iscrta
+    test.LoadTexture("texture/sand_grass_02.jpg", 1);
+    test.LoadTexture("texture/test.JPG", 2);
+
     mPerlinTest = test.LoadHeightmap("texture/terrain0-8bbp-257x257.raw", 8, 257, 257);
 
     // set up framebuffer and output
@@ -179,6 +186,18 @@ void GlowApp::render(float elapsedSeconds)
 
             shader.setTexture("uTexColor", mTextureColor);
             shader.setTexture("uTexNormal", mTextureNormal);
+
+            shader.setUniform("fRenderHeight", test.m_fHeightScale);
+
+
+            for(unsigned int i=0; i<3; i++)
+                {
+                    char sSamplerName[256];
+                    sprintf(sSamplerName, "gSampler[%d]", i);
+                    //test.terrainColor[i]->bind();
+                    test.BindTerrainTexture(test.terrainColor[i], test.uiSampler, i);
+                    shader.setUniform(sSamplerName,GL_SAMPLER_2D, 3, &test.uiSampler);
+                }
 
 //            mMeshCube->bind().draw();
             mPerlinTest->bind().draw();

@@ -24,10 +24,9 @@ GlowApp GlowAppObject;
 
 
 MultiLayeredHeightmap::MultiLayeredHeightmap(float heightScale, float blockScale):
-    m_LocalToWorldMatrix(1),
-    m_HeightmapDimensions(0,0),
     m_fHeightScale(heightScale),
-    m_fBlockScale(blockScale)
+    m_fBlockScale(blockScale),
+    m_HeightmapDimensions(0,0)
     {
 
 }
@@ -37,26 +36,31 @@ MultiLayeredHeightmap::~MultiLayeredHeightmap(){
 }
 
 
-bool MultiLayeredHeightmap::LoadTexture(std::string &filename, unsigned int textureStage){
+void MultiLayeredHeightmap::LoadTexture(const char* filename, unsigned int textureStage){
 
 
-    terrainColor[textureStage] = glow::Texture2DArray::createFromFile(filename, glow::ColorSpace::sRGB);
-    terrainNormal[textureStage] = glow::Texture2DArray::createFromFile(filename, glow::ColorSpace::Linear);
+    terrainColor[textureStage] = glow::Texture2D::createFromFile(filename, glow::ColorSpace::sRGB);
 
-    if(terrainColor[textureStage] != 0 && terrainNormal[textureStage] !=0){
+
+
+   // terrainNormal[textureStage] = glow::Texture2D::createFromFile(filename, glow::ColorSpace::Linear);
+
+    if(terrainColor[textureStage] != 0){
         printf("Terrain color successfully loaded.");
         glBindTexture(terrainColor[textureStage]->getTarget(), terrainColor[textureStage]->getObjectName()); //mozda zamjeniti sa
+        glGenSamplers(1, &uiSampler);
+        glBindSampler(0, uiSampler);
+        glSamplerParameteri(uiSampler, TEXTURE_FILTER_MAG_BILINEAR, TEXTURE_FILTER_MIN_BILINEAR_MIPMAP);
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
         //glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
         glBindTexture( GL_TEXTURE_2D, 0 );
-        return 1;
+        printf("Successful loading texture for texture stage %u",textureStage);
     }
     else {
         printf("Error loading texture for texture stage %u",textureStage);
-        return 0;
     }
 }
 
@@ -112,6 +116,9 @@ glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filenam
     float halfTerrainWidth = terrainWidth * 0.5f;
     float halfTerrainHeight = terrainHeight * 0.5f;
 
+    float fTextureU = float(width)*0.1f;
+    float fTextureV = float(height)*0.1f;
+
     for ( unsigned int j = 0; j < height; ++j )
         {
             for ( unsigned i = 0; i < width; ++i )
@@ -133,13 +140,14 @@ glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filenam
 
                 normals.at(index) = glm::vec3(0);
                 positions.at(index) = glm::vec3(X, Y, Z);
+                tex0buffer.at(index) = glm::vec2(S*fTextureU, T*fTextureV);
 
 #if ENABLE_MULTITEXTURE
                 colors.at(index) = glm::vec4(tex0Contribution, tex0Contribution, tex0Contribution, tex2Contribution);
 #else
                 colors.at(index) = glm::vec4(1.0f);
 #endif
-                tex0buffer.at(index) = glm::vec2(S, T);
+
 
                 if(j != height - 1)
                 {
@@ -169,6 +177,11 @@ glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filenam
     ab->bind().setData(colors);
     abs.push_back(ab);
 
+    ab = glow::ArrayBuffer::create();
+    ab->defineAttribute<glm::vec2>("aTexCoord");
+    ab->bind().setData(tex0buffer);
+    abs.push_back(ab);
+
     for (auto const& ab : abs)
         ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Perlin");
 
@@ -184,6 +197,12 @@ glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filenam
 
     return va;
 
+}
+
+void MultiLayeredHeightmap::BindTerrainTexture(glow::SharedTexture2D uiTexture, GLuint uiSampler, int unit){
+        glActiveTexture(GL_TEXTURE0+unit);
+        glBindTexture(uiTexture->getTarget(), uiTexture->getObjectName());
+        glBindSampler(unit, uiSampler);
 }
 
 
