@@ -1,4 +1,6 @@
 #include "GlowApp.hh"
+#include "PerlinNoise.hh"
+#include "MultiLayeredHeightmap.hh"
 
 #include <AntTweakBar.h>
 
@@ -17,8 +19,71 @@
 #include <glow-extras/assimp/Importer.hh>
 #include <glow-extras/camera/GenericCamera.hh>
 #include <glow-extras/geometry/Quad.hh>
+#include <glow/objects/ElementArrayBuffer.hh>
 
 using namespace glow;
+
+SharedVertexArray GlowApp::createPerlinTerrain()
+{
+    std::vector<glm::vec3> positions;
+    std::vector<glm::vec3> normals;
+    std::vector<glm::vec4> colors;
+    std::vector<uint32_t> indices;
+
+    PerlinNoise perlin(39841790);
+
+    const int dim = 100;
+    const uint32_t restart = 65535;
+    constexpr unsigned int numberOfVertices = dim * dim;
+    positions.resize(numberOfVertices);
+    normals.resize(numberOfVertices);
+    colors.resize(numberOfVertices);
+
+    for(int i = 0; i < dim; i++)
+    {
+        for(int j = 0; j < dim; j++)
+        {
+            float x = 10 * ((float)i / dim), y = 10 * ((float)j/dim);
+            float noise = perlin.noise(x, y, 0.8);
+            positions.at(i*dim + j) = {i, 5 * noise, j};
+            normals.at(i*dim + j) = {0, 1, 0};
+            float colornoise = noise + 1.0f / 2.0f;
+            colors.at(i*dim + j) = {colornoise, colornoise, colornoise, 1.0f};
+            if(i != dim - 1)
+            {
+                indices.push_back(i* dim + j);
+                indices.push_back((i+1) * dim + j);
+            }
+        }
+        indices.push_back(restart);
+    }
+
+    std::vector<SharedArrayBuffer> abs;
+
+    auto ab = ArrayBuffer::create();
+    ab->defineAttribute<glm::vec3>("aPosition");
+    ab->bind().setData(positions);
+    abs.push_back(ab);
+
+    ab = ArrayBuffer::create();
+    ab->defineAttribute<glm::vec3>("aNormal");
+    ab->bind().setData(normals);
+    abs.push_back(ab);
+
+    ab = ArrayBuffer::create();
+    ab->defineAttribute<glm::vec4>("aColor");
+    ab->bind().setData(colors);
+    abs.push_back(ab);
+
+    for (auto const& ab : abs)
+        ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Perlin");
+
+    auto eab = ElementArrayBuffer::create(indices);
+    eab->setObjectLabel("Perlin");
+    auto va = VertexArray::create(abs, eab, GL_TRIANGLE_STRIP);
+    va->setObjectLabel("Perlin");
+    return va;
+}
 
 void GlowApp::init()
 {
@@ -28,7 +93,7 @@ void GlowApp::init()
     if (!std::ifstream("mesh/cube.obj").good())
     {
         glow::error() << "Working directory must be set to `bin/`!";
-		exit(0);
+        exit(0);
     }
 
     // configure GlfwApp
@@ -40,11 +105,14 @@ void GlowApp::init()
     TwAddVarRW(tweakbar(), "light distance", TW_TYPE_FLOAT, &mLightDis, "group=scene step=0.1 min=1 max=100");
     TwAddVarRW(tweakbar(), "rotation speed", TW_TYPE_FLOAT, &mSpeed, "group=scene step=0.1");
 
+   MultiLayeredHeightmap test(30, 2);
+
     // load object
     mMeshCube = assimp::Importer().load("mesh/cube.obj");
     mShaderObj = Program::createFromFile("shader/obj");
     mTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
     mTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
+    mPerlinTest = test.LoadHeightmap("texture/terrain0-8bbp-257x257.raw", 8, 257, 257);
 
     // set up framebuffer and output
     mShaderOutput = Program::createFromFile("shader/output");
@@ -85,8 +153,10 @@ void GlowApp::render(float elapsedSeconds)
     // render to framebuffer
     {
         auto fb = mFramebuffer->bind();
-        GLOW_SCOPED(enable, GL_CULL_FACE);  // use backface culling
+//        GLOW_SCOPED(enable, GL_CULL_FACE);  // use backface culling
         GLOW_SCOPED(enable, GL_DEPTH_TEST); // use z-Buffer
+        GLOW_SCOPED(enable, GL_PRIMITIVE_RESTART);
+        glPrimitiveRestartIndex(65535);
 
         // clear buffer (color + depth)
         {
@@ -110,7 +180,8 @@ void GlowApp::render(float elapsedSeconds)
             shader.setTexture("uTexColor", mTextureColor);
             shader.setTexture("uTexNormal", mTextureNormal);
 
-            mMeshCube->bind().draw();
+//            mMeshCube->bind().draw();
+            mPerlinTest->bind().draw();
         }
     }
 
