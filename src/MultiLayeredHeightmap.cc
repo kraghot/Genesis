@@ -41,23 +41,11 @@ void MultiLayeredHeightmap::LoadTexture(const char* filename, unsigned int textu
 
     terrainColor[textureStage] = glow::Texture2D::createFromFile(filename, glow::ColorSpace::sRGB);
 
-
-
-   // terrainNormal[textureStage] = glow::Texture2D::createFromFile(filename, glow::ColorSpace::Linear);
-
     if(terrainColor[textureStage] != 0){
         printf("Terrain color successfully loaded.");
-        glBindTexture(terrainColor[textureStage]->getTarget(), terrainColor[textureStage]->getObjectName()); //mozda zamjeniti sa
-        glGenSamplers(1, &uiSampler);
-        glBindSampler(0, uiSampler);
-        glSamplerParameteri(uiSampler, TEXTURE_FILTER_MAG_BILINEAR, TEXTURE_FILTER_MIN_BILINEAR_MIPMAP);
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-        //glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-        glBindTexture( GL_TEXTURE_2D, 0 );
-        printf("Successful loading texture for texture stage %u",textureStage);
+        auto tex = terrainColor[textureStage]->bind();
+        tex.setFilter(GL_LINEAR, GL_LINEAR);
+        tex.setWrap(GL_REPEAT, GL_REPEAT);
     }
     else {
         printf("Error loading texture for texture stage %u",textureStage);
@@ -92,7 +80,6 @@ glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filenam
     unsigned char* heightMap = new unsigned char[fileSize];
 
     std::fread(heightMap, fileSize, 1, file);
-
 
     //===========set up buffers===========
 
@@ -131,7 +118,7 @@ glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filenam
                 float T = ( j / (float)(height - 1) );
 
                 float X = ( S * terrainWidth ) - halfTerrainWidth;
-                float Y = heightValue * m_fHeightScale *(-1);
+                float Y = heightValue * m_fHeightScale ;
                 float Z = ( T * terrainHeight ) - halfTerrainHeight;
 
                 // Blend 3 textures depending on the height of the terrain

@@ -3,7 +3,9 @@ uniform vec3 uCamPos;
 
 uniform sampler2D uTexColor;
 uniform sampler2D uTexNormal;
-uniform sampler2D gSampler[3];
+uniform sampler2D gSampler0;
+uniform sampler2D gSampler1;
+uniform sampler2D gSampler2;
 uniform float fRenderHeight;
 
 in vec3 vWorldPosition;
@@ -17,15 +19,16 @@ out vec4 fColor;
 void main()
 {
     const float fRange1 = 0.15f;
-            const float fRange2 = 0.3f;
-            const float fRange3 = 0.65f;
-      const float fRange4 = 0.85f;
+    const float fRange2 = 0.3f;
+    const float fRange3 = 0.65f;
+    const float fRange4 = 0.85f;
 
     float fScale = (vWorldPosition.y*1.0f)/(fRenderHeight*1.0f);
     vec4 vTexColor = vec4(0.0f);
     vec4 testColor = vec4(1, 1, 1, 1);
 
-    if(fScale >= 0.0 && fScale <= fRange1)vTexColor = texture(gSampler[0], vTexCoord);
+    if(fScale >= 0.0 && fScale <= fRange1)
+        vTexColor = texture(gSampler0, vTexCoord);
     else if(fScale <= fRange2){
         fScale -= fRange1;
         fScale /= (fRange2-fRange1);
@@ -33,26 +36,27 @@ void main()
        float fScale2 = fScale;
        fScale = 1.0-fScale;
 
-       vTexColor += texture(gSampler[0], vTexCoord)*fScale;
-       vTexColor += texture(gSampler[1], vTexCoord)*fScale2;
+       vTexColor += texture(gSampler0, vTexCoord)*fScale;
+       vTexColor += texture(gSampler1, vTexCoord)*fScale2;
     }
 
-    else if(fScale <= fRange3)vTexColor = texture(gSampler[1], vTexCoord);
-            else if(fScale <= fRange4)
-            {
-                    fScale -= fRange3;
-                    fScale /= (fRange4-fRange3);
+    else if(fScale <= fRange3)
+        vTexColor = texture(gSampler1, vTexCoord);
+    else if(fScale <= fRange4)
+    {
+            fScale -= fRange3;
+            fScale /= (fRange4-fRange3);
 
-                    float fScale2 = fScale;
-                    fScale = 1.0-fScale;
+            float fScale2 = fScale;
+            fScale = 1.0-fScale;
 
-                    vTexColor += texture(gSampler[1], vTexCoord)*fScale;
-                    vTexColor += texture(gSampler[2], vTexCoord)*fScale2;
-            }
-            else vTexColor = texture(gSampler[2], vTexCoord);
+            vTexColor += texture(gSampler1, vTexCoord)*fScale;
+            vTexColor += texture(gSampler2, vTexCoord)*fScale2;
+    }
+    else vTexColor = texture(gSampler2, vTexCoord);
 
 
-    vec4 vFinalTexColor = fScale*vTexColor+(1-fScale);
+    vec4 vFinalTexColor = vTexColor;
 
 
 
@@ -84,5 +88,5 @@ void main()
     float diffuse = kd * max(0, dot(N, L));
     float specular = ks * pow(max(0, dot(N, H)), shininess);
 //    fColor = color * (albedo + diffuse + specular);
-    fColor = vFinalTexColor * vColor;
+    fColor = vFinalTexColor;
 }

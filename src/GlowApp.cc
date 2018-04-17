@@ -115,9 +115,9 @@ void GlowApp::init()
     mTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
     mTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
 
-    test.LoadTexture("texture/sand_grass_02.jpg", 0); // samo ovo iscrta
+    test.LoadTexture("texture/sand.jpg", 0); // samo ovo iscrta
     test.LoadTexture("texture/sand_grass_02.jpg", 1);
-    test.LoadTexture("texture/test.JPG", 2);
+    test.LoadTexture("texture/rock_2_4w.jpg", 2);
 
     mPerlinTest = test.LoadHeightmap("texture/terrain0-8bbp-257x257.raw", 8, 257, 257);
 
@@ -191,13 +191,11 @@ void GlowApp::render(float elapsedSeconds)
 
 
             for(unsigned int i=0; i<3; i++)
-                {
-                    char sSamplerName[256];
-                    sprintf(sSamplerName, "gSampler[%d]", i);
-                    //test.terrainColor[i]->bind();
-                    test.BindTerrainTexture(test.terrainColor[i], test.uiSampler, i);
-                    shader.setUniform(sSamplerName,GL_SAMPLER_2D, 3, &test.uiSampler);
-                }
+            {
+                char sSamplerName[256];
+                sprintf(sSamplerName, "gSampler%d", i);
+                shader.setTexture(sSamplerName, test.terrainColor[i]);
+            }
 
 //            mMeshCube->bind().draw();
             mPerlinTest->bind().draw();
