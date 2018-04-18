@@ -1,5 +1,5 @@
 #include "GlowApp.hh"
-#include "PerlinNoise.hh"
+#include "PerlinNoiseGenerator.hh"
 
 #include <AntTweakBar.h>
 
@@ -22,84 +22,6 @@
 
 using namespace glow;
 
-SharedVertexArray GlowApp::createPerlinTerrain()
-{
-    std::vector<glm::vec3> positions;
-    std::vector<glm::vec3> normals;
-    std::vector<glm::vec4> colors;
-    std::vector<uint32_t> indices;
-
-    PerlinNoise perlin(39841790);
-
-    const int dim = 100;
-    const uint32_t restart = 65535;
-    constexpr unsigned int numberOfVertices = dim * dim;
-    positions.resize(numberOfVertices);
-    normals.resize(numberOfVertices);
-    colors.resize(numberOfVertices);
-
-    for(int i = 0; i < dim; i++)
-    {
-        for(int j = 0; j < dim; j++)
-        {
-            float x = 10 * ((float)i / dim), y = 10 * ((float)j/dim);
-            float noise = perlin.noise(x, y, 0.8);
-            positions.at(i*dim + j) = {i, 5 * noise, j};
-            normals.at(i*dim + j) = {0, 1, 0};
-            float colornoise = noise + 1.0f / 2.0f;
-            colors.at(i*dim + j) = {colornoise, colornoise, colornoise, 1.0f};
-            if(i != dim - 1)
-            {
-                indices.push_back(i* dim + j);
-                indices.push_back((i+1) * dim + j);
-            }
-        }
-        indices.push_back(restart);
-    }
-
-    std::vector<SharedArrayBuffer> abs;
-
-    auto ab = ArrayBuffer::create();
-    ab->defineAttribute<glm::vec3>("aPosition");
-    ab->bind().setData(positions);
-    abs.push_back(ab);
-
-    ab = ArrayBuffer::create();
-    ab->defineAttribute<glm::vec3>("aNormal");
-    ab->bind().setData(normals);
-    abs.push_back(ab);
-
-    ab = ArrayBuffer::create();
-    ab->defineAttribute<glm::vec4>("aColor");
-    ab->bind().setData(colors);
-    abs.push_back(ab);
-
-    for (auto const& ab : abs)
-        ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Perlin");
-
-    auto eab = ElementArrayBuffer::create(indices);
-    eab->setObjectLabel("Perlin");
-    auto va = VertexArray::create(abs, eab, GL_TRIANGLE_STRIP);
-    va->setObjectLabel("Perlin");
-
-    // manually flip in order to export to bitmap
-    if(false)
-    {
-        std::ostringstream filename;
-        filename << "terrain-8bbp-" << dim << "x" << dim << ".raw";
-        std::ofstream file (filename.str(), std::ios::out | std::ios::binary);
-        std::vector<uint8_t> byteField;
-        byteField.reserve(numberOfVertices);
-        for(auto it : positions)
-        {
-            byteField.push_back(it.y * (255/5));
-        }
-        file.write((char *)byteField.data(), byteField.size());
-    }
-
-    return va;
-}
-
 void GlowApp::init()
 {
     GlfwApp::init(); // call to base!
@@ -120,12 +42,15 @@ void GlowApp::init()
     TwAddVarRW(tweakbar(), "light distance", TW_TYPE_FLOAT, &mLightDis, "group=scene step=0.1 min=1 max=100");
     TwAddVarRW(tweakbar(), "rotation speed", TW_TYPE_FLOAT, &mSpeed, "group=scene step=0.1");
 
+    PerlinNoiseGenerator generator(132412341);
+    mHeightField.init(&generator, 128);
+
     // load object
     mMeshCube = assimp::Importer().load("mesh/cube.obj");
     mShaderObj = Program::createFromFile("shader/obj");
     mTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
     mTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
-    mPerlinTest = createPerlinTerrain();
+    mPerlinTest = mHeightField.createPerlinTerrain();
 
     // set up framebuffer and output
     mShaderOutput = Program::createFromFile("shader/output");

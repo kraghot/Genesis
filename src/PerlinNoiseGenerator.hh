@@ -2,13 +2,14 @@
 #define PERLINNOISE_HH
 
 #include <vector>
+#include "NoiseGenerator.hh"
 
-class PerlinNoise
+class PerlinNoiseGenerator : public NoiseGenerator
 {
 public:
-    PerlinNoise();
-    PerlinNoise(unsigned int seed);
-    double noise(double x, double y, double z);
+    PerlinNoiseGenerator();
+    PerlinNoiseGenerator(unsigned int seed);
+    double noise(double x, double y, double z) override;
 
 private:
     double fade(double t);

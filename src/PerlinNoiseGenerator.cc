@@ -1,10 +1,10 @@
-#include "PerlinNoise.hh"
+#include "PerlinNoiseGenerator.hh"
 #include <cmath>
 #include <random>
 #include <algorithm>
 #include <numeric>
 
-PerlinNoise::PerlinNoise()
+PerlinNoiseGenerator::PerlinNoiseGenerator()
 {
     permutations = {
         151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,
@@ -23,7 +23,7 @@ PerlinNoise::PerlinNoise()
     permutations.insert(permutations.end(), permutations.begin(), permutations.end());
 }
 
-PerlinNoise::PerlinNoise(unsigned int seed)
+PerlinNoiseGenerator::PerlinNoiseGenerator(unsigned int seed)
 {
     permutations.resize(256);
 
@@ -33,7 +33,7 @@ PerlinNoise::PerlinNoise(unsigned int seed)
     permutations.insert(permutations.end(), permutations.begin(), permutations.end());
 }
 
-double PerlinNoise::noise(double x, double y, double z)
+double PerlinNoiseGenerator::noise(double x, double y, double z)
 {
     // Find the unit cube that contains the point
     int X = (int) floor(x) & 255;
@@ -67,17 +67,17 @@ double PerlinNoise::noise(double x, double y, double z)
     return res;
 }
 
-double PerlinNoise::fade(double t)
+double PerlinNoiseGenerator::fade(double t)
 {
     return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
-double PerlinNoise::lerp(double t, double a, double b)
+double PerlinNoiseGenerator::lerp(double t, double a, double b)
 {
     return a + t * (b - a);
 }
 
-double PerlinNoise::grad(int hash, double x, double y, double z)
+double PerlinNoiseGenerator::grad(int hash, double x, double y, double z)
 {
     int h = hash & 15;
     // Convert lower 4 bits of hash into 12 gradient directions

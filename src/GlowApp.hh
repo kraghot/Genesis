@@ -1,8 +1,8 @@
 #include <glow-extras/glfw/GlfwApp.hh>
-
 #include <glow/fwd.hh>
-
 #include <glm/glm.hpp>
+#include "HeightField.hh"
+
 
 class GlowApp : public glow::glfw::GlfwApp
 {
@@ -27,6 +27,8 @@ private:
     glow::SharedVertexArray mPerlinTest;
     glow::SharedTexture2D mTextureColor;
     glow::SharedTexture2D mTextureNormal;
+
+    HeightField mHeightField;
 
 public:
     // load resources, initialize app
