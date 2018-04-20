@@ -4,6 +4,8 @@
 
 #include <glm/glm.hpp>
 
+#include <glow/objects/Texture2DArray.hh>
+
 class GlowApp : public glow::glfw::GlfwApp
 {
 private:
@@ -27,6 +29,8 @@ private:
     glow::SharedVertexArray mPerlinTest;
     glow::SharedTexture2D mTextureColor;
     glow::SharedTexture2D mTextureNormal;
+
+    glow::SharedTexture2DArray tex;
 
 public:
     // load resources, initialize app

@@ -3,6 +3,9 @@ uniform vec3 uCamPos;
 
 uniform sampler2D uTexColor;
 uniform sampler2D uTexNormal;
+
+uniform sampler2DArray uTerrainTex;
+
 uniform sampler2D gSampler0;
 uniform sampler2D gSampler1;
 uniform sampler2D gSampler2;
@@ -28,7 +31,7 @@ void main()
     vec4 testColor = vec4(1, 1, 1, 1);
 
     if(fScale >= 0.0 && fScale <= fRange1)
-        vTexColor = texture(gSampler0, vTexCoord);
+        vTexColor = texture(uTerrainTex, vec3(vTexCoord, 0.3));
     else if(fScale <= fRange2){
         fScale -= fRange1;
         fScale /= (fRange2-fRange1);
@@ -36,12 +39,12 @@ void main()
        float fScale2 = fScale;
        fScale = 1.0-fScale;
 
-       vTexColor += texture(gSampler0, vTexCoord)*fScale;
-       vTexColor += texture(gSampler1, vTexCoord)*fScale2;
+       vTexColor += texture(uTerrainTex, vec3(vTexCoord, 0.3))*fScale;
+       vTexColor += texture(uTerrainTex, vec3(vTexCoord, 1.3))*fScale2;
     }
 
     else if(fScale <= fRange3)
-        vTexColor = texture(gSampler1, vTexCoord);
+        vTexColor = texture(uTerrainTex, vec3(vTexCoord, 1.3));
     else if(fScale <= fRange4)
     {
             fScale -= fRange3;
@@ -50,10 +53,10 @@ void main()
             float fScale2 = fScale;
             fScale = 1.0-fScale;
 
-            vTexColor += texture(gSampler1, vTexCoord)*fScale;
-            vTexColor += texture(gSampler2, vTexCoord)*fScale2;
+            vTexColor += texture(uTerrainTex, vec3(vTexCoord, 1.3))*fScale;
+            vTexColor += texture(uTerrainTex, vec3(vTexCoord, 2))*fScale2;
     }
-    else vTexColor = texture(gSampler2, vTexCoord);
+    else vTexColor = texture(uTerrainTex, vec3(vTexCoord, 2));
 
 
     vec4 vFinalTexColor = vTexColor;

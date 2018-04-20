@@ -15,6 +15,8 @@
 #include <glow/objects/Texture2D.hh>
 #include <glow/objects/TextureRectangle.hh>
 #include <glow/objects/VertexArray.hh>
+#include<glow/data/TextureData.hh>
+#include <glow/data/SurfaceData.hh>
 
 #include <glow-extras/assimp/Importer.hh>
 #include <glow-extras/camera/GenericCamera.hh>
@@ -115,6 +117,32 @@ void GlowApp::init()
     mTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
     mTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
 
+    auto tex0 = TextureData::createFromFile("texture/sand.jpg", ColorSpace::sRGB);
+    auto tex1 = TextureData::createFromFile("texture/sand_grass.png", ColorSpace::sRGB);
+    auto tex2 = TextureData::createFromFile("texture/rock_2_4w.jpg", ColorSpace::sRGB);
+
+    auto data0 = Texture2D::createFromData(tex0)->bind().getData<glm::vec3>();
+    auto data1 = Texture2D::createFromData(tex1)->bind().getData<glm::vec3>();
+    auto data2 = Texture2D::createFromData(tex2)->bind().getData<glm::vec3>();
+
+    auto s0 = tex0->getSurfaces()[0];
+    auto s1 = tex1->getSurfaces()[0];
+    auto s2 = tex2->getSurfaces()[0];
+
+    s0->setOffsetZ(0);
+    s1->setOffsetZ(1);
+    s2->setOffsetZ(2);
+
+    tex0->addSurface(s1);
+    tex0->addSurface(s2);
+    tex0->setTarget(GL_TEXTURE_2D_ARRAY);
+    tex0->setDepth(3);
+
+    tex = Texture2DArray::createFromData(tex0);
+
+
+
+
     test.LoadTexture("texture/sand.jpg", 0); // samo ovo iscrta
     test.LoadTexture("texture/sand_grass_02.jpg", 1);
     test.LoadTexture("texture/rock_2_4w.jpg", 2);
@@ -186,6 +214,8 @@ void GlowApp::render(float elapsedSeconds)
 
             shader.setTexture("uTexColor", mTextureColor);
             shader.setTexture("uTexNormal", mTextureNormal);
+
+            shader.setTexture("uTerrainTex", tex);
 
             shader.setUniform("fRenderHeight", test.m_fHeightScale);
 
