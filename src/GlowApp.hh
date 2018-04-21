@@ -1,7 +1,15 @@
+#include"MultiLayeredHeightmap.hh"
+
 #include <glow-extras/glfw/GlfwApp.hh>
 #include <glow/fwd.hh>
 #include <glm/glm.hpp>
 #include "HeightField.hh"
+
+
+#include <glow/objects/Texture2DArray.hh>
+
+#ifndef GLOWAPP
+#define GLOWAPP
 
 
 class GlowApp : public glow::glfw::GlfwApp
@@ -29,8 +37,11 @@ private:
     glow::SharedTexture2D mTextureNormal;
 
     HeightField mHeightField;
+    glow::SharedTexture2DArray tex;
+    MultiLayeredHeightmap mHeightmap;
 
 public:
+    GlowApp();
     // load resources, initialize app
     void init() override;
     // update game logic with fixed timestep
@@ -40,3 +51,5 @@ public:
     // called after window is resized
     void onResize(int w, int h) override;
 };
+
+#endif

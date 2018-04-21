@@ -22,6 +22,12 @@
 
 using namespace glow;
 
+GlowApp::GlowApp():
+    mHeightmap(20.0f,3.0f)
+{
+
+}
+
 void GlowApp::init()
 {
     GlfwApp::init(); // call to base!
@@ -30,11 +36,11 @@ void GlowApp::init()
     if (!std::ifstream("mesh/cube.obj").good())
     {
         glow::error() << "Working directory must be set to `bin/`!";
-		exit(0);
+        exit(0);
     }
 
     // configure GlfwApp
-    setTitle("GlowApp");
+    setTitle("Genesis");
 
     // set up tweakbar
     TwAddVarRW(tweakbar(), "bg color", TW_TYPE_COLOR3F, &mClearColor, "group=rendering");
@@ -42,15 +48,24 @@ void GlowApp::init()
     TwAddVarRW(tweakbar(), "light distance", TW_TYPE_FLOAT, &mLightDis, "group=scene step=0.1 min=1 max=100");
     TwAddVarRW(tweakbar(), "rotation speed", TW_TYPE_FLOAT, &mSpeed, "group=scene step=0.1");
 
-    PerlinNoiseGenerator generator(132412341);
-    mHeightField.init(&generator, 128);
+//    PerlinNoiseGenerator generator(132412341);
+//    mHeightField.init(&generator, 128);
+
+    //load heightmap, (RAW filename, Bits Per Pixel)
+    mPerlinTest= mHeightmap.LoadHeightmap("texture/terrain0-8bbp-257x257.raw", 8);
+
 
     // load object
-    mMeshCube = assimp::Importer().load("mesh/cube.obj");
+    //mMeshCube = assimp::Importer().load("mesh/cube.obj");
     mShaderObj = Program::createFromFile("shader/obj");
     mTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
     mTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
-    mPerlinTest = mHeightField.createPerlinTerrain();
+//    mPerlinTest = mHeightField.createPerlinTerrain();
+
+    //define textures for terrain
+    std::vector<std::string> mTerrainTextures = {"texture/sand.jpg", "texture/sand_grass.png", "texture/rock_2_4w.jpg"};
+    //load textures for terrain
+    tex = mHeightmap.LoadTexture(mTerrainTextures);
 
     // set up framebuffer and output
     mShaderOutput = Program::createFromFile("shader/output");
@@ -118,7 +133,11 @@ void GlowApp::render(float elapsedSeconds)
             shader.setTexture("uTexColor", mTextureColor);
             shader.setTexture("uTexNormal", mTextureNormal);
 
-//            mMeshCube->bind().draw();
+            //terrain 2d texture array
+            shader.setTexture("uTerrainTex", tex);
+
+            shader.setUniform("fRenderHeight", mHeightmap.m_fHeightScale);
+
             mPerlinTest->bind().draw();
         }
     }
