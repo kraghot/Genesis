@@ -1,3 +1,6 @@
+#ifndef MLHEIGHT
+#define MLHEIGHT
+
 #include<string>
 #include<istream>
 
@@ -25,9 +28,7 @@
 #include<glow/data/TextureData.hh>
 #include<glow/data/SurfaceData.hh>
 
-
-#ifndef MLHEIGHT
-#define MLHEIGHT
+#include "NoiseGenerator.hh"
 
 enum ETextureFiltering
 {
@@ -76,24 +77,16 @@ public:
     MultiLayeredHeightmap(float heightScale, float blockScale);
     virtual ~MultiLayeredHeightmap();
     glow::SharedVertexArray LoadHeightmap(const char *filename, unsigned char bitsPerPixel);
+    glow::SharedVertexArray GenerateTerrain(NoiseGenerator* generator, unsigned int dimX, unsigned int dimY, unsigned int octaves = 4, float freqScale = 0.5f, float maxHeight = 5.0f);
 
     // Get the height of the terrain at a position in world space, position = world space position
-    float getHeightAt(const glm::vec3& position);
+    float GetHeightAt(const glm::vec3& position);
 
     glow::SharedTexture2DArray LoadTexture(std::vector<std::string> textureName);
 
-   std::vector<glm::vec3> positions;
-   std::vector<glm::vec3> normals;
-   std::vector<glm::vec4> colors;
-   std::vector<uint32_t> indices;
-   std::vector<glm::vec2> tex0buffer;
-
-   std::vector<glow::SharedTextureData> tex;
-   std::vector<glow::SharedSurfaceData> surface;
-
     // translate the incoming char data array into a floating point value in the range [0…1]
     // If you wanted to load height maps that are stored MSB,LSB, you would have to reverse the array indices for values that read more than 1 byte.
-    inline float getHeightValue(const unsigned char* data, unsigned char numBytes){
+    inline float GetHeightValue(const unsigned char* data, unsigned char numBytes){
         switch ( numBytes )
             {
             case 1:
@@ -121,18 +114,37 @@ public:
             return 0.0f;
     }
 
-    float m_fHeightScale;
-    float m_fBlockScale;
+    /**
+     * @brief DumpToFile writes the position data to a RAW file
+     */
+    void DumpToFile();
 
+    float getMfHeightScale() const;
 
 private:
-    glm::mat4x4 m_LocalToWorldMatrix;
+    void MakeVertexArray();
+    void FillData(std::vector<float>& heights);
 
+    float mfHeightScale;
+    float mfBlockScale;
+
+    std::vector<glm::vec3> mPositions;
+    std::vector<glm::vec3> mNormals;
+    std::vector<glm::vec4> mColors;
+    std::vector<uint32_t> mIndices;
+    std::vector<glm::vec2> mTexCoords;
+
+    std::vector<glow::SharedTextureData> tex;
+    std::vector<glow::SharedSurfaceData> surface;
+
+    std::vector<glow::SharedArrayBuffer> mAbs;
+    glow::SharedElementArrayBuffer mEab;
+    glow::SharedVertexArray mVao;
+
+    glm::mat4x4 mLocalToWorldMatrix;
     // The dimensions of the heightmap texture
-    glm::uvec2 m_HeightmapDimensions;
-
-
-
+    glm::uvec2 mHeightmapDimensions;
+    unsigned int mNumberOfVertices;
 };
 
 #endif

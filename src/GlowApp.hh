@@ -3,7 +3,6 @@
 #include <glow-extras/glfw/GlfwApp.hh>
 #include <glow/fwd.hh>
 #include <glm/glm.hpp>
-#include "HeightField.hh"
 
 
 #include <glow/objects/Texture2DArray.hh>
@@ -36,7 +35,6 @@ private:
     glow::SharedTexture2D mTextureColor;
     glow::SharedTexture2D mTextureNormal;
 
-    HeightField mHeightField;
     glow::SharedTexture2DArray tex;
     MultiLayeredHeightmap mHeightmap;
 

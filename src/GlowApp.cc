@@ -52,7 +52,9 @@ void GlowApp::init()
 //    mHeightField.init(&generator, 128);
 
     //load heightmap, (RAW filename, Bits Per Pixel)
-    mPerlinTest= mHeightmap.LoadHeightmap("texture/terrain0-8bbp-257x257.raw", 8);
+//    mPerlinTest= mHeightmap.LoadHeightmap("texture/terrain0-8bbp-257x257.raw", 8);
+    PerlinNoiseGenerator noise(2924319);
+    mPerlinTest = mHeightmap.GenerateTerrain(&noise, 100, 100);
 
 
     // load object
@@ -136,7 +138,7 @@ void GlowApp::render(float elapsedSeconds)
             //terrain 2d texture array
             shader.setTexture("uTerrainTex", tex);
 
-            shader.setUniform("fRenderHeight", mHeightmap.m_fHeightScale);
+            shader.setUniform("fRenderHeight", mHeightmap.getMfHeightScale());
 
             mPerlinTest->bind().draw();
         }
