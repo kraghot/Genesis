@@ -37,9 +37,6 @@ MultiLayeredHeightmap::~MultiLayeredHeightmap(){
 
 
 glow::SharedTexture2DArray MultiLayeredHeightmap::LoadTexture(std::vector<std::string> textureName){
-    std::vector<glow::SharedTextureData> tex;
-    std::vector<glow::SharedSurfaceData> surface;
-
 
     tex.resize(textureName.size());
     surface.resize(textureName.size());
@@ -63,7 +60,7 @@ glow::SharedTexture2DArray MultiLayeredHeightmap::LoadTexture(std::vector<std::s
     return glow::Texture2DArray::createFromData(tex[0]);
 }
 
-glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filename, unsigned char bitsPerPixel, unsigned int width, unsigned int height){
+glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filename, unsigned char bitsPerPixel){
 
     //===========verifies the file we are trying to load exists and it is the size we are expecting based on the passed-in parameters===========
 
@@ -78,11 +75,16 @@ glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filenam
                 std::cerr << "File opened successfully" << std::endl;
 
     const unsigned int bytesPerPixel = bitsPerPixel / 8;
-    const unsigned int expectedFileSize = ( bytesPerPixel * width * height );
+    //const unsigned int expectedFileSize = ( bytesPerPixel * width * height );
     const unsigned int fileSize =  getFileSize( file );
 
-    if ( expectedFileSize != fileSize ){
-            std::cerr << "Expected file size [" << expectedFileSize << " bytes] differs from actual file size [" << fileSize << " bytes]" << std::endl;
+    float resolution = fileSize / bytesPerPixel;
+    unsigned int width = glm::sqrt(resolution);
+    unsigned int height = width;
+
+
+    if ( width * height != resolution ){
+            std::cerr << "Expected quadratic resolution! Resolution: " << resolution << " -> " << width <<"x"<< height << std::endl;
             return NULL;
     }
 
@@ -196,12 +198,5 @@ glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filenam
     return va;
 
 }
-
-void MultiLayeredHeightmap::BindTerrainTexture(glow::SharedTexture2D uiTexture, GLuint uiSampler, int unit){
-        glActiveTexture(GL_TEXTURE0+unit);
-        glBindTexture(uiTexture->getTarget(), uiTexture->getObjectName());
-        glBindSampler(unit, uiSampler);
-}
-
 
 

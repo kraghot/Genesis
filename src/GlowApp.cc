@@ -110,8 +110,8 @@ void GlowApp::init()
     TwAddVarRW(tweakbar(), "rotation speed", TW_TYPE_FLOAT, &mSpeed, "group=scene step=0.1");
 
 
-    //load heightmap
-    mTerrain = mHeightmap.LoadHeightmap("texture/terrain0-8bbp-257x257.raw", 8, 257, 257);
+    //load heightmap, (RAW filename, Bits Per Pixel)
+    mTerrain = mHeightmap.LoadHeightmap("texture/terrain0-8bbp-257x257.raw", 8);
 
 
     // load object
@@ -122,7 +122,7 @@ void GlowApp::init()
 
     //define textures for terrain
     std::vector<std::string> mTerrainTextures = {"texture/sand.jpg", "texture/sand_grass.png", "texture/rock_2_4w.jpg"};
-
+    //load textures for terrain
     tex = mHeightmap.LoadTexture(mTerrainTextures);
 
 

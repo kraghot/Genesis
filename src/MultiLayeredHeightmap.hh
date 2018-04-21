@@ -75,20 +75,12 @@ public:
     // float blockScale: determines the space between terrain vertices in world units for both the X and Z axes.
     MultiLayeredHeightmap(float heightScale, float blockScale);
     virtual ~MultiLayeredHeightmap();
-    glow::SharedVertexArray LoadHeightmap(const char *filename, unsigned char bitsPerPixel, unsigned int width, unsigned int height);
+    glow::SharedVertexArray LoadHeightmap(const char *filename, unsigned char bitsPerPixel);
 
     // Get the height of the terrain at a position in world space, position = world space position
     float getHeightAt(const glm::vec3& position);
 
-    //Load textures into 1 of 3 texture stages (3 stages supported; 0 1 and 2
     glow::SharedTexture2DArray LoadTexture(std::vector<std::string> textureName);
-
-    void BindTerrainTexture(glow::SharedTexture2D uiTexture, GLuint uiSampler, int unit);
-
-   static const unsigned int numLayers = 2; //2+1
-
-   glow::SharedTexture2D terrainColor[numLayers];
-   glow::SharedTexture2D terrainNormal[numLayers];
 
    std::vector<glm::vec3> positions;
    std::vector<glm::vec3> normals;
@@ -96,9 +88,8 @@ public:
    std::vector<uint32_t> indices;
    std::vector<glm::vec2> tex0buffer;
 
-   GLuint uiSampler;
-
-
+   std::vector<glow::SharedTextureData> tex;
+   std::vector<glow::SharedSurfaceData> surface;
 
     // translate the incoming char data array into a floating point value in the range [0…1]
     // If you wanted to load height maps that are stored MSB,LSB, you would have to reverse the array indices for values that read more than 1 byte.
@@ -139,6 +130,7 @@ private:
 
     // The dimensions of the heightmap texture
     glm::uvec2 m_HeightmapDimensions;
+
 
 
 };
