@@ -1,7 +1,5 @@
 #include "GlowApp.hh"
 #include "PerlinNoise.hh"
-#include "MultiLayeredHeightmap.hh"
-
 #include <AntTweakBar.h>
 
 #include <fstream>
@@ -23,7 +21,9 @@
 #include <glow-extras/geometry/Quad.hh>
 #include <glow/objects/ElementArrayBuffer.hh>
 
-MultiLayeredHeightmap test(30, 2);
+#include <typeinfo>
+
+//MultiLayeredHeightmap test(30, 2);
 
 using namespace glow;
 
@@ -101,7 +101,7 @@ void GlowApp::init()
     }
 
     // configure GlfwApp
-    setTitle("GlowApp");
+    setTitle("Genesis");
 
     // set up tweakbar
     TwAddVarRW(tweakbar(), "bg color", TW_TYPE_COLOR3F, &mClearColor, "group=rendering");
@@ -110,44 +110,21 @@ void GlowApp::init()
     TwAddVarRW(tweakbar(), "rotation speed", TW_TYPE_FLOAT, &mSpeed, "group=scene step=0.1");
 
 
+    //load heightmap
+    mTerrain = mHeightmap.LoadHeightmap("texture/terrain0-8bbp-257x257.raw", 8, 257, 257);
+
 
     // load object
-    mMeshCube = assimp::Importer().load("mesh/cube.obj");
+    //mMeshCube = assimp::Importer().load("mesh/cube.obj");
     mShaderObj = Program::createFromFile("shader/obj");
     mTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
     mTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
 
-    auto tex0 = TextureData::createFromFile("texture/sand.jpg", ColorSpace::sRGB);
-    auto tex1 = TextureData::createFromFile("texture/sand_grass.png", ColorSpace::sRGB);
-    auto tex2 = TextureData::createFromFile("texture/rock_2_4w.jpg", ColorSpace::sRGB);
+    //define textures for terrain
+    std::vector<std::string> mTerrainTextures = {"texture/sand.jpg", "texture/sand_grass.png", "texture/rock_2_4w.jpg"};
 
-    auto data0 = Texture2D::createFromData(tex0)->bind().getData<glm::vec3>();
-    auto data1 = Texture2D::createFromData(tex1)->bind().getData<glm::vec3>();
-    auto data2 = Texture2D::createFromData(tex2)->bind().getData<glm::vec3>();
+    tex = mHeightmap.LoadTexture(mTerrainTextures);
 
-    auto s0 = tex0->getSurfaces()[0];
-    auto s1 = tex1->getSurfaces()[0];
-    auto s2 = tex2->getSurfaces()[0];
-
-    s0->setOffsetZ(0);
-    s1->setOffsetZ(1);
-    s2->setOffsetZ(2);
-
-    tex0->addSurface(s1);
-    tex0->addSurface(s2);
-    tex0->setTarget(GL_TEXTURE_2D_ARRAY);
-    tex0->setDepth(3);
-
-    tex = Texture2DArray::createFromData(tex0);
-
-
-
-
-    test.LoadTexture("texture/sand.jpg", 0); // samo ovo iscrta
-    test.LoadTexture("texture/sand_grass_02.jpg", 1);
-    test.LoadTexture("texture/rock_2_4w.jpg", 2);
-
-    mPerlinTest = test.LoadHeightmap("texture/terrain0-8bbp-257x257.raw", 8, 257, 257);
 
     // set up framebuffer and output
     mShaderOutput = Program::createFromFile("shader/output");
@@ -215,20 +192,12 @@ void GlowApp::render(float elapsedSeconds)
             shader.setTexture("uTexColor", mTextureColor);
             shader.setTexture("uTexNormal", mTextureNormal);
 
+            //terrain 2d texture array
             shader.setTexture("uTerrainTex", tex);
 
-            shader.setUniform("fRenderHeight", test.m_fHeightScale);
+            shader.setUniform("fRenderHeight", mHeightmap.m_fHeightScale);
 
-
-            for(unsigned int i=0; i<3; i++)
-            {
-                char sSamplerName[256];
-                sprintf(sSamplerName, "gSampler%d", i);
-                shader.setTexture(sSamplerName, test.terrainColor[i]);
-            }
-
-//            mMeshCube->bind().draw();
-            mPerlinTest->bind().draw();
+            mTerrain->bind().draw();
         }
     }
 

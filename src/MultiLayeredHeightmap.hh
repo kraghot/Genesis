@@ -22,6 +22,12 @@
 #include<glow/objects/Texture2DArray.hh>
 #include<glow/objects/ArrayBuffer.hh>
 #include<glow/objects/ElementArrayBuffer.hh>
+#include<glow/data/TextureData.hh>
+#include<glow/data/SurfaceData.hh>
+
+
+#ifndef MLHEIGHT
+#define MLHEIGHT
 
 enum ETextureFiltering
 {
@@ -33,6 +39,8 @@ enum ETextureFiltering
     TEXTURE_FILTER_MIN_BILINEAR_MIPMAP, // Bilinear criterion for minification, but on closest mipmap
     TEXTURE_FILTER_MIN_TRILINEAR, // Bilinear criterion for minification on two closest mipmaps, then averaged
 };
+
+
 
 inline long getFileSize(FILE *file)
     {
@@ -73,7 +81,7 @@ public:
     float getHeightAt(const glm::vec3& position);
 
     //Load textures into 1 of 3 texture stages (3 stages supported; 0 1 and 2
-    void LoadTexture(const char *filename, unsigned int textureStage);
+    glow::SharedTexture2DArray LoadTexture(std::vector<std::string> textureName);
 
     void BindTerrainTexture(glow::SharedTexture2D uiTexture, GLuint uiSampler, int unit);
 
@@ -126,8 +134,6 @@ public:
     float m_fBlockScale;
 
 
-
-
 private:
     glm::mat4x4 m_LocalToWorldMatrix;
 
@@ -135,7 +141,6 @@ private:
     glm::uvec2 m_HeightmapDimensions;
 
 
-
-
-
 };
+
+#endif

@@ -36,20 +36,31 @@ MultiLayeredHeightmap::~MultiLayeredHeightmap(){
 }
 
 
-void MultiLayeredHeightmap::LoadTexture(const char* filename, unsigned int textureStage){
+glow::SharedTexture2DArray MultiLayeredHeightmap::LoadTexture(std::vector<std::string> textureName){
+    std::vector<glow::SharedTextureData> tex;
+    std::vector<glow::SharedSurfaceData> surface;
 
 
-    terrainColor[textureStage] = glow::Texture2D::createFromFile(filename, glow::ColorSpace::sRGB);
+    tex.resize(textureName.size());
+    surface.resize(textureName.size());
 
-    if(terrainColor[textureStage] != 0){
-        printf("Terrain color successfully loaded.");
-        auto tex = terrainColor[textureStage]->bind();
-        tex.setFilter(GL_LINEAR, GL_LINEAR);
-        tex.setWrap(GL_REPEAT, GL_REPEAT);
+    std::cout << "texname0 = "<<textureName[0]<< std::endl;
+
+    for(int i = 0; i < textureName.size(); i++){
+        tex[i] = (glow::TextureData::createFromFile(textureName[i], glow::ColorSpace::sRGB));
+        surface[i] = tex[i]->getSurfaces()[0];
     }
-    else {
-        printf("Error loading texture for texture stage %u",textureStage);
+
+    for(int j = 0; j < surface.size(); j++){
+
+     surface[j]->setOffsetZ(j);
+     tex[0]->addSurface(surface[j]);
     }
+
+    tex[0]->setTarget(GL_TEXTURE_2D_ARRAY);
+    tex[0]->setDepth(surface.size());
+
+    return glow::Texture2DArray::createFromData(tex[0]);
 }
 
 glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filename, unsigned char bitsPerPixel, unsigned int width, unsigned int height){
@@ -170,12 +181,12 @@ glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filenam
     abs.push_back(ab);
 
     for (auto const& ab : abs)
-        ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Perlin");
+        ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Heightmap");
 
     auto eab = glow::ElementArrayBuffer::create(indices);
-    eab->setObjectLabel("Perlin");
+    eab->setObjectLabel("Heightmap");
     auto va = glow::VertexArray::create(abs, eab, GL_TRIANGLE_STRIP);
-    va->setObjectLabel("Perlin");
+    va->setObjectLabel("Heightmap");
 
 
 

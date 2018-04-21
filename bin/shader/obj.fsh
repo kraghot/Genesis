@@ -31,7 +31,7 @@ void main()
     vec4 testColor = vec4(1, 1, 1, 1);
 
     if(fScale >= 0.0 && fScale <= fRange1)
-        vTexColor = texture(uTerrainTex, vec3(vTexCoord, 0.3));
+        vTexColor = texture(uTerrainTex, vec3(vTexCoord, 0.5));
     else if(fScale <= fRange2){
         fScale -= fRange1;
         fScale /= (fRange2-fRange1);
@@ -39,7 +39,7 @@ void main()
        float fScale2 = fScale;
        fScale = 1.0-fScale;
 
-       vTexColor += texture(uTerrainTex, vec3(vTexCoord, 0.3))*fScale;
+       vTexColor += texture(uTerrainTex, vec3(vTexCoord, 0.5))*fScale;
        vTexColor += texture(uTerrainTex, vec3(vTexCoord, 1.3))*fScale2;
     }
 

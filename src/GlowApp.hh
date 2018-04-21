@@ -1,3 +1,5 @@
+#include"MultiLayeredHeightmap.hh"
+
 #include <glow-extras/glfw/GlfwApp.hh>
 
 #include <glow/fwd.hh>
@@ -5,6 +7,10 @@
 #include <glm/glm.hpp>
 
 #include <glow/objects/Texture2DArray.hh>
+
+#ifndef GLOWAPP
+#define GLOWAPP
+
 
 class GlowApp : public glow::glfw::GlfwApp
 {
@@ -26,11 +32,15 @@ private:
 
     glow::SharedProgram mShaderObj;
     glow::SharedVertexArray mMeshCube;
-    glow::SharedVertexArray mPerlinTest;
+    glow::SharedVertexArray mTerrain;
     glow::SharedTexture2D mTextureColor;
     glow::SharedTexture2D mTextureNormal;
 
     glow::SharedTexture2DArray tex;
+
+    MultiLayeredHeightmap mHeightmap = MultiLayeredHeightmap(20,3);
+
+
 
 public:
     // load resources, initialize app
@@ -42,3 +52,5 @@ public:
     // called after window is resized
     void onResize(int w, int h) override;
 };
+
+#endif
