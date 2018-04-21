@@ -6,9 +6,6 @@ uniform sampler2D uTexNormal;
 
 uniform sampler2DArray uTerrainTex;
 
-uniform sampler2D gSampler0;
-uniform sampler2D gSampler1;
-uniform sampler2D gSampler2;
 uniform float fRenderHeight;
 
 in vec3 vWorldPosition;

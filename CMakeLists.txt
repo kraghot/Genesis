@@ -40,6 +40,7 @@ target_link_libraries(GlowApp PUBLIC
     assimp
     glfw
     fmt
+    SOIL
     stdc++fs
     )
 

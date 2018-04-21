@@ -115,27 +115,29 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
     mNormals.resize(mNumberOfVertices);
     int dimX = mHeightmapDimensions.x, dimY = mHeightmapDimensions.y;
 
+#define CURRPOS i*dimY + j
     for(int i = 0; i < dimY; i++)
     {
         for(int j = 0; j < dimX; j++)
         {
-            mPositions.at(i*dimY + j) = {i, heights.at(i*dimY + j), j};
-            mNormals.at(i*dimY + j) = {0, 1, 0};
+            mPositions.at(CURRPOS) = {i, heights.at(i*dimY + j), j};
+            mNormals.at(CURRPOS) = {0, 1, 0};
 
             glm::vec2 normalizedCoord((float)j / dimX, (float)i / dimY);
-            mTexCoords.at(i*dimY + j) = {normalizedCoord.x, normalizedCoord.y};
-            mNormals.at(i*dimY + j) = {0, 1, 0};
+            mTexCoords.at(CURRPOS) = {normalizedCoord.x, normalizedCoord.y};
+            mNormals.at(CURRPOS) = {0, 1, 0};
+            mColors.at(CURRPOS) = {1.0f, 1.0f, 1.0f, 1.0f};
 
             if(i != dimY - 1)
             {
-                mIndices.push_back(i* dimY + j);
-                mIndices.push_back((i+1) * dimY + j);
+                mIndices.push_back(CURRPOS);
+                mIndices.push_back(CURRPOS + dimY);
             }
         }
         mIndices.push_back(restart);
     }
-
 }
+#undef CURRPOS
 
 float MultiLayeredHeightmap::getMfHeightScale() const
 {
