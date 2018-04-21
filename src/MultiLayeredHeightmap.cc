@@ -46,12 +46,8 @@ glow::SharedTexture2DArray MultiLayeredHeightmap::LoadTexture(std::vector<std::s
     for(int i = 0; i < textureName.size(); i++){
         tex[i] = (glow::TextureData::createFromFile(textureName[i], glow::ColorSpace::sRGB));
         surface[i] = tex[i]->getSurfaces()[0];
-    }
-
-    for(int j = 0; j < surface.size(); j++){
-
-     surface[j]->setOffsetZ(j);
-     tex[0]->addSurface(surface[j]);
+        surface[i]->setOffsetZ(i);
+        tex[0]->addSurface(surface[i]);
     }
 
     tex[0]->setTarget(GL_TEXTURE_2D_ARRAY);
