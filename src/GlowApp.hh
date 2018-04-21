@@ -1,10 +1,10 @@
 #include"MultiLayeredHeightmap.hh"
 
 #include <glow-extras/glfw/GlfwApp.hh>
-
 #include <glow/fwd.hh>
-
 #include <glm/glm.hpp>
+#include "HeightField.hh"
+
 
 #include <glow/objects/Texture2DArray.hh>
 
@@ -32,17 +32,16 @@ private:
 
     glow::SharedProgram mShaderObj;
     glow::SharedVertexArray mMeshCube;
-    glow::SharedVertexArray mTerrain;
+    glow::SharedVertexArray mPerlinTest;
     glow::SharedTexture2D mTextureColor;
     glow::SharedTexture2D mTextureNormal;
 
+    HeightField mHeightField;
     glow::SharedTexture2DArray tex;
-
-    MultiLayeredHeightmap mHeightmap = MultiLayeredHeightmap(20,3);
-
-
+    MultiLayeredHeightmap mHeightmap;
 
 public:
+    GlowApp();
     // load resources, initialize app
     void init() override;
     // update game logic with fixed timestep
