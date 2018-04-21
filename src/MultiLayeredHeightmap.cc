@@ -183,7 +183,7 @@ glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filenam
     heights.resize(mNumberOfVertices);
 
     for(size_t i = 0; i < heights.size(); i++)
-        heights.at(i) = (float) heightMap[i] / 255.0f;
+        heights.at(i) = (float) heightMap[i] / pow(2, static_cast<int>(bitsPerPixel));
 
     //===========set up buffers===========
     FillData(heights);
