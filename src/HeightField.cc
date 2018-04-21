@@ -1,4 +1,5 @@
 #include "HeightField.hh"
+#include "PerlinNoiseGenerator.hh"
 #include <glow/objects/ArrayBuffer.hh>
 #include <glow/objects/ElementArrayBuffer.hh>
 #include <fstream>
@@ -23,12 +24,19 @@ glow::SharedVertexArray HeightField::createPerlinTerrain()
     mNormals.resize(mNumberOfVertices);
     mColors.resize(mNumberOfVertices);
 
+    PerlinNoiseGenerator genrator2(74745674);
+    PerlinNoiseGenerator generator3(53493);
+    PerlinNoiseGenerator generator4(4994949);
+
     for(int i = 0; i < dim; i++)
     {
         for(int j = 0; j < dim; j++)
         {
             float x = 10 * ((float)i / dim), y = 10 * ((float)j/dim);
-            float noise = mGenerator->noise(x, y, 0.8);
+            float noise = mGenerator->noise(x, y, 0.8) +
+                    genrator2.noise(x * 2.0f, y * 2.0f, 0.8f) * 0.5f +
+                    generator3.noise(x*4, y *4, 0.8) * 0.25f +
+                    generator4.noise(x*8, y*8, 0.8) * 0.125f;
             mPositions.at(i*dim + j) = {i, 5 * noise, j};
             mNormals.at(i*dim + j) = {0, 1, 0};
             float colornoise = noise + 1.0f / 2.0f;
