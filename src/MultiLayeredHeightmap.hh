@@ -81,15 +81,25 @@ public:
     float getHeightAt(const glm::vec3& position);
 
     glow::SharedTexture2DArray LoadTexture(std::vector<std::string> textureName);
+    glow::SharedTexture2DArray LoadNormal(std::vector<std::string> normalName);
 
    std::vector<glm::vec3> positions;
-   std::vector<glm::vec3> normals;
+   std::vector<glm::vec3> normals1;
+   std::vector<glm::vec3> normals2;
+   std::vector<glm::vec3> normals_final;
    std::vector<glm::vec4> colors;
    std::vector<uint32_t> indices;
    std::vector<glm::vec2> tex0buffer;
 
+   std::vector<glm::vec3> tangents1;
+   std::vector<glm::vec3> tangents2;
+   std::vector<glm::vec3> tangents_final;
+
    std::vector<glow::SharedTextureData> tex;
    std::vector<glow::SharedSurfaceData> surface;
+
+   std::vector<glow::SharedTextureData> normal;
+   std::vector<glow::SharedSurfaceData> nsurface;
 
     // translate the incoming char data array into a floating point value in the range [0…1]
     // If you wanted to load height maps that are stored MSB,LSB, you would have to reverse the array indices for values that read more than 1 byte.

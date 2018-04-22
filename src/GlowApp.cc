@@ -59,13 +59,24 @@ void GlowApp::init()
     //mMeshCube = assimp::Importer().load("mesh/cube.obj");
     mShaderObj = Program::createFromFile("shader/obj");
     mTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
-    mTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
+    //mTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
 //    mPerlinTest = mHeightField.createPerlinTerrain();
 
     //define textures for terrain
-    std::vector<std::string> mTerrainTextures = {"texture/sand.jpg", "texture/sand_grass.png", "texture/rock_2_4w.jpg"};
+    std::vector<std::string> mTerrainTextures = {"texture/sand007.jpg", "texture/grass007.jpg", "texture/rock007.jpg"};
+
+    //define normals of textures for terrain (in the same order as the textures)
+    std::vector<std::string> mTerrainNormals = {"texture/sand007_normal9.png", "texture/grass007_normal9.png", "texture/rock007_normal9.png"};
+
+
     //load textures for terrain
     tex = mHeightmap.LoadTexture(mTerrainTextures);
+
+    //load normals of textures for terrain
+    tex_normal = mHeightmap.LoadNormal(mTerrainNormals);
+
+
+    mTextureNormal = Texture2D::createFromFile("texture/sand007_normal9.png", ColorSpace::Linear);
 
     // set up framebuffer and output
     mShaderOutput = Program::createFromFile("shader/output");
@@ -135,6 +146,7 @@ void GlowApp::render(float elapsedSeconds)
 
             //terrain 2d texture array
             shader.setTexture("uTerrainTex", tex);
+            shader.setTexture("uTerrainNormal", tex_normal);
 
             shader.setUniform("fRenderHeight", mHeightmap.m_fHeightScale);
 

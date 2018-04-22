@@ -41,7 +41,7 @@ glow::SharedTexture2DArray MultiLayeredHeightmap::LoadTexture(std::vector<std::s
     tex.resize(textureName.size());
     surface.resize(textureName.size());
 
-    std::cout << "texname0 = "<<textureName[0]<< std::endl;
+    //std::cout << "texname0 = "<<textureName[0]<< std::endl;
 
     for(int i = 0; i < textureName.size(); i++){
         tex[i] = (glow::TextureData::createFromFile(textureName[i], glow::ColorSpace::sRGB));
@@ -54,6 +54,26 @@ glow::SharedTexture2DArray MultiLayeredHeightmap::LoadTexture(std::vector<std::s
     tex[0]->setDepth(surface.size());
 
     return glow::Texture2DArray::createFromData(tex[0]);
+}
+
+glow::SharedTexture2DArray MultiLayeredHeightmap::LoadNormal(std::vector<std::string> normalName){
+
+    normal.resize(normalName.size());
+    nsurface.resize(normalName.size());
+
+    //std::cout << "texname0 = "<<normalName[0]<< std::endl;
+
+    for(int i = 0; i < normalName.size(); i++){
+        normal[i] = (glow::TextureData::createFromFile(normalName[i], glow::ColorSpace::Linear));
+        nsurface[i] = normal[i]->getSurfaces()[0];
+        nsurface[i]->setOffsetZ(i);
+        normal[0]->addSurface(nsurface[i]);
+    }
+
+    normal[0]->setTarget(GL_TEXTURE_2D_ARRAY);
+    normal[0]->setDepth(nsurface.size());
+
+    return glow::Texture2DArray::createFromData(normal[0]);
 }
 
 glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filename, unsigned char bitsPerPixel){
@@ -101,7 +121,12 @@ glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filenam
     colors.resize(numVerts);
     tex0buffer.resize(numVerts);
     indices.resize(numVerts);
-    normals.resize(numVerts);
+    normals1.resize(numVerts);
+    normals2.resize(numVerts);
+    normals_final.resize(numVerts);
+    tangents1.resize(numVerts);
+    tangents2.resize(numVerts);
+    tangents_final.resize(numVerts);
 
     m_HeightmapDimensions = glm::uvec2(width, height);
 
@@ -134,7 +159,7 @@ glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filenam
                 float tex0Contribution = 1.0f - getPercentage( heightValue, 0.0f, 0.75f );
                 float tex2Contribution = 1.0f - getPercentage( heightValue, 0.75f, 1.0f );
 
-                normals.at(index) = glm::vec3(0);
+                normals_final.at(index) = glm::vec3(0);
                 positions.at(index) = glm::vec3(X, Y, Z);
                 tex0buffer.at(index) = glm::vec2(S*fTextureU, T*fTextureV);
 
@@ -156,6 +181,131 @@ glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filenam
             indices.push_back(restart);
         }
 
+    glm::vec3 tangent1;
+    glm::vec3 tangent2;
+
+    //=========Calculate normals and tangents=========//
+
+    for ( unsigned int j = 0; j < height-1; j++ )
+        {
+            for ( unsigned i = 0; i < width-1; i++ )
+            {
+                unsigned int index = ( j * width ) + i;
+
+
+                glm::vec3 vTriangle0[] =
+                {
+                    positions.at((j * width ) + i),
+                    positions.at((j+1) * width  + i),
+                    positions.at((j+1) * width + i+1)
+                    };
+                glm::vec3 vTriangle1[] =
+                {
+                    positions.at((j+1) * width + i+1),
+                    positions.at((j* width) + i+1),
+                    positions.at((j * width ) + i)
+                    };
+
+                glm::vec2 vUV0[] =
+                {
+                    tex0buffer.at((j * width ) + i),
+                    tex0buffer.at((j+1) * width  + i),
+                    tex0buffer.at((j+1) * width + i+1)
+                    };
+
+                glm::vec2 vUV1[] =
+                {
+                    tex0buffer.at((j+1) * width + i+1),
+                    tex0buffer.at((j* width) + i+1),
+                    tex0buffer.at((j * width ) + i)
+                    };
+
+                //normals
+                glm::vec3 vTriangleNorm0 = glm::cross(vTriangle0[0]-vTriangle0[1], vTriangle0[1]-vTriangle0[2]);
+                glm::vec3 vTriangleNorm1 = glm::cross(vTriangle1[0]-vTriangle1[1], vTriangle1[1]-vTriangle1[2]);
+
+                normals1.at(index) = glm::normalize(vTriangleNorm0);
+                normals2.at(index) = glm::normalize(vTriangleNorm1);
+
+
+                //tangents
+                glm::vec3 deltaPos1 = vTriangle0[0]-vTriangle0[1];
+                glm::vec3 deltaPos2 = vTriangle0[1]-vTriangle0[2];
+
+                glm::vec3 deltaPos3 = vTriangle1[0]-vTriangle1[1];
+                glm::vec3 deltaPos4 = vTriangle1[1]-vTriangle1[2];
+
+                glm::vec2 deltaUV1 = vUV0[0]-vUV0[1];
+                glm::vec2 deltaUV2 = vUV0[1]-vUV0[2];
+
+                glm::vec2 deltaUV3 = vUV1[0]-vUV1[1];
+                glm::vec2 deltaUV4 = vUV1[1]-vUV1[2];
+
+                float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+                tangent1 = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y)*r;
+                tangent2 = (deltaPos3 * deltaUV4.y - deltaPos4 * deltaUV3.y)*r;
+
+                tangents1.at(index) = tangent1;
+                tangents2.at(index) = tangent2;
+
+
+            }
+    }
+
+
+    for ( unsigned int i = 0; i < height; ++i )
+        {
+            for ( unsigned j = 0; j < width; ++j )
+            {
+                glm::vec3 tempNormals = glm::vec3(0.0f, 0.0f, 0.0f);
+                glm::vec3 tempTangents = glm::vec3(0.0f, 0.0f, 0.0f);
+
+                // Look for upper-left triangles
+                if(j != 0 && i != 0){
+                    tempNormals += normals1.at(( (i-1) * width ) + j - 1);
+                    tempNormals += normals2.at(( (i-1) * width ) + j - 1);
+
+                    tempTangents += tangents1.at(( (i-1) * width ) + j - 1);
+                    tempTangents += tangents2.at(( (i-1) * width ) + j - 1);
+                }
+
+                // Look for upper-right triangles
+                if(i != 0 && j != width-1){
+                    tempNormals += normals1.at(( (i-1) * width ) + j);
+                    tempNormals += normals2.at(( (i-1) * width ) + j);
+
+                    tempTangents += tangents1.at(( (i-1) * width ) + j);
+                    tempTangents += tangents2.at(( (i-1) * width ) + j);
+                }
+
+                // Look for bottom-right triangles
+                if(i != height-1 && j != width-1){
+                    tempNormals += normals1.at(( i * width ) + j);
+                    tempNormals += normals2.at(( i * width ) + j);
+
+                    tempTangents += tangents1.at(( i * width ) + j);
+                    tempTangents += tangents2.at(( i * width ) + j);
+                }
+
+                // Look for bottom-left triangles
+                if(i != height-1 && j != 0){
+                    tempNormals += normals1.at(( i * width ) + j - 1);
+                    tempNormals += normals2.at(( i * width ) + j - 1);
+
+                    tempTangents += tangents1.at(( i * width ) + j - 1);
+                    tempTangents += tangents2.at(( i * width ) + j - 1);
+                }
+
+                tempNormals = glm::normalize(tempNormals);
+                normals_final.at(( i * width ) + j) = tempNormals; // Store final normal of j-th vertex in i-th row
+
+
+                tangents_final.at(( i * width ) + j) = tempTangents;
+            }
+    }
+
+    //====================================//
+
     std::vector<glow::SharedArrayBuffer> abs;
 
     auto ab = glow::ArrayBuffer::create();
@@ -165,7 +315,7 @@ glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filenam
 
     ab = glow::ArrayBuffer::create();
     ab->defineAttribute<glm::vec3>("aNormal");
-    ab->bind().setData(normals);
+    ab->bind().setData(normals_final);
     abs.push_back(ab);
 
     ab = glow::ArrayBuffer::create();
@@ -176,6 +326,11 @@ glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filenam
     ab = glow::ArrayBuffer::create();
     ab->defineAttribute<glm::vec2>("aTexCoord");
     ab->bind().setData(tex0buffer);
+    abs.push_back(ab);
+
+    ab = glow::ArrayBuffer::create();
+    ab->defineAttribute<glm::vec3>("aTangent");
+    ab->bind().setData(tangents_final);
     abs.push_back(ab);
 
     for (auto const& ab : abs)
