@@ -162,11 +162,13 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
         for(int j = 0; j < dimX; ++j)
         {
 
+            //float x = 10 * ((float)i / dimY), y = 10 * ((float)j/dimX);
+
             float S = ( j / (float)(dimX - 1) );
             float T = ( i / (float)(dimY - 1) );
 
             float X = ( S * terrainWidth ) - halfTerrainWidth;
-            float Y = heights.at(CURRPOS) * mfHeightScale;
+            float Y = heights.at(CURRPOS) * 30;
             float Z = ( T * terrainHeight ) - halfTerrainHeight;
 
             normals_final.at(CURRPOS) = glm::vec3(0);
@@ -379,12 +381,14 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(NoiseGenerator *g
 
             float x = 10 * normalizedCoord.x,  y = 10 * normalizedCoord.y;
             heights.push_back(0.0f);
-            float amp = maxHeight;
-            for(auto oct = 0u; oct < octaves; oct++)
+            float amp = 5;
+            float temp = 0.0f;
+            for(auto oct = 0u; oct < 4; oct++)
             {
-                heights.back() += generator->noise(x, y, 0.8f) * amp;
+                temp += generator->noise(x, y, 0.8f) * amp;
                 x /= freqScale; y /= freqScale; amp *= freqScale;
             }
+             heights.back() =  (temp * 0.2f) + 0.85f;
         }
     }
 

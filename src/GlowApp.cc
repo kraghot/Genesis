@@ -53,7 +53,7 @@ void GlowApp::init()
     //load heightmap, (RAW filename, Bits Per Pixel)
         //mPerlinTest= mHeightmap.LoadHeightmap("texture/terrain0-8bbp-257x257.raw", 8);
     PerlinNoiseGenerator noise(2924319);
-    mPerlinTest = mHeightmap.GenerateTerrain(&noise, 100, 100);
+    mPerlinTest = mHeightmap.GenerateTerrain(&noise, 257, 257);
 
 
     // load object
