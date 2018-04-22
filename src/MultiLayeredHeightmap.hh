@@ -118,12 +118,13 @@ public:
      * @brief DumpToFile writes the position data to a RAW file
      */
     void DumpToFile();
-
+    void ErodeTerrain();
     float getMfHeightScale() const;
 
 private:
     void MakeVertexArray();
     void FillData(std::vector<float>& heights);
+    std::vector<unsigned int> GetNeighborhood(unsigned int i, unsigned int j);
 
     float mfHeightScale;
     float mfBlockScale;

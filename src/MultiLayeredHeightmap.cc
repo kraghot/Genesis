@@ -136,8 +136,35 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
         }
         mIndices.push_back(restart);
     }
-}
 #undef CURRPOS
+}
+
+std::vector<unsigned int> MultiLayeredHeightmap::GetNeighborhood(unsigned int i, unsigned int j)
+{
+    std::vector<unsigned int> ret;
+    ret.push_back((i - 1) % mHeightmapDimensions.x);
+    ret.push_back((i + 1) % mHeightmapDimensions.x);
+    ret.push_back((j - 1) % mHeightmapDimensions.y);
+    ret.push_back((j + 1) % mHeightmapDimensions.y);
+    return ret;
+}
+
+void MultiLayeredHeightmap::ErodeTerrain()
+{
+#pragma omp for
+    for(int i = 0; i < mHeightmapDimensions.x; i++)
+    {
+        for(int j = 0; j < mHeightmapDimensions.y; j++)
+        {
+            float dMax = 0;
+            auto neigh = GetNeighborhood(j, i);
+            for(auto it : neigh)
+            {
+
+            }
+        }
+    }
+}
 
 float MultiLayeredHeightmap::getMfHeightScale() const
 {
