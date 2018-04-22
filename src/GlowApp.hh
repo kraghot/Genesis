@@ -35,7 +35,9 @@ private:
     glow::SharedTexture2D mTextureColor;
     glow::SharedTexture2D mTextureNormal;
 
-    glow::SharedTexture2DArray tex;
+    glow::SharedTexture2DArray mTexture;
+    glow::SharedTexture2DArray mTexNormal;
+
     MultiLayeredHeightmap mHeightmap;
 
 public:

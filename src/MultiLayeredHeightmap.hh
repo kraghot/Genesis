@@ -83,6 +83,7 @@ public:
     float GetHeightAt(const glm::vec3& position);
 
     glow::SharedTexture2DArray LoadTexture(std::vector<std::string> textureName);
+    glow::SharedTexture2DArray LoadNormal(std::vector<std::string> normalName);
 
     // translate the incoming char data array into a floating point value in the range [0…1]
     // If you wanted to load height maps that are stored MSB,LSB, you would have to reverse the array indices for values that read more than 1 byte.
@@ -124,9 +125,11 @@ public:
 private:
     void MakeVertexArray();
     void FillData(std::vector<float>& heights);
+    void CalculateNormalsTangents(int dimX, int dimY);
 
     float mfHeightScale;
     float mfBlockScale;
+    float mHeightValue;
 
     std::vector<glm::vec3> mPositions;
     std::vector<glm::vec3> mNormals;
@@ -134,8 +137,19 @@ private:
     std::vector<uint32_t> mIndices;
     std::vector<glm::vec2> mTexCoords;
 
-    std::vector<glow::SharedTextureData> tex;
-    std::vector<glow::SharedSurfaceData> surface;
+    std::vector<glm::vec3> normals1;
+    std::vector<glm::vec3> normals2;
+    std::vector<glm::vec3> normals_final;
+
+    std::vector<glm::vec3> tangents1;
+    std::vector<glm::vec3> tangents2;
+    std::vector<glm::vec3> tangents_final;
+
+    std::vector<glow::SharedTextureData> mTexture;
+    std::vector<glow::SharedSurfaceData> mSurface;
+
+    std::vector<glow::SharedTextureData> mTextureNormal;
+    std::vector<glow::SharedSurfaceData> mNormalSurface;
 
     std::vector<glow::SharedArrayBuffer> mAbs;
     glow::SharedElementArrayBuffer mEab;
