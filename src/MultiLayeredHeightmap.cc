@@ -103,6 +103,12 @@ void MultiLayeredHeightmap::MakeVertexArray()
     mEab->setObjectLabel("Heightamp");
     mVao = glow::VertexArray::create(mAbs, mEab, GL_TRIANGLE_STRIP);
     mVao->setObjectLabel("Heightmap");
+
+    mDisplacementTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RED);
+    mDisplacementTexture->bind().setData(GL_RED, mHeightmapDimensions.x,
+                                         mHeightmapDimensions.y, mDisplacement);
+    mDisplacementTexture->bind().generateMipmaps();
+//    mDisplacementTexture->
 }
 
 void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
@@ -113,6 +119,7 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
     mTexCoords.resize(mNumberOfVertices);
     mIndices.resize(mNumberOfVertices);
     mNormals.resize(mNumberOfVertices);
+    mDisplacement.resize(mNumberOfVertices);
     int dimX = mHeightmapDimensions.x, dimY = mHeightmapDimensions.y;
 
 #define CURRPOS i*dimY + j
@@ -120,8 +127,9 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
     {
         for(int j = 0; j < dimX; j++)
         {
-            mPositions.at(CURRPOS) = {i, heights.at(i*dimY + j), j};
+            mPositions.at(CURRPOS) = {i, 0.0f, j};
             mNormals.at(CURRPOS) = {0, 1, 0};
+            mDisplacement.at(CURRPOS) = heights.at(CURRPOS) / 4.0f;
 
             glm::vec2 normalizedCoord((float)j / dimX, (float)i / dimY);
             mTexCoords.at(CURRPOS) = {normalizedCoord.x, normalizedCoord.y};
@@ -136,7 +144,11 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
         }
         mIndices.push_back(restart);
     }
-#undef CURRPOS
+}
+
+glow::SharedTexture2D MultiLayeredHeightmap::GetDisplacementTexture() const
+{
+    return mDisplacementTexture;
 }
 
 std::vector<unsigned int> MultiLayeredHeightmap::GetNeighborhood(unsigned int i, unsigned int j)

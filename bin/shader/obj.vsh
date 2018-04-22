@@ -1,6 +1,7 @@
 uniform mat4 uView;
 uniform mat4 uProj;
 uniform mat4 uModel; // assuming uniform scaling
+uniform sampler2D uTexDisplacement;
 
 in vec3 aPosition;
 in vec3 aNormal;
@@ -16,7 +17,11 @@ out vec2 vTexCoord;
 
 void main()
 {
-    vWorldPosition = vec3(uModel * vec4(aPosition, 1));
+    vec2 perturbedTexCoords = aTexCoord + (0.2f * noise2(aPosition.x * 1000 + aPosition.y));
+    float heightOffset = texture2D(uTexDisplacement, aTexCoord).x * 4.0f;
+    vec4 hPosition = vec4(aPosition, 1.0f);
+    hPosition.y += heightOffset;
+    vWorldPosition = vec3(uModel * hPosition);
     vNormal = mat3(uModel) * aNormal;
     vColor = aColor;
     vTangent = mat3(uModel) * aTangent;

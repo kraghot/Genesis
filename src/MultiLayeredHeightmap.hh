@@ -121,6 +121,8 @@ public:
     void ErodeTerrain();
     float getMfHeightScale() const;
 
+    glow::SharedTexture2D GetDisplacementTexture() const;
+
 private:
     void MakeVertexArray();
     void FillData(std::vector<float>& heights);
@@ -130,6 +132,7 @@ private:
     float mfBlockScale;
 
     std::vector<glm::vec3> mPositions;
+    std::vector<float> mDisplacement;
     std::vector<glm::vec3> mNormals;
     std::vector<glm::vec4> mColors;
     std::vector<uint32_t> mIndices;
@@ -141,6 +144,7 @@ private:
     std::vector<glow::SharedArrayBuffer> mAbs;
     glow::SharedElementArrayBuffer mEab;
     glow::SharedVertexArray mVao;
+    glow::SharedTexture2D mDisplacementTexture;
 
     glm::mat4x4 mLocalToWorldMatrix;
     // The dimensions of the heightmap texture
