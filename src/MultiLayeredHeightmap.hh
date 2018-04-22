@@ -118,7 +118,7 @@ public:
      * @brief DumpToFile writes the position data to a RAW file
      */
     void DumpToFile();
-    void ErodeTerrain();
+    void ThermalErodeTerrain();
     float getMfHeightScale() const;
 
     glow::SharedTexture2D GetDisplacementTexture() const;
@@ -126,7 +126,7 @@ public:
 private:
     void MakeVertexArray();
     void FillData(std::vector<float>& heights);
-    std::vector<unsigned int> GetNeighborhood(unsigned int i, unsigned int j);
+    std::vector<glm::uvec2> GetNeighborhood(unsigned int i, unsigned int j);
 
     float mfHeightScale;
     float mfBlockScale;

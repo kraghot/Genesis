@@ -151,31 +151,51 @@ glow::SharedTexture2D MultiLayeredHeightmap::GetDisplacementTexture() const
     return mDisplacementTexture;
 }
 
-std::vector<unsigned int> MultiLayeredHeightmap::GetNeighborhood(unsigned int i, unsigned int j)
+std::vector<glm::uvec2> MultiLayeredHeightmap::GetNeighborhood(unsigned int i, unsigned int j)
 {
-    std::vector<unsigned int> ret;
-    ret.push_back((i - 1) % mHeightmapDimensions.x);
-    ret.push_back((i + 1) % mHeightmapDimensions.x);
-    ret.push_back((j - 1) % mHeightmapDimensions.y);
-    ret.push_back((j + 1) % mHeightmapDimensions.y);
+    std::vector<glm::uvec2> ret;
+    ret.push_back(glm::uvec2((i - 1) % mHeightmapDimensions.x, j));
+    ret.push_back(glm::uvec2((i + 1) % mHeightmapDimensions.x, j));
+    ret.push_back(glm::uvec2(i, (j - 1) % mHeightmapDimensions.y));
+    ret.push_back(glm::uvec2(i, (j + 1) % mHeightmapDimensions.y));
     return ret;
 }
 
-void MultiLayeredHeightmap::ErodeTerrain()
+void MultiLayeredHeightmap::ThermalErodeTerrain()
 {
+#define LOC(a, b) b * mHeightmapDimensions.y + a
+
+    float T = 8.0f / (float) mHeightmapDimensions.x;
+    int counter = 0;
 #pragma omp for
-    for(int i = 0; i < mHeightmapDimensions.x; i++)
+    for(int i = 0; i < mHeightmapDimensions.y; i++)
     {
-        for(int j = 0; j < mHeightmapDimensions.y; j++)
+        for(int j = 0; j < mHeightmapDimensions.x; j++)
         {
             float dMax = 0;
+            glm::vec2 l;
             auto neigh = GetNeighborhood(j, i);
             for(auto it : neigh)
             {
+                float diff = mDisplacement.at(LOC(j, i)) - mDisplacement.at(LOC(it.x, it.y));
+                if(diff > dMax)
+                {
+                    dMax = diff;
+                    l = it;
+                }
+            }
 
+            if(0 < dMax && dMax <= T)
+            {
+                float deltaH = dMax;
+                mDisplacement.at(LOC(j, i)) -= deltaH;
+                mDisplacement.at(LOC(l.x, l.y)) += deltaH;
+                counter++;
             }
         }
     }
+#undef LOC
+    std::cout << counter << std::endl;
 }
 
 float MultiLayeredHeightmap::getMfHeightScale() const
@@ -257,6 +277,11 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(NoiseGenerator *g
     }
 
     FillData(heights);
+    for(int i = 0; i < 100; i++)
+    {
+        std::cout << "Iteration " << i << ". Changed heights: ";
+        ThermalErodeTerrain();
+    }
     MakeVertexArray();
 
     return mVao;
