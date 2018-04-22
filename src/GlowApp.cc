@@ -51,9 +51,9 @@ void GlowApp::init()
 //    PerlinNoiseGenerator generator(132412341);
 //    mHeightField.init(&generator, 128);
     //load heightmap, (RAW filename, Bits Per Pixel)
-    mPerlinTest= mHeightmap.LoadHeightmap("texture/terrain0-8bbp-257x257.raw", 8);
-//    PerlinNoiseGenerator noise(2924319);
-//    mPerlinTest = mHeightmap.GenerateTerrain(&noise, 100, 100);
+//    mPerlinTest= mHeightmap.LoadHeightmap("texture/terrain0-8bbp-257x257.raw", 8);
+    PerlinNoiseGenerator noise(2924319);
+    mPerlinTest = mHeightmap.GenerateTerrain(&noise, 100, 100);
 
 
     // load object
@@ -61,7 +61,6 @@ void GlowApp::init()
     mShaderObj = Program::createFromFile("shader/obj");
     mTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
     mTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
-//    mPerlinTest = mHeightField.createPerlinTerrain();
 
     //define textures for terrain
     std::vector<std::string> mTerrainTextures = {"texture/sand.jpg", "texture/sand_grass.png", "texture/rock_2_4w.jpg"};

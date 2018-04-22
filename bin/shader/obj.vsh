@@ -17,6 +17,7 @@ out vec2 vTexCoord;
 
 void main()
 {
+    vec2 perturbedTexCoords = aTexCoord + (0.2f * noise2(aPosition.x * 1000 + aPosition.y));
     float heightOffset = texture2D(uTexDisplacement, aTexCoord).x * 4.0f;
     vec4 hPosition = vec4(aPosition, 1.0f);
     hPosition.y += heightOffset;
