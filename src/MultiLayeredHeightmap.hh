@@ -145,6 +145,8 @@ private:
     std::vector<glm::vec3> tangents2;
     std::vector<glm::vec3> tangents_final;
 
+    std::vector<float> slope_y;
+
     std::vector<glow::SharedTextureData> mTexture;
     std::vector<glow::SharedSurfaceData> mSurface;
 

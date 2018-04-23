@@ -14,6 +14,7 @@ in vec3 vNormal;
 in vec4 vColor;
 in vec3 vTangent;
 in vec2 vTexCoord;
+in float vSlopeY;
 
 out vec4 fColor;
 
@@ -24,13 +25,13 @@ void main()
     const float fRange3 = 0.7f;
     const float fRange4 = 0.9f;
 
-    float fScale = (vWorldPosition.y*1.0f)/(fRenderHeight*1.0f);
+    float fScale = (vSlopeY*1.0f);
     vec4 vTexColor = vec4(0.0f);
     vec4 vTexNormal = vec4(0.0f);
 
     if(fScale >= 0.0 && fScale <= fRange1){
-        vTexColor = texture(uTerrainTex, vec3(vTexCoord, 0.5));
-        vTexNormal = texture(uTerrainNormal, vec3(vTexCoord,0.5));
+        vTexColor = texture(uTerrainTex, vec3(vTexCoord, 0.3));
+        vTexNormal = texture(uTerrainNormal, vec3(vTexCoord,0.3));
     }
     else if(fScale <= fRange2){
         fScale -= fRange1;

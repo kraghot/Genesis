@@ -65,10 +65,10 @@ void GlowApp::init()
 
 
     //define textures for terrain
-    std::vector<std::string> mTerrainTextures = {"texture/sand007.jpg", "texture/grass007.jpg", "texture/rock007.jpg"};
+    std::vector<std::string> mTerrainTextures = {"texture/snow009.jpg", "texture/grass007.jpg", "texture/rock007.jpg"};
 
     //define normals of textures for terrain (in the same order as the textures)
-    std::vector<std::string> mTerrainNormals = {"texture/sand007_normal9.png", "texture/grass007_normal9.png", "texture/rock007_normal9.png"};
+    std::vector<std::string> mTerrainNormals = {"texture/snow009_normal.png", "texture/grass007_normal9.png", "texture/rock007_normal9.png"};
 
     //load textures for terrain
     mTexture = mHeightmap.LoadTexture(mTerrainTextures);

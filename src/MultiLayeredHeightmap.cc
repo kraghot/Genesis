@@ -118,6 +118,11 @@ void MultiLayeredHeightmap::MakeVertexArray()
     ab->bind().setData(tangents_final);
     mAbs.push_back(ab);
 
+    ab = glow::ArrayBuffer::create();
+    ab->defineAttribute<float>("aSlopeY");
+    ab->bind().setData(slope_y);
+    mAbs.push_back(ab);
+
     for (auto const& ab : mAbs)
         ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Perlin");
 
@@ -142,6 +147,8 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
     tangents1.resize(mNumberOfVertices);
     tangents2.resize(mNumberOfVertices);
     tangents_final.resize(mNumberOfVertices);
+
+    slope_y.resize(mNumberOfVertices);
 
     int dimX = mHeightmapDimensions.x, dimY = mHeightmapDimensions.y;
 
@@ -307,6 +314,11 @@ void MultiLayeredHeightmap::CalculateNormalsTangents(int dimX, int dimY){
 
 
             tangents_final.at(( i * dimX ) + j) = tempTangents;
+
+            //in radians
+            slope_y.at(( i * dimX ) + j) = glm::acos(tempNormals.y);
+
+
         }
     }
 }
