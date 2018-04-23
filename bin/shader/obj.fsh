@@ -1,3 +1,8 @@
+////change to 1 to enable, 0 to disable slope based blending (in case of 0, height based blending is enabled
+#ifndef ENABLE_SLOPE_BASED_BLEND
+#define ENABLE_SLOPE_BASED_BLEND 1
+#endif
+
 uniform vec3 uLightPos;
 uniform vec3 uCamPos;
 
@@ -26,7 +31,13 @@ void main()
     const float fRange3 = 0.7f;
     const float fRange4 = 0.9f;
 
-    float fScale = uSlopeBlending? vSlopeY : (vWorldPosition.y*1.0f)/(fRenderHeight*1.0f);
+    //float fScale = uSlopeBlending? vSlopeY : (vWorldPosition.y*1.0f)/(fRenderHeight*1.0f);
+
+#if ENABLE_SLOPE_BASED_BLEND
+    float fScale = vSlopeY;
+#else
+    float fScale = (vWorldPosition.y*1.0f)/(fRenderHeight*1.0f);
+#endif
 
     vec4 vTexColor = vec4(0.0f);
     vec4 vTexNormal = vec4(0.0f);

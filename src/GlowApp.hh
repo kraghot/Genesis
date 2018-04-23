@@ -40,8 +40,6 @@ private:
 
     MultiLayeredHeightmap mHeightmap;
 
-    bool slope_blending = 0;
-
 public:
     GlowApp();
     // load resources, initialize app

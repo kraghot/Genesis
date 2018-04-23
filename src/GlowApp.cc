@@ -21,11 +21,6 @@
 #include <glow/objects/ElementArrayBuffer.hh>
 
 
-//change to 1 to enable, 0 to disable slope based blending (in case of 0, height based blending is enabled
-#ifndef ENABLE_SLOPE_BASED_BLEND
-#define ENABLE_SLOPE_BASED_BLEND 1
-#endif
-
 using namespace glow;
 
 GlowApp::GlowApp():
@@ -81,14 +76,6 @@ void GlowApp::init()
 
     //load normals of textures for terrain
     mTexNormal = mHeightmap.LoadNormal(mTerrainNormals);
-
-    //height or slope based blending?
-#if ENABLE_SLOPE_BASED_BLEND
-    slope_blending = 1;
-#else
-    slope_blending = 0;
-#endif
-
 
     // set up framebuffer and output
     mShaderOutput = Program::createFromFile("shader/output");
@@ -161,8 +148,6 @@ void GlowApp::render(float elapsedSeconds)
             shader.setTexture("uTerrainNormal", mTexNormal);
 
             shader.setUniform("fRenderHeight", mHeightmap.getMfHeightScale());
-
-            shader.setUniform("uSlopeBlending", slope_blending);
 
             mPerlinTest->bind().draw();
         }
