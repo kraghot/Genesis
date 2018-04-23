@@ -147,6 +147,7 @@ private:
 
     std::vector<float> slope_y;
 
+
     std::vector<glow::SharedTextureData> mTexture;
     std::vector<glow::SharedSurfaceData> mSurface;
 

@@ -8,6 +8,7 @@ uniform sampler2DArray uTerrainTex;
 uniform sampler2DArray uTerrainNormal;
 
 uniform float fRenderHeight;
+uniform bool uSlopeBlending;
 
 in vec3 vWorldPosition;
 in vec3 vNormal;
@@ -25,7 +26,8 @@ void main()
     const float fRange3 = 0.7f;
     const float fRange4 = 0.9f;
 
-    float fScale = (vSlopeY*1.0f);
+    float fScale = uSlopeBlending? vSlopeY : (vWorldPosition.y*1.0f)/(fRenderHeight*1.0f);
+
     vec4 vTexColor = vec4(0.0f);
     vec4 vTexNormal = vec4(0.0f);
 

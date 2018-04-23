@@ -4,21 +4,6 @@
 #include<stdio.h>
 
 typedef std::basic_ios<char> ios;
-//===========MACROS===========
-
-// Enable mutitexture blending across the terrain
-#ifndef ENABLE_MULTITEXTURE
-#define ENABLE_MULTITEXTURE 1
-#endif
-
-// Enable the blend constants based on the slope of the terrain
-#ifndef ENABLE_SLOPE_BASED_BLEND
-#define ENABLE_SLOPE_BASED_BLEND 0
-#endif
-
-#define BUFFER_OFFSET(i) ((char*)NULL + (i))
-
-//===========MACROS===========
 
 GlowApp GlowAppObject;
 
