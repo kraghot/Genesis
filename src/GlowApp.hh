@@ -6,6 +6,8 @@
 
 
 #include <glow/objects/Texture2DArray.hh>
+#include<glow/objects/TextureCubeMap.hh>
+
 
 #ifndef GLOWAPP
 #define GLOWAPP
@@ -39,6 +41,9 @@ private:
     glow::SharedTexture2DArray mTexNormal;
 
     MultiLayeredHeightmap mHeightmap;
+
+    glow::SharedTextureCubeMap mBackgroundTexture;
+    glow::SharedProgram mShaderBg;
 
 public:
     GlowApp();

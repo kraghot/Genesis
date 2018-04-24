@@ -8,6 +8,7 @@
 #include <glm/ext.hpp>
 
 #include <glow/common/scoped_gl.hh>
+#include <glow/common/str_utils.hh>
 #include <glow/gl.hh>
 #include <glow/objects/Framebuffer.hh>
 #include <glow/objects/Program.hh>
@@ -19,6 +20,7 @@
 #include <glow-extras/camera/GenericCamera.hh>
 #include <glow-extras/geometry/Quad.hh>
 #include <glow/objects/ElementArrayBuffer.hh>
+
 
 
 using namespace glow;
@@ -83,6 +85,17 @@ void GlowApp::init()
     mTargetColor = TextureRectangle::create(1, 1, GL_RGB16F);
     mTargetDepth = TextureRectangle::create(1, 1, GL_DEPTH_COMPONENT32);
     mFramebuffer = Framebuffer::create("fColor", mTargetColor, mTargetDepth);
+
+    //setup background
+    auto pbt = util::pathOf(__FILE__) + "/../bin/cubemap/mountain/";
+    mBackgroundTexture = glow::TextureCubeMap::createFromData(glow::TextureData::createFromFileCube(pbt + "posx.jpg",
+                                                                                                    pbt + "negx.jpg",
+                                                                                                    pbt + "posy.jpg",
+                                                                                                    pbt + "negy.jpg",
+                                                                                                    pbt + "posz.jpg",
+                                                                                                    pbt + "negz.jpg",
+                                                                                                    glow::ColorSpace::sRGB));
+    mShaderBg = glow::Program::createFromFile("shader/bg");
 }
 
 void GlowApp::onResize(int w, int h)
@@ -115,9 +128,9 @@ void GlowApp::render(float elapsedSeconds)
 
     // render to framebuffer
     {
-        auto fb = mFramebuffer->bind();
+        //auto fb = mFramebuffer->bind();
 //        GLOW_SCOPED(enable, GL_CULL_FACE);  // use backface culling
-        GLOW_SCOPED(enable, GL_DEPTH_TEST); // use z-Buffer
+        //GLOW_SCOPED(enable, GL_DEPTH_TEST); // use z-Buffer
         GLOW_SCOPED(enable, GL_PRIMITIVE_RESTART);
         glPrimitiveRestartIndex(65535);
 
@@ -127,6 +140,27 @@ void GlowApp::render(float elapsedSeconds)
             GLOW_SCOPED(clearColor, c.r, c.g, c.b, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
+
+        {
+            GLOW_SCOPED(disable, GL_CULL_FACE); // no backface culling
+            glDepthMask(GL_FALSE);
+
+            auto shader = mShaderBg->use();
+
+            shader.setTexture("uTexture", mBackgroundTexture);
+            auto invProj = inverse(cam->getProjectionMatrix());
+            auto invView = inverse(cam->getViewMatrix());
+            shader.setUniform("uInvProj", invProj);
+            shader.setUniform("uInvView", invView);
+
+            // draw fullscreen quad
+            mMeshQuad->bind().draw();
+
+            glEnable(GL_DEPTH_TEST);
+            glDepthMask(GL_TRUE);
+        }
+
+
 
         // draw object
         {
@@ -151,17 +185,15 @@ void GlowApp::render(float elapsedSeconds)
 
             mPerlinTest->bind().draw();
         }
+
+
     }
 
     // render to screen
     // (applies gamma correction and dithering)
-    {
-        GLOW_SCOPED(disable, GL_CULL_FACE); // no backface culling
 
-        auto shader = mShaderOutput->use();
-        shader.setTexture("uTexture", mTargetColor);
 
-        // draw fullscreen quad
-        mMeshQuad->bind().draw();
-    }
+
+
+
 }
