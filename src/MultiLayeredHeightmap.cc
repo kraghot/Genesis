@@ -168,9 +168,9 @@ void MultiLayeredHeightmap::ThermalErodeTerrain()
     float T = 8.0f / (float) mHeightmapDimensions.x;
     int counter = 0;
 #pragma omp for
-    for(int i = 0; i < mHeightmapDimensions.y; i++)
+    for(auto i = 0u; i < mHeightmapDimensions.y; i++)
     {
-        for(int j = 0; j < mHeightmapDimensions.x; j++)
+        for(auto j = 0u; j < mHeightmapDimensions.x; j++)
         {
             float dMax = 0;
             glm::vec2 l;
@@ -196,6 +196,51 @@ void MultiLayeredHeightmap::ThermalErodeTerrain()
     }
 #undef LOC
     std::cout << counter << std::endl;
+}
+
+void MultiLayeredHeightmap::HydraulicErodeTerrain()
+{
+#define LOC(a, b) b * mHeightmapDimensions.y + a
+
+    const float rainfall = 0.01f;
+    const float sediment = 0.01f * mfHeightScale;
+#pragma omp for
+    for(auto i = 0u; i < mHeightmapDimensions.y; i++)
+    {
+        for(auto j = 0u; j < mHeightmapDimensions.x; j++)
+        {
+            mWaterLevel.at(LOC(j, i)) += rainfall;
+            float a = mDisplacement.at(LOC(j, i)) + mWaterLevel.at(LOC(j, i));
+            auto neigh = GetNeighborhood(j, i);
+            glm::uvec2 lowestNeigh = neigh.at(0);
+            float dmax = -1.0f;
+            for (auto it: neigh)
+            {
+                float ai = mDisplacement.at(LOC(it.x, it.y)) + mWaterLevel.at(LOC(it.x, it.y));
+                float di = a - ai;
+                if (di > 0.0f)
+                {
+                    if(di > dmax)
+                    {
+                        dmax = di;
+                        lowestNeigh = it;
+
+                    }
+                }
+            }
+
+            if(dmax <= 0.0f)
+                continue;
+
+            float sedimentToTransport = sediment * (std::min(mWaterLevel.at(LOC(lowestNeigh.x, lowestNeigh.y)), dmax));
+            mDisplacement.at(LOC(j, i)) -= sedimentToTransport;
+            mDisplacement.at(LOC(lowestNeigh.x, lowestNeigh.y)) += sediment;
+            mWaterLevel.at(LOC(j, i)) *= 0.5f;
+        }
+    }
+
+
+#undef LOC
 }
 
 float MultiLayeredHeightmap::getMfHeightScale() const
@@ -277,10 +322,12 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(NoiseGenerator *g
     }
 
     FillData(heights);
+    mWaterLevel.resize(mNumberOfVertices);
     for(int i = 0; i < 100; i++)
     {
         std::cout << "Iteration " << i << ". Changed heights: ";
-        ThermalErodeTerrain();
+        HydraulicErodeTerrain();
+//        ThermalErodeTerrain();
     }
     MakeVertexArray();
 

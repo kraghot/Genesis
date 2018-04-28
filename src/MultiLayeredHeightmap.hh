@@ -119,6 +119,7 @@ public:
      */
     void DumpToFile();
     void ThermalErodeTerrain();
+    void HydraulicErodeTerrain();
     float getMfHeightScale() const;
 
     glow::SharedTexture2D GetDisplacementTexture() const;
@@ -137,6 +138,7 @@ private:
     std::vector<glm::vec4> mColors;
     std::vector<uint32_t> mIndices;
     std::vector<glm::vec2> mTexCoords;
+    std::vector<float> mWaterLevel;
 
     std::vector<glow::SharedTextureData> tex;
     std::vector<glow::SharedSurfaceData> surface;
