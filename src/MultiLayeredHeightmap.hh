@@ -72,6 +72,13 @@ inline int getFileLength(std::istream& file){
 class MultiLayeredHeightmap
 {
 public:
+    enum NeighSide {
+        Left = 0,
+        Right = 1,
+        Up = 2,
+        Down = 3
+    };
+
     // float heightScale: determines the maximum height of the terrain in world units.
     // float blockScale: determines the space between terrain vertices in world units for both the X and Z axes.
     MultiLayeredHeightmap(float heightScale, float blockScale);
@@ -83,6 +90,7 @@ public:
     float GetHeightAt(const glm::vec3& position);
 
     glow::SharedTexture2DArray LoadTexture(std::vector<std::string> textureName);
+    glow::SharedTexture2DArray LoadNormal(std::vector<std::string> normalName);
 
     // translate the incoming char data array into a floating point value in the range [0…1]
     // If you wanted to load height maps that are stored MSB,LSB, you would have to reverse the array indices for values that read more than 1 byte.
@@ -120,17 +128,25 @@ public:
     void DumpToFile();
     void ThermalErodeTerrain();
     void HydraulicErodeTerrain();
+    void DropletErodeTerrain(glm::vec2 coordinates, float strength=1.0f);
     float getMfHeightScale() const;
+    float GetDisplacementAt(glm::uvec2 pos);
+    /// @todo Add brushlike softening and deposition
+    void AddDisplacementAt(glm::uvec2 pos, float addition);
 
     glow::SharedTexture2D GetDisplacementTexture() const;
 
 private:
     void MakeVertexArray();
     void FillData(std::vector<float>& heights);
+    void CalculateNormalsTangents(int dimX, int dimY);
     std::vector<glm::uvec2> GetNeighborhood(unsigned int i, unsigned int j);
+    std::vector<glm::uvec2> GetNeighborhood(glm::uvec2 coord);
+    glm::uvec2 GetLowestNeigh(std::vector<glm::uvec2>& neigh);
 
     float mfHeightScale;
     float mfBlockScale;
+    float mHeightValue;
 
     std::vector<glm::vec3> mPositions;
     std::vector<float> mDisplacement;
@@ -140,8 +156,22 @@ private:
     std::vector<glm::vec2> mTexCoords;
     std::vector<float> mWaterLevel;
 
-    std::vector<glow::SharedTextureData> tex;
-    std::vector<glow::SharedSurfaceData> surface;
+    std::vector<glm::vec3> normals1;
+    std::vector<glm::vec3> normals2;
+    std::vector<glm::vec3> normals_final;
+
+    std::vector<glm::vec3> tangents1;
+    std::vector<glm::vec3> tangents2;
+    std::vector<glm::vec3> tangents_final;
+
+    std::vector<float> slope_y;
+
+
+    std::vector<glow::SharedTextureData> mTexture;
+    std::vector<glow::SharedSurfaceData> mSurface;
+
+    std::vector<glow::SharedTextureData> mTextureNormal;
+    std::vector<glow::SharedSurfaceData> mNormalSurface;
 
     std::vector<glow::SharedArrayBuffer> mAbs;
     glow::SharedElementArrayBuffer mEab;
