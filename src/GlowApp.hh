@@ -1,5 +1,7 @@
 #include"MultiLayeredHeightmap.hh"
 
+#include <AntTweakBar.h>
+
 #include <glow-extras/glfw/GlfwApp.hh>
 #include <glow/fwd.hh>
 #include <glm/glm.hpp>
@@ -23,6 +25,10 @@ private:
 
     float mAngle = 0.0f;
     float mSpeed = 0.0f;
+
+
+
+
 
 private:
     glow::SharedProgram mShaderOutput;
@@ -55,6 +61,16 @@ public:
     void render(float elapsedSeconds) override;
     // called after window is resized
     void onResize(int w, int h) override;
+
+    void initTerrain();
+
+    static void TW_CALL randomTerrain(void *clientData);
+    static void TW_CALL setSeedTerrain(const void *value, void *clientData);
+    static void TW_CALL getSeedTerrain(void *value, void *clientData);
+
+    void setSeed(unsigned int var);
+    unsigned int getSeed() const;
+
 };
 
 #endif
