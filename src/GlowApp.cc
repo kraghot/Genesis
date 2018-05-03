@@ -128,8 +128,6 @@ void GlowApp::update(float elapsedSeconds)
 
 void GlowApp::render(float elapsedSeconds)
 {
-    std::cout << "before seed: " << seed << " before button: " << button << std::endl;
-
     if(button){
         GlowApp::initTerrain();
         button = false;
