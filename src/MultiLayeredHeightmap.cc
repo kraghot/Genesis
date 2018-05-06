@@ -118,8 +118,10 @@ void MultiLayeredHeightmap::MakeVertexArray()
     mVao->setObjectLabel("Heightmap");
 
     mDisplacementTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RED);
-    mDisplacementTexture->bind().setData(GL_RED, mHeightmapDimensions.x,
-                                         mHeightmapDimensions.y, mDisplacement);
+//    mDisplacementTexture->bind().setData(GL_RED, mHeightmapDimensions.x,
+//                                         mHeightmapDimensions.y, mDisplacement);
+    mDisplacementTexture->bind().setData(GL_RED, mHeightmapDimensions.x, mHeightmapDimensions.y, GL_R32F, GL_FLOAT, mDisplacement.data());
+    mDisplacementTexture->bind().setFilter(GL_NEAREST, GL_NEAREST);
     mDisplacementTexture->bind().generateMipmaps();
 //    mDisplacementTexture->
 }
@@ -632,7 +634,7 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(NoiseGenerator *g
 //        ThermalErodeTerrain();
 
 //    }
-    DropletErodeTerrain(glm::uvec2(50, 50), 50);
+//    DropletErodeTerrain(glm::uvec2(50, 50), 50);
     MakeVertexArray();
 
     return mVao;
