@@ -126,6 +126,11 @@ void MultiLayeredHeightmap::MakeVertexArray()
     ab->bind().setData(slope_y);
     mAbs.push_back(ab);
 
+    ab = glow::ArrayBuffer::create();
+    ab->defineAttribute<glm::vec2>("aHeightCoord");
+    ab->bind().setData(mHeightCoords);
+    mAbs.push_back(ab);
+
     for (auto const& ab : mAbs)
         ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Perlin");
 
@@ -160,6 +165,8 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
 
     slope_y.resize(mNumberOfVertices);
 
+    mHeightCoords.resize(mNumberOfVertices);
+
     int dimX = mHeightmapDimensions.x, dimY = mHeightmapDimensions.y;
 
     float terrainWidth = ( dimX - 1 ) * mfBlockScale;
@@ -190,7 +197,8 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
 
             normals_final.at(CURRPOS) = glm::vec3(0);
             mPositions.at(CURRPOS) = glm::vec3(X, Y, Z);
-            mTexCoords.at(CURRPOS) = glm::vec2(S*fTextureU, T*fTextureV);
+            mTexCoords.at(CURRPOS) = glm::vec2(S * fTextureU, T * fTextureV);
+            mHeightCoords.at(CURRPOS) = glm::vec2(S, T);
 
              if(i != dimY - 1)
              {
@@ -440,16 +448,19 @@ void MultiLayeredHeightmap::LoadSplatmap(){
 
     float fScale;
 
-    float r = 0.0f;
-    float g = 0.0f;
-    float b = 0.0f;
+    float r;
+    float g;
+    float b;
 
     for(unsigned int i = 0; i<mNumberOfVertices; i++){
+        r = 0.0f;
+        g = 0.0f;
+        b = 0.0f;
 
         fScale = slope_y.at(i);
 
         if(fScale >= 0.0 && fScale <= fRange1){
-            r = 255;
+            r = 1.f;
         }
 
         else if(fScale <= fRange2){
@@ -459,13 +470,13 @@ void MultiLayeredHeightmap::LoadSplatmap(){
            float fScale2 = fScale;
            fScale = 1.0-fScale;
 
-           r += 255 * fScale;
-           g += 255 * fScale2;
+           r = fScale;
+           g = fScale2;
 
         }
 
         else if(fScale <= fRange3){
-            g += 255;
+            g = 1.f;
         }
 
         else if(fScale <= fRange4)
@@ -476,12 +487,12 @@ void MultiLayeredHeightmap::LoadSplatmap(){
                 float fScale2 = fScale;
                 fScale = 1.0-fScale;
 
-                g += 255 * fScale;
-                b += 255 * fScale2;
+                g = fScale;
+                b = fScale2;
         }
 
         else{
-            b = 255;
+            b = 1.f;
            }
 
         mSplatmap.at(i) = {r,g,b};

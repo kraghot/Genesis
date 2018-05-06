@@ -22,6 +22,7 @@ in vec4 vColor;
 in vec3 vTangent;
 in vec2 vTexCoord;
 in float vSlopeY;
+in vec2 vHeightCoord;
 
 out vec4 fColor;
 
@@ -110,8 +111,9 @@ void main()
     vec3 normalMap = vTexNormal.rgb;
 
 
-    vec3 temp = texture(uSplatmapTex, vTexCoord).rgb;
-    vec4 vFinalTexColor = vec4(temp,1.f);
+    //vec3 temp = texture(uSplatmapTex, aHeightCoord).rgb;
+
+    vec4 vFinalTexColor = texture(uSplatmapTex, vHeightCoord);
 
 
 
