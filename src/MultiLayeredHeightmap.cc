@@ -29,7 +29,7 @@ glow::SharedTexture2DArray MultiLayeredHeightmap::LoadTexture(std::vector<std::s
 
     //std::cout << "texname0 = "<<textureName[0]<< std::endl;
 
-    for(int i = 0; i < textureName.size(); i++){
+    for(auto i = 0u; i < textureName.size(); i++){
         mTexture[i] = (glow::TextureData::createFromFile(textureName[i], glow::ColorSpace::sRGB));
         mSurface[i] = mTexture[i]->getSurfaces()[0];
         mSurface[i]->setOffsetZ(i);
@@ -49,7 +49,7 @@ glow::SharedTexture2DArray MultiLayeredHeightmap::LoadNormal(std::vector<std::st
 
     //std::cout << "texname0 = "<<normalName[0]<< std::endl;
 
-    for(int i = 0; i < normalName.size(); i++){
+    for(auto i = 0u; i < normalName.size(); i++){
         mTextureNormal[i] = (glow::TextureData::createFromFile(normalName[i], glow::ColorSpace::Linear));
         mNormalSurface[i] = mTextureNormal[i]->getSurfaces()[0];
         mNormalSurface[i]->setOffsetZ(i);
@@ -397,9 +397,9 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
 
 void MultiLayeredHeightmap::CalculateNormalsTangents(int dimX, int dimY){
 
-    for ( unsigned int j = 0; j < dimY-1; j++ )
+    for (int j = 0; j < dimY-1; j++ )
     {
-        for ( unsigned i = 0; i < dimX-1; i++ )
+        for (int i = 0; i < dimX-1; i++ )
         {
             unsigned int index = ( j * dimX ) + i;
 
@@ -474,9 +474,9 @@ void MultiLayeredHeightmap::CalculateNormalsTangents(int dimX, int dimY){
     }
 
 
-    for ( unsigned int i = 0; i < dimY; ++i )
+    for (int i = 0; i < dimY; ++i )
     {
-        for ( unsigned j = 0; j < dimX; ++j )
+        for (int j = 0; j < dimX; ++j )
         {
             glm::vec3 tempNormals = glm::vec3(0.0f, 0.0f, 0.0f);
             glm::vec3 tempTangents = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -587,7 +587,7 @@ glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filenam
     heights.resize(mNumberOfVertices);
 
     for(size_t i = 0; i < heights.size(); i++)
-        heights.at(i) = (unsigned char)heightMap[i * bytesPerPixel]/(float)0xff;
+        heights.at(i) = (float) heightMap[i] / 255.0f;
 
     //===========set up buffers===========
     FillData(heights);
@@ -612,14 +612,14 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(NoiseGenerator *g
 
             float x = 10 * normalizedCoord.x,  y = 10 * normalizedCoord.y;
             heights.push_back(0.0f);
-            float amp = 5;
+            float amp = maxHeight;
             float temp = 0.0f;
-            for(auto oct = 0u; oct < 4; oct++)
+            for(auto oct = 0u; oct < octaves; oct++)
             {
                 temp += generator->noise(x, y, 0.8f) * amp;
-                x /= freqScale; y /= freqScale; amp *= freqScale;
+                x /= freqScale; y /= freqScale; amp *= 0.5f;
             }
-            heights.back() = (temp * 0.2f) + 0.85f;
+             heights.back() =  temp + 0.5f;
         }
     }
 

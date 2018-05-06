@@ -34,7 +34,7 @@ void main()
     //float fScale = uSlopeBlending? vSlopeY : (vWorldPosition.y*1.0f)/(fRenderHeight*1.0f);
 
 #if ENABLE_SLOPE_BASED_BLEND
-    float fScale = vSlopeY * 10.0f;
+    float fScale = vSlopeY;
 #else
     float fScale = (vWorldPosition.y*1.0f)/(fRenderHeight*1.0f);
 #endif

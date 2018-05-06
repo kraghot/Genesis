@@ -84,7 +84,7 @@ public:
     MultiLayeredHeightmap(float heightScale, float blockScale);
     virtual ~MultiLayeredHeightmap();
     glow::SharedVertexArray LoadHeightmap(const char *filename, unsigned char bitsPerPixel);
-    glow::SharedVertexArray GenerateTerrain(NoiseGenerator* generator, unsigned int dimX, unsigned int dimY, unsigned int octaves = 4, float freqScale = 0.5f, float maxHeight = 5.0f);
+    glow::SharedVertexArray GenerateTerrain(NoiseGenerator* generator, unsigned int dimX, unsigned int dimY, unsigned int octaves = 4, float freqScale = 0.5f, float maxHeight = 1.0f);
 
     // Get the height of the terrain at a position in world space, position = world space position
     float GetHeightAt(const glm::vec3& position);
