@@ -123,14 +123,8 @@ void MultiLayeredHeightmap::MakeVertexArray()
     mVao->setObjectLabel("Heightmap");
 
     mDisplacementTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_R32F);
-//    mDisplacementTexture->bind().setData(GL_RED, mHeightmapDimensions.x,
-//                                         mHeightmapDimensions.y, mDisplacement);
-    GLenum error = glGetError();
     mDisplacementTexture->bind().setData(GL_R32F, mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RED, GL_FLOAT, mDisplacement.data());
-    error = glGetError();
-    mDisplacementTexture->bind().setFilter(GL_NEAREST, GL_NEAREST);
     mDisplacementTexture->bind().generateMipmaps();
-//    mDisplacementTexture->
 }
 
 void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
@@ -188,7 +182,7 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
             normals_final.at(CURRPOS) = glm::vec3(0);
             mPositions.at(CURRPOS) = glm::vec3(X, Y, Z);
             mTexCoords.at(CURRPOS) = glm::vec2(S*fTextureU, T*fTextureV);
-            mHeightCoords.at(CURRPOS) = glm::vec2((float)i/dimX, (float)j/dimY);
+            mHeightCoords.at(CURRPOS) = glm::vec2(S, T);
 
              if(i != dimY - 1)
              {
@@ -536,7 +530,6 @@ void MultiLayeredHeightmap::CalculateNormalsTangents(int dimX, int dimY){
 
             //in radians
             slope_y.at(( i * dimX ) + j) = glm::acos(tempNormals.y);
-
 
         }
     }

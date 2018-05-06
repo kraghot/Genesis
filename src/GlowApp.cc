@@ -25,6 +25,7 @@ unsigned int seed;
 bool button;
 
 using namespace glow;
+const int heightMapDim = 150;
 
 void TW_CALL GlowApp::randomTerrain(void *clientData){
     static_cast<GlowApp *>(clientData)->setSeed(std::rand());
@@ -73,7 +74,7 @@ void GlowApp::init()
     //load heightmap, (RAW filename, Bits Per Pixel)
 //    mPerlinTest= mHeightmap.LoadHeightmap("texture/terrain0-8bbp-257x257.raw", 8);
     PerlinNoiseGenerator noise(2924319);
-    mPerlinTest = mHeightmap.GenerateTerrain(&noise, 100, 100);
+    mPerlinTest = mHeightmap.GenerateTerrain(&noise, heightMapDim, heightMapDim);
 
 
     // load object
@@ -223,7 +224,7 @@ void GlowApp::render(float elapsedSeconds)
 void GlowApp::initTerrain(){
 
     PerlinNoiseGenerator noise(seed);
-    mPerlinTest = mHeightmap.GenerateTerrain(&noise, 257, 257);
+    mPerlinTest = mHeightmap.GenerateTerrain(&noise, heightMapDim, heightMapDim);
 
 //    mPerlinTest = mHeightField.createPerlinTerrain();
 
