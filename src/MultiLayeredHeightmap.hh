@@ -84,7 +84,7 @@ public:
     glow::SharedTexture2DArray LoadTexture(std::vector<std::string> textureName);
     glow::SharedTexture2DArray LoadNormal(std::vector<std::string> normalName);
 
-    std::vector<uint8_t> LoadSplatmap();
+    void LoadSplatmap();
 
     // translate the incoming char data array into a floating point value in the range [0…1]
     // If you wanted to load height maps that are stored MSB,LSB, you would have to reverse the array indices for values that read more than 1 byte.
@@ -124,6 +124,8 @@ public:
 
     float getMfHeightScale() const;
 
+    glow::SharedTexture2D getSplatmapTexture() const;
+
 private:
     void MakeVertexArray();
     void FillData(std::vector<float>& heights);
@@ -149,7 +151,8 @@ private:
 
     std::vector<float> slope_y;
 
-    std::vector<uint8_t> mSplatmap;
+    std::vector<glm::vec3> mSplatmap;
+    glow::SharedTexture2D mSplatmapTexture;
 
 
     std::vector<glow::SharedTextureData> mTexture;

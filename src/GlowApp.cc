@@ -66,11 +66,6 @@ void GlowApp::init()
     TwAddVarCB(tweakbar(), "seed", TW_TYPE_UINT16, GlowApp::setSeedTerrain, GlowApp::getSeedTerrain, &seed, "group=scene step=1");
     TwAddButton(tweakbar(), "terrain", GlowApp::randomTerrain, NULL, " label='Generate random terrain '");
 
-//    PerlinNoiseGenerator generator(132412341);
-//    mHeightField.init(&generator, 128);
-    //load heightmap, (RAW filename, Bits Per Pixel)
-        //mPerlinTest= mHeightmap.LoadHeightmap("texture/terrain0-8bbp-257x257.raw", 8);
-
 
     // load object
     //mMeshCube = assimp::Importer().load("mesh/cube.obj");
@@ -83,13 +78,13 @@ void GlowApp::init()
     seed = std::rand();
     GlowApp::initTerrain();
     std::cout << "seed: " << seed << std::endl;
-   mHeightmap.DumpHeightmapToFile();
-   mHeightmap.DumpSplatmapToFile();
 
-    //TwAddButton(tweakbar(), "Generate random terrain", initTerrain, &seed, NULL);
+    //mHeightmap.DumpHeightmapToFile();
+   //mHeightmap.DumpSplatmapToFile();
 
+//    mSplatmapTexture = Texture2D::create(mHeightmap.mHeightmapDimensions.x, mHeightmap.mHeightmapDimensions.y, GL_RGB);
+//    mSplatmapTexture->bind().setData(GL_RGB, mHeightmap.mHeightmapDimensions.x, mHeightmap.mHeightmapDimensions.y, mHeightmap.mSplatmap, 0);
 
-    //GlowApp::initTerrain();
 
     // set up framebuffer and output
     mShaderOutput = Program::createFromFile("shader/output");
@@ -129,12 +124,10 @@ void GlowApp::update(float elapsedSeconds)
 
 void GlowApp::render(float elapsedSeconds)
 {
-   // std::cout << "before seed: " << seed << " before button: " << button << std::endl;
 
     if(button){
         GlowApp::initTerrain();
         button = false;
-        //std::cout << "if seed: " << seed << " if button: " << button << std::endl;
     }
 
     GlfwApp::render(elapsedSeconds); // call to base!
@@ -186,7 +179,7 @@ void GlowApp::render(float elapsedSeconds)
 
         // draw object
         {
-            auto model = glm::rotate(mAngle, glm::vec3(0, 1, 0));// * glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
+            auto model = glm::rotate(mAngle, glm::vec3(0, 1, 0)) * glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
 
             auto shader = mShaderObj->use();
             shader.setUniform("uView", view);
@@ -198,6 +191,8 @@ void GlowApp::render(float elapsedSeconds)
 
             shader.setTexture("uTexColor", mTextureColor);
             shader.setTexture("uTexNormal", mTextureNormal);
+
+            shader.setTexture("uSplatmapTex", mHeightmap.getSplatmapTexture());
 
             //terrain 2d texture array
             shader.setTexture("uTerrainTex", mTexture);
@@ -223,9 +218,6 @@ void GlowApp::initTerrain(){
     mPerlinTest = mHeightmap.GenerateTerrain(&noise, 257, 257);
     //mPerlinTest = mHeightmap.LoadHeightmap("terrain-heightmap-8bbp-257x257.raw", 8);
 
-//    mPerlinTest = mHeightField.createPerlinTerrain();
-
-
     //define textures for terrain
     std::vector<std::string> mTerrainTextures = {"texture/snow009.jpg", "texture/grass007.jpg", "texture/rock007.jpg"};
 
@@ -248,8 +240,6 @@ void GlowApp::setSeed(unsigned int var){
 
   else
       button = false;
-
-  //std::cout << "seed: " << seed << " button: " << button << std::endl;
 }
 
 unsigned int GlowApp::getSeed() const{

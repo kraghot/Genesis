@@ -88,9 +88,9 @@ void MultiLayeredHeightmap::DumpSplatmapToFile()
     std::vector<uint8_t> byteField;
     byteField.reserve(mNumberOfVertices*3);
 
-    byteField = LoadSplatmap();
+//    byteField = mSplatmap;
 
-    file.write((char *)byteField.data(), byteField.size());
+//    file.write((char *)byteField.data(), byteField.size());
 }
 
 
@@ -133,6 +133,13 @@ void MultiLayeredHeightmap::MakeVertexArray()
     mEab->setObjectLabel("Heightamp");
     mVao = glow::VertexArray::create(mAbs, mEab, GL_TRIANGLE_STRIP);
     mVao->setObjectLabel("Heightmap");
+
+    mSplatmapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RGB);
+    mSplatmapTexture->bind().setData(GL_RGB, mHeightmapDimensions.x, mHeightmapDimensions.y, mSplatmap);
+    mSplatmapTexture->bind().generateMipmaps();
+
+
+
 }
 
 void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
@@ -195,6 +202,7 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
         mIndices.push_back(restart);
     }
     CalculateNormalsTangents(dimX, dimY);
+    LoadSplatmap();
 }
 #undef CURRPOS
 
@@ -326,6 +334,11 @@ void MultiLayeredHeightmap::CalculateNormalsTangents(int dimX, int dimY){
     }
 }
 
+glow::SharedTexture2D MultiLayeredHeightmap::getSplatmapTexture() const
+{
+    return mSplatmapTexture;
+}
+
 float MultiLayeredHeightmap::getMfHeightScale() const
 {
     return mfHeightScale;
@@ -416,9 +429,9 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(NoiseGenerator *g
     return mVao;
 }
 
-std::vector<uint8_t> MultiLayeredHeightmap::LoadSplatmap(){
+void MultiLayeredHeightmap::LoadSplatmap(){
 
-    mSplatmap.reserve(mNumberOfVertices*3);
+    mSplatmap.resize(mNumberOfVertices);
 
     const float fRange1 = 0.3f;
     const float fRange2 = 0.5f;
@@ -471,14 +484,8 @@ std::vector<uint8_t> MultiLayeredHeightmap::LoadSplatmap(){
             b = 255;
            }
 
-        mSplatmap.push_back(r);
-        mSplatmap.push_back(g);
-        mSplatmap.push_back(b);
+        mSplatmap.at(i) = {r,g,b};
     }
 
-    return mSplatmap;
 
 }
-
-
-

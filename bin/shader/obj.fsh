@@ -9,6 +9,8 @@ uniform vec3 uCamPos;
 uniform sampler2D uTexColor;
 uniform sampler2D uTexNormal;
 
+uniform sampler2D uSplatmapTex;
+
 uniform sampler2DArray uTerrainTex;
 uniform sampler2DArray uTerrainNormal;
 
@@ -101,11 +103,15 @@ void main()
 
 
    // vec4 vFinalTexColor = vTexColor;
-    vec4 vFinalTexColor;
-    vFinalTexColor.r = r;
-    vFinalTexColor.g = g;
-    vFinalTexColor.b = b;
+//    vec4 vFinalTexColor;
+//    vFinalTexColor.r = r;
+//    vFinalTexColor.g = g;
+//    vFinalTexColor.b = b;
     vec3 normalMap = vTexNormal.rgb;
+
+
+    vec3 temp = texture(uSplatmapTex, vTexCoord).rgb;
+    vec4 vFinalTexColor = vec4(temp,1.f);
 
 
 
