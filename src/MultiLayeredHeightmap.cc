@@ -3,6 +3,10 @@
 
 #include<stdio.h>
 
+#ifndef ENABLE_SLOPE_BASED_BLEND
+#define ENABLE_SLOPE_BASED_BLEND 1
+#endif
+
 typedef std::basic_ios<char> ios;
 
 GlowApp GlowAppObject;
@@ -457,7 +461,12 @@ void MultiLayeredHeightmap::LoadSplatmap(){
         g = 0.0f;
         b = 0.0f;
 
-        fScale = slope_y.at(i);
+#if ENABLE_SLOPE_BASED_BLEND
+    fScale = slope_y.at(i);
+#else
+    fScale = mPositions.at(i).y/mfHeightScale;
+#endif
+#undef ENABLE_SLOPE_BASED_BLEND
 
         if(fScale >= 0.0 && fScale <= fRange1){
             r = 1.f;
