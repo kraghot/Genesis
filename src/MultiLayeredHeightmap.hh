@@ -154,6 +154,7 @@ private:
     std::vector<glm::vec4> mColors;
     std::vector<uint32_t> mIndices;
     std::vector<glm::vec2> mTexCoords;
+    std::vector<glm::vec2> mHeightCoords;
     std::vector<float> mWaterLevel;
 
     std::vector<glm::vec3> normals1;

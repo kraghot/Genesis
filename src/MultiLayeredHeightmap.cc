@@ -109,6 +109,11 @@ void MultiLayeredHeightmap::MakeVertexArray()
     ab->bind().setData(slope_y);
     mAbs.push_back(ab);
 
+    ab = glow::ArrayBuffer::create();
+    ab->defineAttribute<glm::vec2>("aHeightCoord");
+    ab->bind().setData(mHeightCoords);
+    mAbs.push_back(ab);
+
     for (auto const& ab : mAbs)
         ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Perlin");
 
@@ -117,10 +122,12 @@ void MultiLayeredHeightmap::MakeVertexArray()
     mVao = glow::VertexArray::create(mAbs, mEab, GL_TRIANGLE_STRIP);
     mVao->setObjectLabel("Heightmap");
 
-    mDisplacementTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RED);
+    mDisplacementTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_R32F);
 //    mDisplacementTexture->bind().setData(GL_RED, mHeightmapDimensions.x,
 //                                         mHeightmapDimensions.y, mDisplacement);
-    mDisplacementTexture->bind().setData(GL_RED, mHeightmapDimensions.x, mHeightmapDimensions.y, GL_R32F, GL_FLOAT, mDisplacement.data());
+    GLenum error = glGetError();
+    mDisplacementTexture->bind().setData(GL_R32F, mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RED, GL_FLOAT, mDisplacement.data());
+    error = glGetError();
     mDisplacementTexture->bind().setFilter(GL_NEAREST, GL_NEAREST);
     mDisplacementTexture->bind().generateMipmaps();
 //    mDisplacementTexture->
@@ -142,6 +149,7 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
     tangents2.resize(mNumberOfVertices);
     tangents_final.resize(mNumberOfVertices);
     mDisplacement.resize(mNumberOfVertices);
+    mHeightCoords.resize(mNumberOfVertices);
 
     slope_y.resize(mNumberOfVertices);
 
@@ -180,6 +188,7 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
             normals_final.at(CURRPOS) = glm::vec3(0);
             mPositions.at(CURRPOS) = glm::vec3(X, Y, Z);
             mTexCoords.at(CURRPOS) = glm::vec2(S*fTextureU, T*fTextureV);
+            mHeightCoords.at(CURRPOS) = glm::vec2((float)i/dimX, (float)j/dimY);
 
              if(i != dimY - 1)
              {
