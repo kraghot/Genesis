@@ -61,20 +61,102 @@ glow::SharedTexture2DArray MultiLayeredHeightmap::LoadNormal(std::vector<std::st
     return glow::Texture2DArray::createFromData(mTextureNormal[0]);
 }
 
-void MultiLayeredHeightmap::DumpToFile()
+void MultiLayeredHeightmap::DumpHeightmapToFile()
 {
     std::ostringstream filename;
-    filename << "terrain-8bbp-" << mHeightmapDimensions.x << "x" << mHeightmapDimensions.y << ".raw";
+    filename << "terrain-heightmap-8bbp-" << mHeightmapDimensions.x << "x" << mHeightmapDimensions.y << ".raw";
     std::ofstream file (filename.str(), std::ios::out | std::ios::binary);
     std::vector<uint8_t> byteField;
     byteField.reserve(mNumberOfVertices);
     for(auto it : mPositions)
     {
+        if(it.y < 0)
+            it.y *= (-1);
+
         /// @todo Correct for y scaling
-        byteField.push_back(it.y * (255));
+        byteField.push_back((it.y/30) * (255));
     }
     file.write((char *)byteField.data(), byteField.size());
 }
+
+void MultiLayeredHeightmap::DumpSplatmapToFile()
+{
+    const float fRange1 = 0.3f;
+    const float fRange2 = 0.5f;
+    const float fRange3 = 0.7f;
+    const float fRange4 = 0.9f;
+    float fScale;
+
+    float r = 0.0f;
+    float g = 0.0f;
+    float b = 0.0f;
+
+
+    std::ostringstream filename;
+    filename << "terrain-splatmap-8bbp-" << mHeightmapDimensions.x << "x" << mHeightmapDimensions.y << ".raw";
+    std::ofstream file (filename.str(), std::ios::out | std::ios::binary);
+    std::vector<uint8_t> byteField;
+    byteField.reserve(mNumberOfVertices);
+    for(unsigned int i = 0; i<mNumberOfVertices; i++){
+        /// @todo Correct for y scaling
+        //byteField.push_back(it.y * (255));
+        fScale = slope_y.at(i);
+
+        if(fScale >= 0.0 && fScale <= fRange1){
+            r = 255 * 0.3;
+            g = 255 * 0.7;
+        }
+
+        else if(fScale <= fRange2){
+            fScale -= fRange1;
+            fScale /= (fRange2-fRange1);
+
+           float fScale2 = fScale;
+           fScale = 1.0-fScale;
+
+           r += 255 * 0.5 * fScale;
+           g += 255 * 0.5 * fScale;
+
+           g += 255 * 0.3 * fScale2;
+           b += 255 * 0.7 * fScale2;
+
+        }
+
+        else if(fScale <= fRange3){
+            g = 255 * 0.3;
+            b += 255 * 0.7;
+
+        }
+
+        else if(fScale <= fRange4)
+        {
+                fScale -= fRange3;
+                fScale /= (fRange4-fRange3);
+
+                float fScale2 = fScale;
+                fScale = 1.0-fScale;
+
+                g += 255 * 0.3 * fScale;
+                b += 255 * 0.7 * fScale;
+
+                b += 255 * fScale2;
+        }
+        else{
+            b = 255;
+           }
+
+
+
+        byteField.push_back(r);
+        byteField.push_back(g);
+        byteField.push_back(b);
+
+        mSplatmap.at(i)
+
+    }
+    file.write((char *)byteField.data(), byteField.size());
+}
+
 
 void MultiLayeredHeightmap::MakeVertexArray()
 {
@@ -344,6 +426,8 @@ glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filenam
     mHeightmapDimensions = {width, height};
     mNumberOfVertices = resolution;
 
+    std::cerr << "Resolution: " << resolution << " -> " << mHeightmapDimensions.x  <<"x"<< mHeightmapDimensions.y << std::endl;
+
     //===========load the height map data from the RAW texture into a float array===========
     unsigned char heightMap[fileSize];
     std::fread(heightMap, fileSize, 1, file);
@@ -378,14 +462,14 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(NoiseGenerator *g
 
             float x = 10 * normalizedCoord.x,  y = 10 * normalizedCoord.y;
             heights.push_back(0.0f);
-            float amp = 5;
+            float amp = maxHeight;
             float temp = 0.0f;
-            for(auto oct = 0u; oct < 4; oct++)
+            for(auto oct = 0u; oct < octaves; oct++)
             {
                 temp += generator->noise(x, y, 0.8f) * amp;
-                x /= freqScale; y /= freqScale; amp *= freqScale;
+                x /= freqScale; y /= freqScale; amp *= 0.5f;
             }
-             heights.back() =  (temp * 0.2f) + 0.85f;
+             heights.back() =  temp + 0.5f;
         }
     }
 
@@ -394,6 +478,65 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(NoiseGenerator *g
     MakeVertexArray();
 
     return mVao;
+}
+
+std::vector<uint8_t> MultiLayeredHeightmap::LoadSplatmap(){
+
+    const float fRange1 = 0.3f;
+    const float fRange2 = 0.5f;
+    const float fRange3 = 0.7f;
+    const float fRange4 = 0.9f;
+
+    float fScale;
+
+    float r = 0.0f;
+    float g = 0.0f;
+    float b = 0.0f;
+
+    for(unsigned int i = 0; i<mNumberOfVertices; i++){
+
+        fScale = slope_y.at(i);
+
+        if(fScale >= 0.0 && fScale <= fRange1){
+            r = 255;
+        }
+
+        else if(fScale <= fRange2){
+            fScale -= fRange1;
+            fScale /= (fRange2-fRange1);
+
+           float fScale2 = fScale;
+           fScale = 1.0-fScale;
+
+           r += 255 * fScale;
+           g += 255 * fScale2;
+
+        }
+
+        else if(fScale <= fRange3){
+            g += 255;
+        }
+
+        else if(fScale <= fRange4)
+        {
+                fScale -= fRange3;
+                fScale /= (fRange4-fRange3);
+
+                float fScale2 = fScale;
+                fScale = 1.0-fScale;
+
+                g += 255 * fScale;
+                b += 255 * fScale2;
+        }
+
+        else{
+            b = 255;
+           }
+
+        mSplatmap.push_back(r);
+        mSplatmap.push_back(g);
+        mSplatmap.push_back(b);
+
 }
 
 

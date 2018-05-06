@@ -63,7 +63,6 @@ void GlowApp::init()
     TwAddVarRW(tweakbar(), "light direction", TW_TYPE_DIR3F, &mLightDir, "group=scene");
     TwAddVarRW(tweakbar(), "light distance", TW_TYPE_FLOAT, &mLightDis, "group=scene step=0.1 min=1 max=100");
     TwAddVarRW(tweakbar(), "rotation speed", TW_TYPE_FLOAT, &mSpeed, "group=scene step=0.1");
-    TwAddVarRW(tweakbar(), "rotation speed", TW_TYPE_UINT16, &mSpeed, "group=scene step=0.1");
     TwAddVarCB(tweakbar(), "seed", TW_TYPE_UINT16, GlowApp::setSeedTerrain, GlowApp::getSeedTerrain, &seed, "group=scene step=1");
     TwAddButton(tweakbar(), "terrain", GlowApp::randomTerrain, NULL, " label='Generate random terrain '");
 
@@ -84,6 +83,8 @@ void GlowApp::init()
     seed = std::rand();
     GlowApp::initTerrain();
     std::cout << "seed: " << seed << std::endl;
+   mHeightmap.DumpHeightmapToFile();
+   mHeightmap.DumpSplatmapToFile();
 
     //TwAddButton(tweakbar(), "Generate random terrain", initTerrain, &seed, NULL);
 
@@ -128,12 +129,12 @@ void GlowApp::update(float elapsedSeconds)
 
 void GlowApp::render(float elapsedSeconds)
 {
-    std::cout << "before seed: " << seed << " before button: " << button << std::endl;
+   // std::cout << "before seed: " << seed << " before button: " << button << std::endl;
 
     if(button){
         GlowApp::initTerrain();
         button = false;
-        std::cout << "if seed: " << seed << " if button: " << button << std::endl;
+        //std::cout << "if seed: " << seed << " if button: " << button << std::endl;
     }
 
     GlfwApp::render(elapsedSeconds); // call to base!
@@ -185,7 +186,7 @@ void GlowApp::render(float elapsedSeconds)
 
         // draw object
         {
-            auto model = glm::rotate(mAngle, glm::vec3(0, 1, 0)) * glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
+            auto model = glm::rotate(mAngle, glm::vec3(0, 1, 0));// * glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
 
             auto shader = mShaderObj->use();
             shader.setUniform("uView", view);
@@ -217,8 +218,10 @@ void GlowApp::render(float elapsedSeconds)
 
 void GlowApp::initTerrain(){
 
+    seed = 20;
     PerlinNoiseGenerator noise(seed);
     mPerlinTest = mHeightmap.GenerateTerrain(&noise, 257, 257);
+    //mPerlinTest = mHeightmap.LoadHeightmap("terrain-heightmap-8bbp-257x257.raw", 8);
 
 //    mPerlinTest = mHeightField.createPerlinTerrain();
 
@@ -246,7 +249,7 @@ void GlowApp::setSeed(unsigned int var){
   else
       button = false;
 
-  std::cout << "seed: " << seed << " button: " << button << std::endl;
+  //std::cout << "seed: " << seed << " button: " << button << std::endl;
 }
 
 unsigned int GlowApp::getSeed() const{

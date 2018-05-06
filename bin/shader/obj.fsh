@@ -13,7 +13,6 @@ uniform sampler2DArray uTerrainTex;
 uniform sampler2DArray uTerrainNormal;
 
 uniform float fRenderHeight;
-uniform bool uSlopeBlending;
 
 in vec3 vWorldPosition;
 in vec3 vNormal;
@@ -31,6 +30,10 @@ void main()
     const float fRange3 = 0.7f;
     const float fRange4 = 0.9f;
 
+    float r = 0.0f;
+    float g = 0.0f;
+    float b = 0.0f;
+
     //float fScale = uSlopeBlending? vSlopeY : (vWorldPosition.y*1.0f)/(fRenderHeight*1.0f);
 
 #if ENABLE_SLOPE_BASED_BLEND
@@ -45,6 +48,8 @@ void main()
     if(fScale >= 0.0 && fScale <= fRange1){
         vTexColor = texture(uTerrainTex, vec3(vTexCoord, 0.3));
         vTexNormal = texture(uTerrainNormal, vec3(vTexCoord,0.3));
+
+        r = 255;
     }
     else if(fScale <= fRange2){
         fScale -= fRange1;
@@ -53,17 +58,25 @@ void main()
        float fScale2 = fScale;
        fScale = 1.0-fScale;
 
-       vTexColor += texture(uTerrainTex, vec3(vTexCoord, 0.5))*fScale;
-       vTexColor += texture(uTerrainTex, vec3(vTexCoord, 1.3))*fScale2;
+       vTexColor += texture(uTerrainTex, vec3(vTexCoord, 0.0))*fScale;
+       vTexColor += texture(uTerrainTex, vec3(vTexCoord, 1.0))*fScale2;
 
        vTexNormal += texture(uTerrainNormal, vec3(vTexCoord, 0.5)) *fScale;
        vTexNormal += texture(uTerrainNormal, vec3(vTexCoord, 1.3)) *fScale2;
 
+       r += 255 * fScale;
+       //g += 255 * 0.5 * fScale;
+
+       g += 255 * fScale2;
+       //b += 255 * 0.3 * fScale2;
+
     }
 
     else if(fScale <= fRange3){
-        vTexColor = texture(uTerrainTex, vec3(vTexCoord, 1.3));
-        vTexNormal = texture(uTerrainNormal, vec3(vTexCoord, 1.3));
+        vTexColor = texture(uTerrainTex, vec3(vTexCoord, 1.0));
+        vTexNormal = texture(uTerrainNormal, vec3(vTexCoord, 1.0));
+
+        g += 255;
     }
     else if(fScale <= fRange4)
     {
@@ -73,19 +86,30 @@ void main()
             float fScale2 = fScale;
             fScale = 1.0-fScale;
 
-            vTexColor += texture(uTerrainTex, vec3(vTexCoord, 1.3))*fScale;
+            vTexColor += texture(uTerrainTex, vec3(vTexCoord, 1.0))*fScale;
             vTexColor += texture(uTerrainTex, vec3(vTexCoord, 2))*fScale2;
 
-            vTexNormal += texture(uTerrainNormal, vec3(vTexCoord, 1.3)) *fScale;
+            vTexNormal += texture(uTerrainNormal, vec3(vTexCoord, 1.0)) *fScale;
             vTexNormal += texture(uTerrainNormal, vec3(vTexCoord, 2)) *fScale2;
+
+            g += 255 * fScale;
+            //b += 255 * 0.3 * fScale;
+
+            b += 255 * fScale2;
     }
     else{
         vTexColor = texture(uTerrainTex, vec3(vTexCoord, 2));
         vTexNormal = texture(uTerrainNormal, vec3(vTexCoord, 2));
+
+        b = 255;
        }
 
 
-    vec4 vFinalTexColor = vTexColor;
+   // vec4 vFinalTexColor = vTexColor;
+    vec4 vFinalTexColor;
+    vFinalTexColor.r = r;
+    vFinalTexColor.g = g;
+    vFinalTexColor.b = b;
     vec3 normalMap = vTexNormal.rgb;
 
 
