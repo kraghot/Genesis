@@ -28,7 +28,7 @@ glow::SharedTexture2DArray MultiLayeredHeightmap::LoadTexture(std::vector<std::s
 
     //std::cout << "texname0 = "<<textureName[0]<< std::endl;
 
-    for(int i = 0; i < textureName.size(); i++){
+    for(auto i = 0u; i < textureName.size(); i++){
         mTexture[i] = (glow::TextureData::createFromFile(textureName[i], glow::ColorSpace::sRGB));
         mSurface[i] = mTexture[i]->getSurfaces()[0];
         mSurface[i]->setOffsetZ(i);
@@ -48,7 +48,7 @@ glow::SharedTexture2DArray MultiLayeredHeightmap::LoadNormal(std::vector<std::st
 
     //std::cout << "texname0 = "<<normalName[0]<< std::endl;
 
-    for(int i = 0; i < normalName.size(); i++){
+    for(auto i = 0u; i < normalName.size(); i++){
         mTextureNormal[i] = (glow::TextureData::createFromFile(normalName[i], glow::ColorSpace::Linear));
         mNormalSurface[i] = mTextureNormal[i]->getSurfaces()[0];
         mNormalSurface[i]->setOffsetZ(i);
@@ -182,9 +182,9 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
 
 void MultiLayeredHeightmap::CalculateNormalsTangents(int dimX, int dimY){
 
-    for ( unsigned int j = 0; j < dimY-1; j++ )
+    for (int j = 0; j < dimY-1; j++ )
     {
-        for ( unsigned i = 0; i < dimX-1; i++ )
+        for (int i = 0; i < dimX-1; i++ )
         {
             unsigned int index = ( j * dimX ) + i;
 
@@ -251,9 +251,9 @@ void MultiLayeredHeightmap::CalculateNormalsTangents(int dimX, int dimY){
     }
 
 
-    for ( unsigned int i = 0; i < dimY; ++i )
+    for (int i = 0; i < dimY; ++i )
     {
-        for ( unsigned j = 0; j < dimX; ++j )
+        for (int j = 0; j < dimX; ++j )
         {
             glm::vec3 tempNormals = glm::vec3(0.0f, 0.0f, 0.0f);
             glm::vec3 tempTangents = glm::vec3(0.0f, 0.0f, 0.0f);
