@@ -65,10 +65,7 @@ void main()
        vTexNormal += texture(uTerrainNormal, vec3(vTexCoord, 1.3)) *fScale2;
 
        r += 255 * fScale;
-       //g += 255 * 0.5 * fScale;
-
        g += 255 * fScale2;
-       //b += 255 * 0.3 * fScale2;
 
     }
 
@@ -93,8 +90,6 @@ void main()
             vTexNormal += texture(uTerrainNormal, vec3(vTexCoord, 2)) *fScale2;
 
             g += 255 * fScale;
-            //b += 255 * 0.3 * fScale;
-
             b += 255 * fScale2;
     }
     else{
