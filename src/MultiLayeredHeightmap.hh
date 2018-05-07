@@ -170,8 +170,6 @@ private:
     std::vector<glm::vec3> tangents2;
     std::vector<glm::vec3> tangents_final;
 
-    std::vector<glm::vec2> mHeightCoords;
-
     std::vector<float> slope_y;
 
     std::vector<glm::vec3> mSplatmap;
