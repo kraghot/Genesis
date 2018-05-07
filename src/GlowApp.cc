@@ -7,6 +7,7 @@
 
 #include <glm/ext.hpp>
 
+#include<glow-extras/glfw/GlfwApp.hh>
 #include <glow/common/scoped_gl.hh>
 #include <glow/common/str_utils.hh>
 #include <glow/gl.hh>
@@ -49,6 +50,7 @@ GlowApp::GlowApp():
 
 void GlowApp::init()
 {
+
     GlfwApp::init(); // call to base!
 
     // check correct working dir
@@ -69,12 +71,16 @@ void GlowApp::init()
     TwAddVarCB(tweakbar(), "seed", TW_TYPE_UINT16, GlowApp::setSeedTerrain, GlowApp::getSeedTerrain, &seed, "group=scene step=1");
     TwAddButton(tweakbar(), "terrain", GlowApp::randomTerrain, NULL, " label='Generate random terrain '");
 
+
+
+
+
     PerlinNoiseGenerator noise(2924319);
     mPerlinTest = mHeightmap.GenerateTerrain(&noise, heightMapDim, heightMapDim);
 
 
     // load object
-    //mMeshCube = assimp::Importer().load("mesh/cube.obj");
+    mMeshCube = assimp::Importer().load("mesh/cube.obj");
     mShaderObj = Program::createFromFile("shader/obj");
     mTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
     mTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
@@ -140,6 +146,9 @@ void GlowApp::render(float elapsedSeconds)
         button = false;
     }
 
+
+
+
     GlfwApp::render(elapsedSeconds); // call to base!
 
     auto cam = getCamera(); // internal camera from GlfwApp with some default input handling
@@ -148,6 +157,9 @@ void GlowApp::render(float elapsedSeconds)
     auto camPos = cam->getPosition();
 
     auto lightPos = normalize(mLightDir) * mLightDis;
+
+
+
 
     // render to framebuffer
     {
@@ -173,6 +185,17 @@ void GlowApp::render(float elapsedSeconds)
             shader.setTexture("uTexture", mBackgroundTexture);
             auto invProj = inverse(cam->getProjectionMatrix());
             auto invView = inverse(cam->getViewMatrix());
+
+            //world space mouse position
+
+//            if(GlfwApp::isMouseButtonPressed(mLeftClick)){
+//                std::cout << "mouse x: " << mMousePosFinal.x << " mouse pos y: " << mMousePosFinal.y << " mouse pos z: " << mMousePosFinal.z << std::endl;
+//            }
+
+
+
+            //std::cout << "mouse x: " << testRay.direction.x << "mouse x: " << testRay.direction.y << std::endl;
+
             shader.setUniform("uInvProj", invProj);
             shader.setUniform("uInvView", invView);
 
@@ -181,13 +204,20 @@ void GlowApp::render(float elapsedSeconds)
 
             glEnable(GL_DEPTH_TEST);
             glDepthMask(GL_TRUE);
+
+            mMousePosWin = GlfwApp::getMousePosition();
+            mMouseNDC = glm::vec4((mMousePosWin.x/(getWindowWidth()/2.f) - 1.f), ((getWindowHeight()-mMousePosWin.y)/(getWindowHeight()/2.f) - 1.f), cam->getNearClippingPlane(), 1.f);
+            mMousePosWorld =invProj *  mMouseNDC;
+            mMousePosFinal = invView * glm::vec4(mMousePosWorld.x, mMousePosWorld.y, -1.f, 0.f);
+           // mMousePosFinal = glm::vec3(mMousePosWorld.x/mMousePosWorld.w, mMousePosWorld.y/mMousePosWorld.w, mMousePosWorld.z/mMousePosWorld.w);
         }
 
 
 
         // draw object
         {
-            auto model = glm::rotate(mAngle, glm::vec3(0, 1, 0)) * glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
+
+            auto model = glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
 
             auto shader = mShaderObj->use();
             shader.setUniform("uView", view);
@@ -209,7 +239,22 @@ void GlowApp::render(float elapsedSeconds)
 
             shader.setUniform("fRenderHeight", mHeightmap.getMfHeightScale());
 
+            Ray testRay;
+            testRay.origin = camPos;
+
+            mMousePosFinal = glm::normalize(mMousePosFinal);
+            testRay.direction = mMousePosFinal;
+            mHeightmap.intersect(testRay);
+
+            glm::vec3 camPos1 = camPos;
+            glm::vec3 testRaydir =  testRay.direction;
+
+            //std::cout << "testRaydir x: " << testRaydir.x << " testRaydir pos y: " << testRaydir.y << " testRaydir pos z: " << testRaydir.z << std::endl;
+            //std::cout << "camPos x: " << camPos.x << " camPos pos y: " << camPos.y << " camPos pos z: " << camPos.z << std::endl;
+
+
             mPerlinTest->bind().draw();
+            //mMeshCube->bind().draw();
         }
     }
 

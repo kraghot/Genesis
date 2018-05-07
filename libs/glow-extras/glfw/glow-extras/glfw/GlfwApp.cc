@@ -243,7 +243,7 @@ bool GlfwApp::onMouseButton(double x, double y, int button, int action, int mods
         return true;
 
     if (button == GLFW_MOUSE_BUTTON_LEFT && action != GLFW_RELEASE)
-        mMouseLeft = true;
+        mMouseLeft = false;
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action != GLFW_RELEASE)
         mMouseRight = true;
 

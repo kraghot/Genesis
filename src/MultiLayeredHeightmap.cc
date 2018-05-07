@@ -108,7 +108,7 @@ void MultiLayeredHeightmap::MakeVertexArray()
 
     ab = glow::ArrayBuffer::create();
     ab->defineAttribute<glm::vec3>("aNormal");
-    ab->bind().setData(normals_final);
+    ab->bind().setData(mNormalsFinal);
     mAbs.push_back(ab);
 
     ab = glow::ArrayBuffer::create();
@@ -123,12 +123,12 @@ void MultiLayeredHeightmap::MakeVertexArray()
 
     ab = glow::ArrayBuffer::create();
     ab->defineAttribute<glm::vec3>("aTangent");
-    ab->bind().setData(tangents_final);
+    ab->bind().setData(mTangentsFinal);
     mAbs.push_back(ab);
 
     ab = glow::ArrayBuffer::create();
     ab->defineAttribute<float>("aSlopeY");
-    ab->bind().setData(slope_y);
+    ab->bind().setData(mSlopeY);
     mAbs.push_back(ab);
 
     ab = glow::ArrayBuffer::create();
@@ -162,16 +162,16 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
     mIndices.resize(mNumberOfVertices);
     mNormals.resize(mNumberOfVertices);
 
-    normals1.resize(mNumberOfVertices);
-    normals2.resize(mNumberOfVertices);
-    normals_final.resize(mNumberOfVertices);
-    tangents1.resize(mNumberOfVertices);
-    tangents2.resize(mNumberOfVertices);
-    tangents_final.resize(mNumberOfVertices);
+    mNormals1.resize(mNumberOfVertices);
+    mNormals2.resize(mNumberOfVertices);
+    mNormalsFinal.resize(mNumberOfVertices);
+    mTangents1.resize(mNumberOfVertices);
+    mTangents2.resize(mNumberOfVertices);
+    mTangentsFinal.resize(mNumberOfVertices);
     mDisplacement.resize(mNumberOfVertices);
     mHeightCoords.resize(mNumberOfVertices);
 
-    slope_y.resize(mNumberOfVertices);
+    mSlopeY.resize(mNumberOfVertices);
 
     mHeightCoords.resize(mNumberOfVertices);
 
@@ -207,7 +207,7 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
             float Y = 0.0f;
             float Z = ( T * terrainHeight ) - halfTerrainHeight;
 
-            normals_final.at(CURRPOS) = glm::vec3(0);
+            mNormalsFinal.at(CURRPOS) = glm::vec3(0);
             mPositions.at(CURRPOS) = glm::vec3(X, Y, Z);
             mTexCoords.at(CURRPOS) = glm::vec2(S * fTextureU, T * fTextureV);
             mHeightCoords.at(CURRPOS) = glm::vec2(S, T);
@@ -477,8 +477,8 @@ void MultiLayeredHeightmap::CalculateNormalsTangents(int dimX, int dimY){
             glm::vec3 vTriangleNorm0 = glm::cross(vTriangle0[0]-vTriangle0[1], vTriangle0[1]-vTriangle0[2]);
             glm::vec3 vTriangleNorm1 = glm::cross(vTriangle1[0]-vTriangle1[1], vTriangle1[1]-vTriangle1[2]);
 
-            normals1.at(index) = glm::normalize(vTriangleNorm0);
-            normals2.at(index) = glm::normalize(vTriangleNorm1);
+            mNormals1.at(index) = glm::normalize(vTriangleNorm0);
+            mNormals2.at(index) = glm::normalize(vTriangleNorm1);
 
             //tangents
             glm::vec3 deltaPos1 = vTriangle0[0]-vTriangle0[1];
@@ -501,8 +501,8 @@ void MultiLayeredHeightmap::CalculateNormalsTangents(int dimX, int dimY){
             tangent1 = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y)*r;
             tangent2 = (deltaPos3 * deltaUV4.y - deltaPos4 * deltaUV3.y)*r;
 
-            tangents1.at(index) = tangent1;
-            tangents2.at(index) = tangent2;
+            mTangents1.at(index) = tangent1;
+            mTangents2.at(index) = tangent2;
 
         }
     }
@@ -517,48 +517,48 @@ void MultiLayeredHeightmap::CalculateNormalsTangents(int dimX, int dimY){
 
             // Look for upper-left triangles
             if(j != 0 && i != 0){
-                tempNormals += normals1.at(( (i-1) * dimX ) + j - 1);
-                tempNormals += normals2.at(( (i-1) * dimX ) + j - 1);
+                tempNormals += mNormals1.at(( (i-1) * dimX ) + j - 1);
+                tempNormals += mNormals2.at(( (i-1) * dimX ) + j - 1);
 
-                tempTangents += tangents1.at(( (i-1) * dimX ) + j - 1);
-                tempTangents += tangents2.at(( (i-1) * dimX ) + j - 1);
+                tempTangents += mTangents1.at(( (i-1) * dimX ) + j - 1);
+                tempTangents += mTangents2.at(( (i-1) * dimX ) + j - 1);
             }
 
             // Look for upper-right triangles
             if(i != 0 && j != dimX-1){
-                tempNormals += normals1.at(( (i-1) * dimX ) + j);
-                tempNormals += normals2.at(( (i-1) * dimX ) + j);
+                tempNormals += mNormals1.at(( (i-1) * dimX ) + j);
+                tempNormals += mNormals2.at(( (i-1) * dimX ) + j);
 
-                tempTangents += tangents1.at(( (i-1) * dimX ) + j);
-                tempTangents += tangents2.at(( (i-1) * dimX ) + j);
+                tempTangents += mTangents1.at(( (i-1) * dimX ) + j);
+                tempTangents += mTangents2.at(( (i-1) * dimX ) + j);
             }
 
             // Look for bottom-right triangles
             if(i != dimY-1 && j != dimX-1){
-                tempNormals += normals1.at(( i * dimX ) + j);
-                tempNormals += normals2.at(( i * dimX ) + j);
+                tempNormals += mNormals1.at(( i * dimX ) + j);
+                tempNormals += mNormals2.at(( i * dimX ) + j);
 
-                tempTangents += tangents1.at(( i * dimX ) + j);
-                tempTangents += tangents2.at(( i * dimX ) + j);
+                tempTangents += mTangents1.at(( i * dimX ) + j);
+                tempTangents += mTangents2.at(( i * dimX ) + j);
             }
 
             // Look for bottom-left triangles
             if(i != dimY-1 && j != 0){
-                tempNormals += normals1.at(( i * dimX ) + j - 1);
-                tempNormals += normals2.at(( i * dimX ) + j - 1);
+                tempNormals += mNormals1.at(( i * dimX ) + j - 1);
+                tempNormals += mNormals2.at(( i * dimX ) + j - 1);
 
-                tempTangents += tangents1.at(( i * dimX ) + j - 1);
-                tempTangents += tangents2.at(( i * dimX ) + j - 1);
+                tempTangents += mTangents1.at(( i * dimX ) + j - 1);
+                tempTangents += mTangents2.at(( i * dimX ) + j - 1);
             }
 
             tempNormals = glm::normalize(tempNormals);
-            normals_final.at(( i * dimX ) + j) = tempNormals; // Store final normal of j-th vertex in i-th row
+            mNormalsFinal.at(( i * dimX ) + j) = tempNormals; // Store final normal of j-th vertex in i-th row
 
 
-            tangents_final.at(( i * dimX ) + j) = tempTangents;
+            mTangentsFinal.at(( i * dimX ) + j) = tempTangents;
 
             //in radians
-            slope_y.at(( i * dimX ) + j) = glm::acos(tempNormals.y);
+            mSlopeY.at(( i * dimX ) + j) = glm::acos(tempNormals.y);
 
         }
     }
@@ -697,7 +697,7 @@ void MultiLayeredHeightmap::LoadSplatmap(){
         b = 0.0f;
 
 #if ENABLE_SLOPE_BASED_BLEND
-    fScale = slope_y.at(i);
+    fScale = mSlopeY.at(i);
 #else
     fScale = mPositions.at(i).y/mfHeightScale;
 #endif
@@ -741,6 +741,160 @@ void MultiLayeredHeightmap::LoadSplatmap(){
 
         mSplatmap.at(i) = {r,g,b};
     }
-
-
 }
+
+bool MultiLayeredHeightmap::intersectTriangle(const Face& _face, const glm::vec3& _normal, const Ray& _ray)
+{
+
+    glm::vec3 bary;
+
+    double dotRN = glm::dot(_ray.direction , _normal);
+
+
+
+    if (fabs(dotRN) < epsilon)
+        return false;
+
+    double planeDist = glm::dot((_face.p0 - _ray.origin), _normal);
+
+    _t = planeDist / dotRN;
+    intersectionPoint = _ray.origin + _ray.direction * _t;
+
+    bary_coord(intersectionPoint, _face.p0, _face.p1, _face.p2, bary);
+
+
+    if(bary[0] >= 0 && bary[1] >= 0 && bary[2] >= 0 && bary[0] <= 1 && bary[1] <= 1 && bary[2] <= 1 && _t > 0){
+
+        std::cout << "_ray.origin at: " << _ray.origin.x << "," << _ray.origin.y << ","<<  _ray.origin.z << std::endl;
+        std::cout << "_face.p0 at: " << _face.p0.x << "," << _face.p0.y << ","<<  _face.p0.z << std::endl;
+
+        return true;
+    }
+
+    return false;
+}
+
+bool MultiLayeredHeightmap::bary_coord(const glm::vec3& _p, const glm::vec3& _u, const glm::vec3& _v, const glm::vec3& _w, glm::vec3& _result) const
+{
+    glm::vec3 vu = _v - _u;
+    glm::vec3 wu = _w - _u;
+    glm::vec3 pu = _p - _u;
+
+    // find largest absolute coordinate of normal
+    double nx = vu[1] * wu[2] - vu[2] * wu[1];
+    double ny = vu[2] * wu[0] - vu[0] * wu[2];
+    double nz = vu[0] * wu[1] - vu[1] * wu[0];
+    double ax = fabs(nx);
+    double ay = fabs(ny);
+    double az = fabs(nz);
+
+    unsigned char max_coord;
+
+    if (ax > ay)
+    {
+        if (ax > az)
+        {
+            max_coord = 0;
+        }
+        else
+        {
+            max_coord = 2;
+        }
+    }
+    else
+    {
+        if (ay > az)
+        {
+            max_coord = 1;
+        }
+        else
+        {
+            max_coord = 2;
+        }
+    }
+
+    // solve 2D problem
+    switch (max_coord)
+    {
+    case 0:
+        if (1.0 + ax == 1.0)
+            return false;
+        _result[1] = 1.0 + (pu[1] * wu[2] - pu[2] * wu[1]) / nx - 1.0;
+        _result[2] = 1.0 + (vu[1] * pu[2] - vu[2] * pu[1]) / nx - 1.0;
+        _result[0] = 1.0 - _result[1] - _result[2];
+        break;
+
+    case 1:
+        if (1.0 + ay == 1.0)
+            return false;
+        _result[1] = 1.0 + (pu[2] * wu[0] - pu[0] * wu[2]) / ny - 1.0;
+        _result[2] = 1.0 + (vu[2] * pu[0] - vu[0] * pu[2]) / ny - 1.0;
+        _result[0] = 1.0 - _result[1] - _result[2];
+        break;
+
+    case 2:
+        if (1.0 + az == 1.0)
+            return false;
+        _result[1] = 1.0 + (pu[0] * wu[1] - pu[1] * wu[0]) / nz - 1.0;
+        _result[2] = 1.0 + (vu[0] * pu[1] - vu[1] * pu[0]) / nz - 1.0;
+        _result[0] = 1.0 - _result[1] - _result[2];
+        break;
+    }
+
+    return true;
+}
+
+void MultiLayeredHeightmap::intersect(const Ray& _ray )
+{
+
+    int dimX = mHeightmapDimensions.x, dimY = mHeightmapDimensions.y;
+    Face Triangle1, Triangle2;
+    glm::dvec3 Normal1, Normal2;
+
+    for (int j = 0; j < dimY-1; j++ )
+    {
+        for (int i = 0; i < dimX-1; i++ )
+        {
+
+            unsigned int index = ( j * dimX ) + i;
+
+            Triangle1.p0 = mPositions.at((j * dimX ) + i);
+            Triangle1.p1 = mPositions.at((j+1) * dimX  + i);
+            Triangle1.p2 = mPositions.at((j+1) * dimX + i+1);
+
+            Triangle1.p0.y = mDisplacement.at((j * dimX ) + i);
+            Triangle1.p1.y = mDisplacement.at((j+1) * dimX  + i);
+            Triangle1.p2.y = mDisplacement.at((j+1) * dimX + i+1);
+
+            Triangle2.p0 = mPositions.at((j+1) * dimX + i+1);
+            Triangle2.p1 = mPositions.at((j* dimX) + i+1);
+            Triangle2.p2 = mPositions.at((j * dimX ) + i);
+
+            Triangle2.p0.y = mDisplacement.at((j+1) * dimX + i+1);
+            Triangle2.p1.y = mDisplacement.at((j* dimX) + i+1);
+            Triangle2.p2.y = mDisplacement.at((j * dimX ) + i);
+
+            Normal1 = glm::normalize(glm::cross(Triangle1.p0-Triangle1.p1, Triangle1.p1-Triangle1.p2));
+            Normal2 = glm::normalize(glm::cross(Triangle2.p0-Triangle2.p1, Triangle2.p1-Triangle2.p2));
+
+            if((intersectTriangle(Triangle1, mNormalsFinal.at(index), _ray) || intersectTriangle(Triangle2, mNormalsFinal.at(index), _ray)) && _t > 0){
+                std::cerr << "Intersection happened at: " << intersectionPoint.x << "," << intersectionPoint.y << ","<<  intersectionPoint.z << std::endl;
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

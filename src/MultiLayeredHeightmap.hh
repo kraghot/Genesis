@@ -30,18 +30,6 @@
 
 #include "NoiseGenerator.hh"
 
-enum ETextureFiltering
-{
-    TEXTURE_FILTER_MAG_NEAREST = 0, // Nearest criterion for magnification
-    TEXTURE_FILTER_MAG_BILINEAR, // Bilinear criterion for magnification
-    TEXTURE_FILTER_MIN_NEAREST, // Nearest criterion for minification
-    TEXTURE_FILTER_MIN_BILINEAR, // Bilinear criterion for minification
-    TEXTURE_FILTER_MIN_NEAREST_MIPMAP, // Nearest criterion for minification, but on closest mipmap
-    TEXTURE_FILTER_MIN_BILINEAR_MIPMAP, // Bilinear criterion for minification, but on closest mipmap
-    TEXTURE_FILTER_MIN_TRILINEAR, // Bilinear criterion for minification on two closest mipmaps, then averaged
-};
-
-
 
 inline long getFileSize(FILE *file)
     {
@@ -68,6 +56,19 @@ inline int getFileLength(std::istream& file){
     return length;
 }
 
+struct Ray
+{
+    glm::vec3 origin = {0, 0, 0};
+    glm::vec3 direction = {0, 0, 0};
+};
+
+struct Face
+{
+    glm::vec3 p0;
+    glm::vec3 p1;
+    glm::vec3 p2;
+};
+
 
 class MultiLayeredHeightmap
 {
@@ -78,6 +79,8 @@ public:
         Up = 2,
         Down = 3
     };
+
+
 
     // float heightScale: determines the maximum height of the terrain in world units.
     // float blockScale: determines the space between terrain vertices in world units for both the X and Z axes.
@@ -93,36 +96,6 @@ public:
     glow::SharedTexture2DArray LoadNormal(std::vector<std::string> normalName);
 
     void LoadSplatmap();
-
-    // translate the incoming char data array into a floating point value in the range [0…1]
-    // If you wanted to load height maps that are stored MSB,LSB, you would have to reverse the array indices for values that read more than 1 byte.
-    inline float GetHeightValue(const unsigned char* data, unsigned char numBytes){
-        switch ( numBytes )
-            {
-            case 1:
-                {
-                    return (unsigned char)(data[0]) / (float)0xff;
-                }
-                break;
-            case 2:
-                {
-                    return (unsigned short)(data[1] << 8 | data[0] ) / (float)0xffff;
-                }
-                break;
-            case 4:
-                {
-                    return (unsigned int)(data[3] << 24 | data[2] << 16 | data[1] << 8 | data[0] ) / (float)0xffffffff;
-                }
-                break;
-            default:
-                {
-                    assert(false);  // Height field with non standard pixle sizes
-                }
-                break;
-            }
-
-            return 0.0f;
-    }
 
     /**
      * @brief DumpHeightmapToFile writes the position data to a RAW file
@@ -140,6 +113,10 @@ public:
     glow::SharedTexture2D GetDisplacementTexture() const;
 
     glow::SharedTexture2D getSplatmapTexture() const;
+
+    bool bary_coord(const glm::vec3& _p, const glm::vec3& _u, const glm::vec3& _v, const glm::vec3& _w, glm::vec3& _result) const;
+    bool intersectTriangle(const Face& _face, const glm::vec3 &_normal, const Ray &_ray);
+    void intersect(const Ray& _ray );
 
 private:
     void MakeVertexArray();
@@ -162,15 +139,15 @@ private:
     std::vector<glm::vec2> mHeightCoords;
     std::vector<float> mWaterLevel;
 
-    std::vector<glm::vec3> normals1;
-    std::vector<glm::vec3> normals2;
-    std::vector<glm::vec3> normals_final;
+    std::vector<glm::vec3> mNormals1;
+    std::vector<glm::vec3> mNormals2;
+    std::vector<glm::vec3> mNormalsFinal;
 
-    std::vector<glm::vec3> tangents1;
-    std::vector<glm::vec3> tangents2;
-    std::vector<glm::vec3> tangents_final;
+    std::vector<glm::vec3> mTangents1;
+    std::vector<glm::vec3> mTangents2;
+    std::vector<glm::vec3> mTangentsFinal;
 
-    std::vector<float> slope_y;
+    std::vector<float> mSlopeY;
 
     std::vector<glm::vec3> mSplatmap;
     glow::SharedTexture2D mSplatmapTexture;
@@ -191,6 +168,11 @@ private:
     // The dimensions of the heightmap texture
     glm::uvec2 mHeightmapDimensions;
     unsigned int mNumberOfVertices;
+
+    glm::dvec3 intersectionPoint;
+    float _t;
+    double epsilon = 0.01;
+
 };
 
 #endif

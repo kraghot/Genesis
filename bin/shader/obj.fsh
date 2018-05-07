@@ -1,8 +1,3 @@
-////change to 1 to enable, 0 to disable slope based blending (in case of 0, height based blending is enabled
-#ifndef ENABLE_SLOPE_BASED_BLEND
-#define ENABLE_SLOPE_BASED_BLEND 1
-#endif
-
 uniform vec3 uLightPos;
 uniform vec3 uCamPos;
 

@@ -26,6 +26,15 @@ private:
     float mAngle = 0.0f;
     float mSpeed = 0.0f;
 
+    glm::vec2 mMousePosWin;
+    const int mLeftClick = 0;
+    const int mRightClick = 1;
+
+    glm::vec3 mMousePosFinal;
+    glm::vec4 mMousePosWorld;
+    glm::vec4 mMouseNDC;
+
+
 
 
 
