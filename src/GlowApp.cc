@@ -80,10 +80,8 @@ void GlowApp::init()
     std::cout << "seed: " << seed << std::endl;
 
     //mHeightmap.DumpHeightmapToFile();
-   //mHeightmap.DumpSplatmapToFile();
+   mHeightmap.DumpSplatmapToFile();
 
-//    mSplatmapTexture = Texture2D::create(mHeightmap.mHeightmapDimensions.x, mHeightmap.mHeightmapDimensions.y, GL_RGB);
-//    mSplatmapTexture->bind().setData(GL_RGB, mHeightmap.mHeightmapDimensions.x, mHeightmap.mHeightmapDimensions.y, mHeightmap.mSplatmap, 0);
 
 
     // set up framebuffer and output

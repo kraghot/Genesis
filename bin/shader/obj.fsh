@@ -28,20 +28,11 @@ out vec4 fColor;
 
 void main()
 {
-
-#if ENABLE_SLOPE_BASED_BLEND
-    float fScale = vSlopeY;
-#else
-    float fScale = (vWorldPosition.y*1.0f)/(fRenderHeight*1.0f);
-#endif
-
     vec4 SplatmapColor = texture(uSplatmapTex, vHeightCoord);
 
     vec3 normalMap = (texture(uTerrainNormal, vec3(vTexCoord, 0.0)) * SplatmapColor.r  + texture(uTerrainNormal, vec3(vTexCoord, 1.0)) * SplatmapColor.g + texture(uTerrainNormal, vec3(vTexCoord, 2.0)) * SplatmapColor.b).rgb;
 
     vec4 vFinalTexColor = texture(uTerrainTex, vec3(vTexCoord, 0.0)) * SplatmapColor.r  + texture(uTerrainTex, vec3(vTexCoord, 1.0)) * SplatmapColor.g + texture(uTerrainTex, vec3(vTexCoord, 2.0)) * SplatmapColor.b;
-
-
 
     // material settings
     float shininess = 8;

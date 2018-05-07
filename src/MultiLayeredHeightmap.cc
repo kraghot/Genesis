@@ -89,12 +89,12 @@ void MultiLayeredHeightmap::DumpSplatmapToFile()
     std::ostringstream filename;
     filename << "terrain-splatmap-8bbp-" << mHeightmapDimensions.x << "x" << mHeightmapDimensions.y << ".raw";
     std::ofstream file (filename.str(), std::ios::out | std::ios::binary);
-    std::vector<uint8_t> byteField;
-    byteField.reserve(mNumberOfVertices*3);
+    std::vector<glm::vec3> byteField;
+    byteField.reserve(mNumberOfVertices);
 
-//    byteField = mSplatmap;
+    byteField = mSplatmap;
 
-//    file.write((char *)byteField.data(), byteField.size());
+    file.write((char *)byteField.data(), byteField.size());
 }
 
 
