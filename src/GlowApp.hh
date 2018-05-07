@@ -47,6 +47,7 @@ private:
     glow::SharedTexture2DArray mTexNormal;
 
     MultiLayeredHeightmap mHeightmap;
+    glow::SharedTexture2D mSplatmapTexture;
 
     glow::SharedTextureCubeMap mBackgroundTexture;
     glow::SharedProgram mShaderBg;

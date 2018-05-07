@@ -92,6 +92,8 @@ public:
     glow::SharedTexture2DArray LoadTexture(std::vector<std::string> textureName);
     glow::SharedTexture2DArray LoadNormal(std::vector<std::string> normalName);
 
+    void LoadSplatmap();
+
     // translate the incoming char data array into a floating point value in the range [0…1]
     // If you wanted to load height maps that are stored MSB,LSB, you would have to reverse the array indices for values that read more than 1 byte.
     inline float GetHeightValue(const unsigned char* data, unsigned char numBytes){
@@ -123,9 +125,10 @@ public:
     }
 
     /**
-     * @brief DumpToFile writes the position data to a RAW file
+     * @brief DumpHeightmapToFile writes the position data to a RAW file
      */
-    void DumpToFile();
+    void DumpHeightmapToFile();
+    void DumpSplatmapToFile();
     void ThermalErodeTerrain();
     void HydraulicErodeTerrain();
     void DropletErodeTerrain(glm::vec2 coordinates, float strength=1.0f);
@@ -135,6 +138,8 @@ public:
     void AddDisplacementAt(glm::uvec2 pos, float addition);
 
     glow::SharedTexture2D GetDisplacementTexture() const;
+
+    glow::SharedTexture2D getSplatmapTexture() const;
 
 private:
     void MakeVertexArray();
@@ -165,7 +170,12 @@ private:
     std::vector<glm::vec3> tangents2;
     std::vector<glm::vec3> tangents_final;
 
+    std::vector<glm::vec2> mHeightCoords;
+
     std::vector<float> slope_y;
+
+    std::vector<glm::vec3> mSplatmap;
+    glow::SharedTexture2D mSplatmapTexture;
 
 
     std::vector<glow::SharedTextureData> mTexture;

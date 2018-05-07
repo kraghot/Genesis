@@ -17,6 +17,7 @@ out vec4 vColor;
 out vec3 vTangent;
 out vec2 vTexCoord;
 out float vSlopeY;
+out vec2 vHeightCoord;
 
 void main()
 {
@@ -30,6 +31,7 @@ void main()
     vTangent = mat3(uModel) * aTangent;
     vTexCoord = aTexCoord;
     vSlopeY = aSlopeY;
+    vHeightCoord = aHeightCoord;
 
     gl_Position = uProj * uView * vec4(vWorldPosition, 1);
 }

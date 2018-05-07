@@ -62,20 +62,38 @@ glow::SharedTexture2DArray MultiLayeredHeightmap::LoadNormal(std::vector<std::st
     return glow::Texture2DArray::createFromData(mTextureNormal[0]);
 }
 
-void MultiLayeredHeightmap::DumpToFile()
+void MultiLayeredHeightmap::DumpHeightmapToFile()
 {
     std::ostringstream filename;
-    filename << "terrain-8bbp-" << mHeightmapDimensions.x << "x" << mHeightmapDimensions.y << ".raw";
+    filename << "terrain-heightmap-8bbp-" << mHeightmapDimensions.x << "x" << mHeightmapDimensions.y << ".raw";
     std::ofstream file (filename.str(), std::ios::out | std::ios::binary);
     std::vector<uint8_t> byteField;
     byteField.reserve(mNumberOfVertices);
     for(auto it : mPositions)
     {
+        if(it.y < 0)
+            it.y *= (-1);
+
         /// @todo Correct for y scaling
         byteField.push_back(it.y * (255));
     }
     file.write((char *)byteField.data(), byteField.size());
 }
+
+void MultiLayeredHeightmap::DumpSplatmapToFile()
+{
+
+    std::ostringstream filename;
+    filename << "terrain-splatmap-8bbp-" << mHeightmapDimensions.x << "x" << mHeightmapDimensions.y << ".raw";
+    std::ofstream file (filename.str(), std::ios::out | std::ios::binary);
+    std::vector<uint8_t> byteField;
+    byteField.reserve(mNumberOfVertices*3);
+
+//    byteField = mSplatmap;
+
+//    file.write((char *)byteField.data(), byteField.size());
+}
+
 
 void MultiLayeredHeightmap::MakeVertexArray()
 {
@@ -125,6 +143,10 @@ void MultiLayeredHeightmap::MakeVertexArray()
     mDisplacementTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_R32F);
     mDisplacementTexture->bind().setData(GL_R32F, mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RED, GL_FLOAT, mDisplacement.data());
     mDisplacementTexture->bind().generateMipmaps();
+
+    mSplatmapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RGB);
+    mSplatmapTexture->bind().setData(GL_RGB, mHeightmapDimensions.x, mHeightmapDimensions.y, mSplatmap);
+    mSplatmapTexture->bind().generateMipmaps();
 }
 
 void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
@@ -146,6 +168,8 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
     mHeightCoords.resize(mNumberOfVertices);
 
     slope_y.resize(mNumberOfVertices);
+
+    mHeightCoords.resize(mNumberOfVertices);
 
     int dimX = mHeightmapDimensions.x, dimY = mHeightmapDimensions.y;
 
@@ -181,7 +205,7 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
 
             normals_final.at(CURRPOS) = glm::vec3(0);
             mPositions.at(CURRPOS) = glm::vec3(X, Y, Z);
-            mTexCoords.at(CURRPOS) = glm::vec2(S*fTextureU, T*fTextureV);
+            mTexCoords.at(CURRPOS) = glm::vec2(S * fTextureU, T * fTextureV);
             mHeightCoords.at(CURRPOS) = glm::vec2(S, T);
 
              if(i != dimY - 1)
@@ -194,6 +218,7 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
         mIndices.push_back(restart);
     }
     CalculateNormalsTangents(dimX, dimY);
+    LoadSplatmap();
 }
 
 glow::SharedTexture2D MultiLayeredHeightmap::GetDisplacementTexture() const
@@ -535,6 +560,11 @@ void MultiLayeredHeightmap::CalculateNormalsTangents(int dimX, int dimY){
     }
 }
 
+glow::SharedTexture2D MultiLayeredHeightmap::getSplatmapTexture() const
+{
+    return mSplatmapTexture;
+}
+
 float MultiLayeredHeightmap::getMfHeightScale() const
 {
     return mfHeightScale;
@@ -642,4 +672,66 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(NoiseGenerator *g
     return mVao;
 }
 
+void MultiLayeredHeightmap::LoadSplatmap(){
 
+    mSplatmap.resize(mNumberOfVertices);
+
+    const float fRange1 = 0.3f;
+    const float fRange2 = 0.5f;
+    const float fRange3 = 0.7f;
+    const float fRange4 = 0.9f;
+
+    float fScale;
+
+    float r;
+    float g;
+    float b;
+
+    for(unsigned int i = 0; i<mNumberOfVertices; i++){
+        r = 0.0f;
+        g = 0.0f;
+        b = 0.0f;
+
+        fScale = slope_y.at(i);
+
+        if(fScale >= 0.0 && fScale <= fRange1){
+            r = 1.f;
+        }
+
+        else if(fScale <= fRange2){
+            fScale -= fRange1;
+            fScale /= (fRange2-fRange1);
+
+           float fScale2 = fScale;
+           fScale = 1.0-fScale;
+
+           r = fScale;
+           g = fScale2;
+
+        }
+
+        else if(fScale <= fRange3){
+            g = 1.f;
+        }
+
+        else if(fScale <= fRange4)
+        {
+                fScale -= fRange3;
+                fScale /= (fRange4-fRange3);
+
+                float fScale2 = fScale;
+                fScale = 1.0-fScale;
+
+                g = fScale;
+                b = fScale2;
+        }
+
+        else{
+            b = 1.f;
+           }
+
+        mSplatmap.at(i) = {r,g,b};
+    }
+
+
+}

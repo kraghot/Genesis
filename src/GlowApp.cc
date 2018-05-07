@@ -69,10 +69,6 @@ void GlowApp::init()
     TwAddVarCB(tweakbar(), "seed", TW_TYPE_UINT16, GlowApp::setSeedTerrain, GlowApp::getSeedTerrain, &seed, "group=scene step=1");
     TwAddButton(tweakbar(), "terrain", GlowApp::randomTerrain, NULL, " label='Generate random terrain '");
 
-//    PerlinNoiseGenerator generator(132412341);
-//    mHeightField.init(&generator, 128);
-    //load heightmap, (RAW filename, Bits Per Pixel)
-//    mPerlinTest= mHeightmap.LoadHeightmap("texture/terrain0-8bbp-257x257.raw", 8);
     PerlinNoiseGenerator noise(2924319);
     mPerlinTest = mHeightmap.GenerateTerrain(&noise, heightMapDim, heightMapDim);
 
@@ -142,7 +138,6 @@ void GlowApp::render(float elapsedSeconds)
     if(button){
         GlowApp::initTerrain();
         button = false;
-        std::cout << "if seed: " << seed << " if button: " << button << std::endl;
     }
 
     GlfwApp::render(elapsedSeconds); // call to base!
@@ -205,6 +200,8 @@ void GlowApp::render(float elapsedSeconds)
             shader.setTexture("uTexColor", mTextureColor);
             shader.setTexture("uTexNormal", mTextureNormal);
 
+            shader.setTexture("uSplatmapTex", mHeightmap.getSplatmapTexture());
+
             //terrain 2d texture array
             shader.setTexture("uTerrainTex", mTexture);
             shader.setTexture("uTerrainNormal", mTexNormal);
@@ -225,9 +222,6 @@ void GlowApp::initTerrain(){
 
     PerlinNoiseGenerator noise(seed);
     mPerlinTest = mHeightmap.GenerateTerrain(&noise, heightMapDim, heightMapDim);
-
-//    mPerlinTest = mHeightField.createPerlinTerrain();
-
 
     //define textures for terrain
     std::vector<std::string> mTerrainTextures = {"texture/snow009.jpg", "texture/grass007.jpg", "texture/rock007.jpg"};
@@ -251,8 +245,6 @@ void GlowApp::setSeed(unsigned int var){
 
   else
       button = false;
-
-  std::cout << "seed: " << seed << " button: " << button << std::endl;
 }
 
 unsigned int GlowApp::getSeed() const{
