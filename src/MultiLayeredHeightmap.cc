@@ -90,7 +90,7 @@ void MultiLayeredHeightmap::DumpSplatmapToFile()
     std::ostringstream filename;
     filename << "terrain-splatmap-8bbp-" << mHeightmapDimensions.x << "x" << mHeightmapDimensions.y << ".raw";
     std::ofstream file (filename.str(), std::ios::out | std::ios::binary);
-    std::vector<glm::vec3> byteField;
+    std::vector<glm::vec4> byteField;
     byteField.reserve(mNumberOfVertices);
 
     byteField = mSplatmap;
@@ -148,8 +148,8 @@ void MultiLayeredHeightmap::MakeVertexArray()
     mDisplacementTexture->bind().setData(GL_R32F, mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RED, GL_FLOAT, mDisplacement.data());
     mDisplacementTexture->bind().generateMipmaps();
 
-    mSplatmapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RGB);
-    mSplatmapTexture->bind().setData(GL_RGB, mHeightmapDimensions.x, mHeightmapDimensions.y, mSplatmap);
+    mSplatmapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RGBA);
+    mSplatmapTexture->bind().setData(GL_RGBA, mHeightmapDimensions.x, mHeightmapDimensions.y, mSplatmap);
     mSplatmapTexture->bind().generateMipmaps();
 }
 
@@ -389,6 +389,8 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
             currPos = neigh.at(random);
             continue;
         }
+
+        mSplatmap.at(LOC(currPos.x, currPos.y)).a = 1.0f;
 
         // If this location is the deepest in the neigh try to deposit everything
         if(heightDifference < 0)
@@ -670,7 +672,7 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(NoiseGenerator *g
 //        ThermalErodeTerrain();
 
 //    }
-//    DropletErodeTerrain(glm::uvec2(50, 50), 50);
+    DropletErodeTerrain(glm::uvec2(50, 50), 50);
     MakeVertexArray();
 
     return mVao;
@@ -739,7 +741,7 @@ void MultiLayeredHeightmap::LoadSplatmap(){
             b = 1.f;
            }
 
-        mSplatmap.at(i) = {r,g,b};
+        mSplatmap.at(i) = {r,g,b,0.0f};
     }
 
 

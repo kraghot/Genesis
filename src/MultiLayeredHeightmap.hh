@@ -172,7 +172,7 @@ private:
 
     std::vector<float> slope_y;
 
-    std::vector<glm::vec3> mSplatmap;
+    std::vector<glm::vec4> mSplatmap;
     glow::SharedTexture2D mSplatmapTexture;
 
 
