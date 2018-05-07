@@ -680,10 +680,10 @@ void MultiLayeredHeightmap::LoadSplatmap(){
 
     mSplatmap.resize(mNumberOfVertices);
 
-    const float fRange1 = 0.3f;
-    const float fRange2 = 0.5f;
-    const float fRange3 = 0.7f;
-    const float fRange4 = 0.9f;
+    const float fRange1 = 0.01f;
+    const float fRange2 = 0.01667f;
+    const float fRange3 = 0.02333f;
+    const float fRange4 = 0.03f;
 
     float fScale;
 
