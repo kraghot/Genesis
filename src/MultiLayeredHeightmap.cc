@@ -750,8 +750,6 @@ bool MultiLayeredHeightmap::intersectTriangle(const Face& _face, const glm::vec3
 
     double dotRN = glm::dot(_ray.direction , _normal);
 
-
-
     if (fabs(dotRN) < epsilon)
         return false;
 
@@ -764,9 +762,6 @@ bool MultiLayeredHeightmap::intersectTriangle(const Face& _face, const glm::vec3
 
 
     if(bary[0] >= 0 && bary[1] >= 0 && bary[2] >= 0 && bary[0] <= 1 && bary[1] <= 1 && bary[2] <= 1 && _t > 0){
-
-        std::cout << "_ray.origin at: " << _ray.origin.x << "," << _ray.origin.y << ","<<  _ray.origin.z << std::endl;
-        std::cout << "_face.p0 at: " << _face.p0.x << "," << _face.p0.y << ","<<  _face.p0.z << std::endl;
 
         return true;
     }
