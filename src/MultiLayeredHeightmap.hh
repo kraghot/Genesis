@@ -118,6 +118,8 @@ public:
     bool intersectTriangle(const Face& _face, const glm::vec3 &_normal, const Ray &_ray);
     void intersect(const Ray& _ray );
 
+    glm::dvec3 getIntersectionPoint() const;
+
 private:
     void MakeVertexArray();
     void FillData(std::vector<float>& heights);
@@ -169,9 +171,9 @@ private:
     glm::uvec2 mHeightmapDimensions;
     unsigned int mNumberOfVertices;
 
-    glm::dvec3 intersectionPoint;
+    glm::vec3 intersectionPoint;
     float _t;
-    double epsilon = 0.01;
+    float epsilon = 0.01;
 
 };
 

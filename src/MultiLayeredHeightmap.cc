@@ -203,8 +203,8 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
             float T = ( i / (float)(dimY - 1) );
 
             float X = ( S * terrainWidth ) - halfTerrainWidth;
-            //float Y = heights.at(CURRPOS) * 30;
-            float Y = 0.0f;
+            float Y = heights.at(CURRPOS) * 30;
+            //float Y = 0.0f;
             float Z = ( T * terrainHeight ) - halfTerrainHeight;
 
             mNormalsFinal.at(CURRPOS) = glm::vec3(0);
@@ -260,6 +260,11 @@ glm::uvec2 MultiLayeredHeightmap::GetLowestNeigh(std::vector<glm::uvec2> &neigh)
     }
 
     return neigh.at(lowestIndex);
+}
+
+glm::dvec3 MultiLayeredHeightmap::getIntersectionPoint() const
+{
+    return intersectionPoint;
 }
 
 void MultiLayeredHeightmap::ThermalErodeTerrain()
@@ -747,24 +752,60 @@ bool MultiLayeredHeightmap::intersectTriangle(const Face& _face, const glm::vec3
 {
 
     glm::vec3 bary;
+    auto temp_t = _t;
+    auto temp_intersection = intersectionPoint;
 
-    double dotRN = glm::dot(_ray.direction , _normal);
+//    auto edge1 = _face.p1 - _face.p0;
+//    auto edge2 = _face.p2 - _face.p0;
 
-    if (fabs(dotRN) < epsilon)
-        return false;
+//    auto h = glm::cross(_ray.direction, edge2);
+//    auto a = glm::dot(edge1, h);
 
-    double planeDist = glm::dot((_face.p0 - _ray.origin), _normal);
+//    auto f = 1/a;
+//    auto s = _ray.origin - _face.p0;
+//    auto q = glm::cross(s, edge1);
 
-    _t = planeDist / dotRN;
-    intersectionPoint = _ray.origin + _ray.direction * _t;
+//    _t = f * (glm::dot(edge2, q));
+
+    auto w = _ray.origin - _face.p0;
+
+
+
+    auto N = - glm::dot(_normal, w);
+    //std::cout << "_t = " << w.x << std::endl;
+
+    auto D = glm::dot(_normal, _ray.direction);
+
+    _t = N / D;
+
+
+
+    //_t *= mfBlockScale;
+
+
+
+//    float dotRN = glm::dot(_ray.direction, _normal);
+
+//    if (fabs(dotRN) < epsilon)
+//        return false;
+
+//    float planeDist = glm::dot((_face.p0 - _ray.origin), _normal);
+
+//    _t = planeDist / dotRN;
+
+
+    intersectionPoint = _ray.origin + _t * _ray.direction;
 
     bary_coord(intersectionPoint, _face.p0, _face.p1, _face.p2, bary);
 
 
-    if(bary[0] >= 0 && bary[1] >= 0 && bary[2] >= 0 && bary[0] <= 1 && bary[1] <= 1 && bary[2] <= 1 && _t > 0){
+    if(bary[0] >= 0 && bary[1] >= 0 && bary[2] >= 0 && bary[0] <= 1 && bary[1] <= 1 && bary[2] <= 1 && _t > epsilon){
 
         return true;
     }
+
+    _t = temp_t;
+    intersectionPoint = temp_intersection;
 
     return false;
 }
@@ -844,12 +885,17 @@ void MultiLayeredHeightmap::intersect(const Ray& _ray )
 
     int dimX = mHeightmapDimensions.x, dimY = mHeightmapDimensions.y;
     Face Triangle1, Triangle2;
-    glm::dvec3 Normal1, Normal2;
+    glm::vec3 Normal1, Normal2;
+    float temp_t = 100;
+
+
 
     for (int j = 0; j < dimY-1; j++ )
     {
         for (int i = 0; i < dimX-1; i++ )
         {
+
+
 
             unsigned int index = ( j * dimX ) + i;
 
@@ -857,25 +903,30 @@ void MultiLayeredHeightmap::intersect(const Ray& _ray )
             Triangle1.p1 = mPositions.at((j+1) * dimX  + i);
             Triangle1.p2 = mPositions.at((j+1) * dimX + i+1);
 
-            Triangle1.p0.y = mDisplacement.at((j * dimX ) + i);
-            Triangle1.p1.y = mDisplacement.at((j+1) * dimX  + i);
-            Triangle1.p2.y = mDisplacement.at((j+1) * dimX + i+1);
+//            Triangle1.p0.y = mDisplacement.at((j * dimX ) + i);
+//            Triangle1.p1.y = mDisplacement.at((j+1) * dimX  + i);
+//            Triangle1.p2.y = mDisplacement.at((j+1) * dimX + i+1);
 
             Triangle2.p0 = mPositions.at((j+1) * dimX + i+1);
             Triangle2.p1 = mPositions.at((j* dimX) + i+1);
             Triangle2.p2 = mPositions.at((j * dimX ) + i);
 
-            Triangle2.p0.y = mDisplacement.at((j+1) * dimX + i+1);
-            Triangle2.p1.y = mDisplacement.at((j* dimX) + i+1);
-            Triangle2.p2.y = mDisplacement.at((j * dimX ) + i);
+//            Triangle2.p0.y = mDisplacement.at((j+1) * dimX + i+1);
+//            Triangle2.p1.y = mDisplacement.at((j* dimX) + i+1);
+//            Triangle2.p2.y = mDisplacement.at((j * dimX ) + i);
 
             Normal1 = glm::normalize(glm::cross(Triangle1.p0-Triangle1.p1, Triangle1.p1-Triangle1.p2));
             Normal2 = glm::normalize(glm::cross(Triangle2.p0-Triangle2.p1, Triangle2.p1-Triangle2.p2));
 
-            if((intersectTriangle(Triangle1, mNormalsFinal.at(index), _ray) || intersectTriangle(Triangle2, mNormalsFinal.at(index), _ray)) && _t > 0){
+            if((intersectTriangle(Triangle1, Normal1, _ray) || intersectTriangle(Triangle2, Normal2, _ray)) && _t < temp_t){
                 std::cerr << "Intersection happened at: " << intersectionPoint.x << "," << intersectionPoint.y << ","<<  intersectionPoint.z << std::endl;
+                temp_t = _t;
+
+               // std::cout << "_t = " << _t << std::endl;
+                break;
             }
         }
+
     }
 }
 

@@ -122,10 +122,10 @@ void GlowApp::init()
     mShaderBg = glow::Program::createFromFile("shader/bg");
     mShaderLine = glow::Program::createFromFile("shader/line");
 
-    std::vector<glm::vec3> mPositions = {{0, 50, 0}, {0, 0, 0}};
+    std::vector<glm::vec3> linePositions = {{0, 50, 0}, {0, 0, 0}};
     auto ab = glow::ArrayBuffer::create();
     ab->defineAttribute<glm::vec3>("aPosition");
-    ab->bind().setData(mPositions);
+    ab->bind().setData(linePositions);
     ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Line");
 
     mLineVao = glow::VertexArray::create(ab, GL_LINES);
@@ -240,25 +240,27 @@ void GlowApp::render(float elapsedSeconds)
 //            mMousePosFinal = glm::normalize(mMousePosFinal);
             testRay.direction = glm::normalize(mMousePosFinal - camPos);
 
+            mHeightmap.intersect(testRay);
+
             if(isKeyPressed(71)) // GLFW_KEY_G
             {
-                std::vector<glm::vec3> mPositions = {testRay.origin, testRay.origin + (testRay.direction * 100)};
+                std::vector<glm::vec3> linePositions = {testRay.origin, mHeightmap.getIntersectionPoint()};
                 auto ab = glow::ArrayBuffer::create();
                 ab->defineAttribute<glm::vec3>("aPosition");
-                ab->bind().setData(mPositions);
+                ab->bind().setData(linePositions);
                 ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Line");
 
                 mLineVao = glow::VertexArray::create(ab, GL_LINES);
             }
 
-//            mHeightmap.intersect(testRay);
+//
 
             mLineVao->bind().draw();
 
             glm::vec3 camPos1 = camPos;
             glm::vec3 testRaydir =  testRay.direction;
 
-            auto model = glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
+            auto model = glm::mat4(1.f); //glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
             auto shader = mShaderObj->use();
             shader.setUniform("uView", view);
             shader.setUniform("uProj", proj);
