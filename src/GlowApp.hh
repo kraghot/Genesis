@@ -34,11 +34,6 @@ private:
     glm::vec4 mMousePosWorld;
     glm::vec4 mMouseNDC;
 
-
-
-
-
-
 private:
     glow::SharedProgram mShaderOutput;
     glow::SharedVertexArray mMeshQuad;
@@ -47,8 +42,10 @@ private:
     glow::SharedTextureRectangle mTargetDepth;
 
     glow::SharedProgram mShaderObj;
+    glow::SharedProgram mShaderLine;
     glow::SharedVertexArray mMeshCube;
     glow::SharedVertexArray mPerlinTest;
+    glow::SharedVertexArray mLineVao;
     glow::SharedTexture2D mTextureColor;
     glow::SharedTexture2D mTextureNormal;
 

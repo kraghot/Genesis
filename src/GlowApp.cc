@@ -120,6 +120,16 @@ void GlowApp::init()
                                                                                                     pbt + "negz.jpg",
                                                                                                     glow::ColorSpace::sRGB));
     mShaderBg = glow::Program::createFromFile("shader/bg");
+    mShaderLine = glow::Program::createFromFile("shader/line");
+
+    std::vector<glm::vec3> mPositions = {{0, 50, 0}, {0, 0, 0}};
+    auto ab = glow::ArrayBuffer::create();
+    ab->defineAttribute<glm::vec3>("aPosition");
+    ab->bind().setData(mPositions);
+    ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Line");
+
+    mLineVao = glow::VertexArray::create(ab, GL_LINES);
+
 }
 
 void GlowApp::onResize(int w, int h)
@@ -184,7 +194,8 @@ void GlowApp::render(float elapsedSeconds)
 
             shader.setTexture("uTexture", mBackgroundTexture);
             auto invProj = inverse(cam->getProjectionMatrix());
-            auto invView = inverse(cam->getViewMatrix());
+//            auto invView = inverse(cam->getViewMatrix());
+            auto invView = cam->getInverseViewMatrix();
 
             //world space mouse position
 
@@ -206,19 +217,48 @@ void GlowApp::render(float elapsedSeconds)
             glDepthMask(GL_TRUE);
 
             mMousePosWin = GlfwApp::getMousePosition();
-            mMouseNDC = glm::vec4((mMousePosWin.x/(getWindowWidth()/2.f) - 1.f), ((getWindowHeight()-mMousePosWin.y)/(getWindowHeight()/2.f) - 1.f), cam->getNearClippingPlane(), 1.f);
+            mMouseNDC = glm::vec4((mMousePosWin.x/(getWindowWidth()/2.f) - 1.f), ((getWindowHeight()-mMousePosWin.y)/(getWindowHeight()/2.f) - 1.f), -1.0f, 1.f);
             mMousePosWorld =invProj *  mMouseNDC;
-            mMousePosFinal = invView * glm::vec4(mMousePosWorld.x, mMousePosWorld.y, -1.f, 0.f);
-           // mMousePosFinal = glm::vec3(mMousePosWorld.x/mMousePosWorld.w, mMousePosWorld.y/mMousePosWorld.w, mMousePosWorld.z/mMousePosWorld.w);
+            mMousePosWorld /= mMousePosWorld.w;
+            mMousePosWorld = invView * mMousePosWorld;
+            mMousePosFinal = glm::vec3(mMousePosWorld);
+//            mMousePosFinal = invView * glm::vec4(mMousePosWorld.x, mMousePosWorld.y, -1.f, 0.f);
+//            mMousePosFinal = glm::vec3(mMousePosWorld.x/mMousePosWorld.w, mMousePosWorld.y/mMousePosWorld.w, mMousePosWorld.z/mMousePosWorld.w);
         }
 
-
+//        std::cout << mMousePosFinal.x << " " << mMousePosFinal.y << " " << mMousePosFinal.z << std::endl;
 
         // draw object
         {
+            auto lineShader = mShaderLine->use();
+            lineShader.setUniform("uView", view);
+            lineShader.setUniform("uProj", proj);
+
+            Ray testRay;
+            testRay.origin = camPos;
+
+//            mMousePosFinal = glm::normalize(mMousePosFinal);
+            testRay.direction = glm::normalize(mMousePosFinal - camPos);
+
+            if(isKeyPressed(71)) // GLFW_KEY_G
+            {
+                std::vector<glm::vec3> mPositions = {testRay.origin, testRay.origin + (testRay.direction * 100)};
+                auto ab = glow::ArrayBuffer::create();
+                ab->defineAttribute<glm::vec3>("aPosition");
+                ab->bind().setData(mPositions);
+                ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Line");
+
+                mLineVao = glow::VertexArray::create(ab, GL_LINES);
+            }
+
+//            mHeightmap.intersect(testRay);
+
+            mLineVao->bind().draw();
+
+            glm::vec3 camPos1 = camPos;
+            glm::vec3 testRaydir =  testRay.direction;
 
             auto model = glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
-
             auto shader = mShaderObj->use();
             shader.setUniform("uView", view);
             shader.setUniform("uProj", proj);
@@ -238,20 +278,6 @@ void GlowApp::render(float elapsedSeconds)
             shader.setTexture("uTexDisplacement", mHeightmap.GetDisplacementTexture());
 
             shader.setUniform("fRenderHeight", mHeightmap.getMfHeightScale());
-
-            Ray testRay;
-            testRay.origin = camPos;
-
-            mMousePosFinal = glm::normalize(mMousePosFinal);
-            testRay.direction = mMousePosFinal;
-            mHeightmap.intersect(testRay);
-
-            glm::vec3 camPos1 = camPos;
-            glm::vec3 testRaydir =  testRay.direction;
-
-            //std::cout << "testRaydir x: " << testRaydir.x << " testRaydir pos y: " << testRaydir.y << " testRaydir pos z: " << testRaydir.z << std::endl;
-            //std::cout << "camPos x: " << camPos.x << " camPos pos y: " << camPos.y << " camPos pos z: " << camPos.z << std::endl;
-
 
             mPerlinTest->bind().draw();
             //mMeshCube->bind().draw();
