@@ -767,16 +767,16 @@ bool MultiLayeredHeightmap::intersectTriangle(const Face& _face, const glm::vec3
 
 //    _t = f * (glm::dot(edge2, q));
 
-    auto w = _ray.origin - _face.p0;
+//    auto w = _ray.origin - _face.p0;
 
 
 
-    auto N = - glm::dot(_normal, w);
-    //std::cout << "_t = " << w.x << std::endl;
+//    auto N = - glm::dot(_normal, w);
+//    //std::cout << "_t = " << w.x << std::endl;
 
-    auto D = glm::dot(_normal, _ray.direction);
+//    auto D = glm::dot(_normal, _ray.direction);
 
-    _t = N / D;
+//    _t = N / D;
 
 
 
@@ -784,14 +784,14 @@ bool MultiLayeredHeightmap::intersectTriangle(const Face& _face, const glm::vec3
 
 
 
-//    float dotRN = glm::dot(_ray.direction, _normal);
+    float dotRN = glm::dot(_ray.direction, _normal);
 
 //    if (fabs(dotRN) < epsilon)
 //        return false;
 
-//    float planeDist = glm::dot((_face.p0 - _ray.origin), _normal);
+    float planeDist = glm::dot((_face.p0 - _ray.origin), _normal);
 
-//    _t = planeDist / dotRN;
+    _t = planeDist / dotRN;
 
 
     intersectionPoint = _ray.origin + _t * _ray.direction;
@@ -886,7 +886,7 @@ void MultiLayeredHeightmap::intersect(const Ray& _ray )
     int dimX = mHeightmapDimensions.x, dimY = mHeightmapDimensions.y;
     Face Triangle1, Triangle2;
     glm::vec3 Normal1, Normal2;
-    float temp_t = 100;
+    float temp_t = 1000000.f;
 
 
 
@@ -923,7 +923,11 @@ void MultiLayeredHeightmap::intersect(const Ray& _ray )
                 temp_t = _t;
 
                // std::cout << "_t = " << _t << std::endl;
-                break;
+               // break;
+            }
+            if(_t > temp_t){
+                                intersectionPoint = _ray.origin + temp_t * _ray.direction;
+
             }
         }
 
