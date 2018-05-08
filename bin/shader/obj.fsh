@@ -33,8 +33,16 @@ void main()
     vec3 normalMap = (texture(uTerrainNormal, vec3(vTexCoord, 0.0)) * SplatmapColor.r  + texture(uTerrainNormal, vec3(vTexCoord, 1.0)) * SplatmapColor.g + texture(uTerrainNormal, vec3(vTexCoord, 2.0)) * SplatmapColor.b).rgb;
 
     vec4 vFinalTexColor;
-    if(SplatmapColor.a > 0.9f)
-        vFinalTexColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    float val = SplatmapColor.a;
+    if(val >= 0.01f)
+    {
+        vec3 color;
+        if(val < 0.5f)
+            color = mix(vec3(1, 0, 0), vec3(0, 1, 0), val * 2);
+        else
+            color = mix(vec3(0, 1, 0), vec3(0, 0, 1), (val - 0.5) * 2);
+        vFinalTexColor = vec4(color, 1.0f);
+    }
     else
         vFinalTexColor = texture(uTerrainTex, vec3(vTexCoord, 0.0)) * SplatmapColor.r  + texture(uTerrainTex, vec3(vTexCoord, 1.0)) * SplatmapColor.g + texture(uTerrainTex, vec3(vTexCoord, 2.0)) * SplatmapColor.b;
 
