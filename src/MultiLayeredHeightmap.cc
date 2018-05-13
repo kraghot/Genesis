@@ -583,18 +583,31 @@ float MultiLayeredHeightmap::GetDisplacementAt(glm::uvec2 pos)
     return mDisplacement.at(LOC(pos.x, pos.y));
 }
 
+float MultiLayeredHeightmap::SetDisplacementAt(glm::uvec2 pos, float value)
+{
+    mDisplacement.at(LOC(pos.x, pos.y)) = value;
+}
+
 void MultiLayeredHeightmap::AddDisplacementAt(glm::uvec2 pos, float addition)
 {
     mDisplacement.at(LOC(pos.x, pos.y)) += addition;
+}
+
+void MultiLayeredHeightmap::AddClampedDisplacementAt(glm::uvec2 pos, float addition, float min)
+{
+    float potentialHeight = GetDisplacementAt(pos) + addition;
+    float heightToSet = glm::max(min, potentialHeight);
+    SetDisplacementAt(pos, heightToSet);
 }
 
 void MultiLayeredHeightmap::AddSoftDisplacement(glm::uvec2 pos, float addition)
 {
     float scaledAddition = addition /2.0f;
     AddDisplacementAt(pos, scaledAddition);
+    float currH = GetDisplacementAt(pos);
     auto neigh = GetNeighborhood(pos);
     for(auto it: neigh)
-        AddDisplacementAt(it, scaledAddition/4.0f);
+        AddClampedDisplacementAt(it, scaledAddition/4.0f, currH);
 }
 
 void MultiLayeredHeightmap::IterateDroplet(int num)
