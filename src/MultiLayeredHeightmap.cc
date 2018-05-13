@@ -377,8 +377,8 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
         auto next = GetLowestNeigh(neigh);
 
         float heightDifference = GetDisplacementAt(currPos) - GetDisplacementAt(next);
-        std::cout << "Currently at position " << currPos.x << " " << currPos.y << std::endl;
-        std::cout << "Height " << GetDisplacementAt(currPos) << " " << heightDifference << std::endl;
+//        std::cout << "Currently at position " << currPos.x << " " << currPos.y << std::endl;
+//        std::cout << "Height " << GetDisplacementAt(currPos) << " " << heightDifference << std::endl;
 
         /// @todo Add handling when the differece is negligible
         /// Move in random direction
@@ -397,13 +397,13 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
             // Deposit everthing up to the height difference in order to prevent it being heigher than the neighs
             if(s < heightDifference)
             {
-                AddDisplacementAt(currPos, s);
+                AddSoftDisplacement(currPos, s);
                 s = 0;
                 break;
             }
             else
             {
-                AddDisplacementAt(currPos, heightDifference);
+                AddSoftDisplacement(currPos, heightDifference);
                 s -= heightDifference;
             }
         }
@@ -415,7 +415,7 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
             if(accumulate > heightDifference)
                 accumulate = heightDifference;
 
-            AddDisplacementAt(currPos, -accumulate);
+            AddSoftDisplacement(currPos, -accumulate);
             s += accumulate;
             v = sqrt(v*v + Cg * heightDifference);
         }
@@ -424,7 +424,10 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
         currPos = next;
 
         if(i > maxPathLength)
+        {
+            std::cout << "Max Number of iterations" << std::endl;
             break;
+        }
 
     }
 
@@ -583,6 +586,15 @@ float MultiLayeredHeightmap::GetDisplacementAt(glm::uvec2 pos)
 void MultiLayeredHeightmap::AddDisplacementAt(glm::uvec2 pos, float addition)
 {
     mDisplacement.at(LOC(pos.x, pos.y)) += addition;
+}
+
+void MultiLayeredHeightmap::AddSoftDisplacement(glm::uvec2 pos, float addition)
+{
+    float scaledAddition = addition /2.0f;
+    AddDisplacementAt(pos, scaledAddition);
+    auto neigh = GetNeighborhood(pos);
+    for(auto it: neigh)
+        AddDisplacementAt(it, scaledAddition/4.0f);
 }
 
 void MultiLayeredHeightmap::IterateDroplet(int num)

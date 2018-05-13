@@ -136,6 +136,7 @@ public:
     float GetDisplacementAt(glm::uvec2 pos);
     /// @todo Add brushlike softening and deposition
     void AddDisplacementAt(glm::uvec2 pos, float addition);
+    void AddSoftDisplacement(glm::uvec2 pos, float addition);
     void IterateDroplet(int num);
 
     glow::SharedTexture2D GetDisplacementTexture() const;
