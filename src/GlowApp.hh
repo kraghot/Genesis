@@ -25,10 +25,7 @@ private:
 
     float mAngle = 0.0f;
     float mSpeed = 0.0f;
-
-
-
-
+    unsigned int mNumIterations = 1;
 
 private:
     glow::SharedProgram mShaderOutput;
@@ -75,9 +72,13 @@ public:
 
         *static_cast<unsigned int *>(value) = static_cast<const GlowApp *>(clientData)->getSeed();
     }
+    static void TW_CALL dropletErode(void* clientData){
+        static_cast<GlowApp *>(clientData)->dropletErodeIterations();
+    }
 
     void setSeed(unsigned int var);
     unsigned int getSeed() const;
+    void dropletErodeIterations();
 
 };
 

@@ -382,12 +382,12 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
 
         /// @todo Add handling when the differece is negligible
         /// Move in random direction
-//        if(heightDifference <= 0.0001)
-//        {
-//            int random = std::experimental::randint(0, 3);
-//            currPos = neigh.at(random);
-//            continue;
-//        }
+        if(heightDifference <= 0.0001)
+        {
+            int random = std::experimental::randint(0, 3);
+            currPos = neigh.at(random);
+            continue;
+        }
 
         mSplatmap.at(LOC(currPos.x, currPos.y)).a = /*0.1f * (i+1)*/1.0f;
 
@@ -395,7 +395,7 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
         if(heightDifference < 0.0001)
         {
             // Deposit everthing up to the height difference in order to prevent it being heigher than the neighs
-            if(/*s < heightDifference*/1)
+            if(s < heightDifference)
             {
                 AddDisplacementAt(currPos, s);
                 s = 0;
@@ -405,7 +405,6 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
             {
                 AddDisplacementAt(currPos, heightDifference);
                 s -= heightDifference;
-                break;
             }
         }
         // It is possible to go downhill, calculate if sediment is accumulated
@@ -584,6 +583,18 @@ float MultiLayeredHeightmap::GetDisplacementAt(glm::uvec2 pos)
 void MultiLayeredHeightmap::AddDisplacementAt(glm::uvec2 pos, float addition)
 {
     mDisplacement.at(LOC(pos.x, pos.y)) += addition;
+}
+
+void MultiLayeredHeightmap::IterateDroplet(int num)
+{
+    for(auto i=0u; i < num; i++)
+    {
+        glm::uvec2 coords;
+        coords.x = std::experimental::randint(0u, mHeightmapDimensions.x-1);
+        coords.y = std::experimental::randint(0u, mHeightmapDimensions.y-1);
+        DropletErodeTerrain(coords);
+    }
+    MakeVertexArray();
 }
 
 #undef LOC
