@@ -34,15 +34,17 @@ void main()
 
     vec4 vFinalTexColor;
     float val = SplatmapColor.a;
-    if(val >= 0.01f)
-    {
-        vec3 color;
-        if(val < 0.5f)
-            color = mix(vec3(1, 0, 0), vec3(0, 1, 0), val * 2);
-        else
-            color = mix(vec3(0, 1, 0), vec3(0, 0, 1), (val - 0.5) * 2);
-        vFinalTexColor = vec4(color, 1.0f);
-    }
+    if(val >= 0.95f)
+        vFinalTexColor = vec4(1.0f, 0, 0, 1.0f);
+//    if(val >= 0.01f)
+//    {
+//        vec3 color;
+//        if(val < 0.5f)
+//            color = mix(vec3(1, 0, 0), vec3(0, 1, 0), val * 2);
+//        else
+//            color = mix(vec3(0, 1, 0), vec3(0, 0, 1), (val - 0.5) * 2);
+//        vFinalTexColor = vec4(color, 1.0f);
+//    }
     else
         vFinalTexColor = texture(uTerrainTex, vec3(vTexCoord, 0.0)) * SplatmapColor.r  + texture(uTerrainTex, vec3(vTexCoord, 1.0)) * SplatmapColor.g + texture(uTerrainTex, vec3(vTexCoord, 2.0)) * SplatmapColor.b;
 

@@ -389,7 +389,7 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
 //            continue;
 //        }
 
-        mSplatmap.at(LOC(currPos.x, currPos.y)).a = 0.1f * (i+1);
+        mSplatmap.at(LOC(currPos.x, currPos.y)).a = /*0.1f * (i+1)*/1.0f;
 
         // If this location is the deepest in the neigh try to deposit everything
         if(heightDifference < 0.0001)
@@ -672,7 +672,7 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(NoiseGenerator *g
 //        ThermalErodeTerrain();
 
 //    }
-    DropletErodeTerrain(glm::uvec2(50, 50), 50);
+//    DropletErodeTerrain(glm::uvec2(50, 50), 50);
     MakeVertexArray();
 
     return mVao;
