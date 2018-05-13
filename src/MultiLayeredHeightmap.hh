@@ -187,6 +187,8 @@ private:
     Face mIntersectionTriangle;
     glow::SharedVertexArray mCircleVao;
 
+    glm::vec3 testFinalNormal;
+
 };
 
 #endif

@@ -271,12 +271,12 @@ glow::SharedVertexArray MultiLayeredHeightmap::getCircleVao() const
 
 glm::mat4 MultiLayeredHeightmap::GetCircleRotation()
 {
-    glm::vec3 xVector(0, 0, 1);
-    glm::mat4 rot = glm::lookAt(glm::vec3(0,0,0),
-                                xVector,
+    glm::vec3 upVector(0, 1, 0);
+    glm::vec3 xVector = glm::cross(upVector, mIntersectionTriangle.normal);
+    glm::mat4 rot = glm::lookAt(intersectionPoint,
+                                intersectionPoint + xVector,
                                 mIntersectionTriangle.normal);
-    glm::mat4 translate = glm::translate(glm::mat4(1.0f), intersectionPoint);
-    return (translate* rot);
+    return inverse(rot);
 }
 
 glm::dvec3 MultiLayeredHeightmap::getIntersectionPoint() const
@@ -466,9 +466,9 @@ void MultiLayeredHeightmap::CalculateNormalsTangents(int dimX, int dimY){
                 mPositions.at((j+1) * dimX + i+1)
             };
 
-            vTriangle0[0].y = mDisplacement.at((j * dimX ) + i);
-            vTriangle0[1].y = mDisplacement.at((j+1) * dimX  + i);
-            vTriangle0[2].y = mDisplacement.at((j+1) * dimX + i+1);
+             vTriangle0[0].y = mDisplacement.at((j * dimX ) + i);
+             vTriangle0[1].y = mDisplacement.at((j+1) * dimX  + i);
+             vTriangle0[2].y = mDisplacement.at((j+1) * dimX + i+1);
 
             glm::vec3 vTriangle1[] =
             {
@@ -477,9 +477,9 @@ void MultiLayeredHeightmap::CalculateNormalsTangents(int dimX, int dimY){
                  mPositions.at((j * dimX ) + i)
             };
 
-            vTriangle1[0].y = mDisplacement.at((j+1) * dimX + i+1);
-            vTriangle1[1].y = mDisplacement.at((j* dimX) + i+1);
-            vTriangle1[2].y = mDisplacement.at((j * dimX ) + i);
+             vTriangle1[0].y = mDisplacement.at((j+1) * dimX + i+1);
+             vTriangle1[1].y = mDisplacement.at((j* dimX) + i+1);
+             vTriangle1[2].y = mDisplacement.at((j * dimX ) + i);
 
             glm::vec2 vUV0[] =
             {
@@ -934,17 +934,19 @@ void MultiLayeredHeightmap::intersect(const Ray& _ray )
 
             if(intersectTriangle(Triangle1, Normal1, _ray) && _t < temp_t){
                 //std::cerr << "Intersection happened at: " << intersectionPoint.x << "," << intersectionPoint.y << ","<<  intersectionPoint.z << std::endl;
-                temp_t = _t;
+                temp_t = _t* 0.9;
                 Triangle1.normal = Normal1;
+                 testFinalNormal = mNormalsFinal.at(index);
                 mIntersectionTriangle = Triangle1;
                // std::cout << "_t = " << _t << std::endl;
                // break;
             }
 
             else if(intersectTriangle(Triangle2, Normal2, _ray) && _t < temp_t){
-                temp_t = _t;
+                temp_t = _t * 0.9;
                 Triangle2.normal = Normal2;
                 mIntersectionTriangle = Triangle2;
+                testFinalNormal = mNormalsFinal.at(index);
 
             }
 
