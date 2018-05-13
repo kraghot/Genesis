@@ -257,8 +257,6 @@ void GlowApp::render(float elapsedSeconds)
 
             mLineVao->bind().draw();
 
-            glm::vec3 camPos1 = camPos;
-            glm::vec3 testRaydir =  testRay.direction;
 
             auto model = glm::mat4(1.f); //glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
             auto shader = mShaderObj->use();

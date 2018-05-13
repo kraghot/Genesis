@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 #include <experimental/random>
+#include <glm/gtc/quaternion.hpp>
+#include<glm/gtx/quaternion.hpp>
 
 #ifndef ENABLE_SLOPE_BASED_BLEND
 #define ENABLE_SLOPE_BASED_BLEND 1
@@ -894,9 +896,6 @@ void MultiLayeredHeightmap::intersect(const Ray& _ray )
     {
         for (int i = 0; i < dimX-1; i++ )
         {
-
-
-
             unsigned int index = ( j * dimX ) + i;
 
             Triangle1.p0 = mPositions.at((j * dimX ) + i);
@@ -918,22 +917,130 @@ void MultiLayeredHeightmap::intersect(const Ray& _ray )
             Normal1 = glm::normalize(glm::cross(Triangle1.p0-Triangle1.p1, Triangle1.p1-Triangle1.p2));
             Normal2 = glm::normalize(glm::cross(Triangle2.p0-Triangle2.p1, Triangle2.p1-Triangle2.p2));
 
-            if((intersectTriangle(Triangle1, Normal1, _ray) || intersectTriangle(Triangle2, Normal2, _ray)) && _t < temp_t){
-                std::cerr << "Intersection happened at: " << intersectionPoint.x << "," << intersectionPoint.y << ","<<  intersectionPoint.z << std::endl;
+            if(intersectTriangle(Triangle1, Normal1, _ray) && _t < temp_t){
+                //std::cerr << "Intersection happened at: " << intersectionPoint.x << "," << intersectionPoint.y << ","<<  intersectionPoint.z << std::endl;
                 temp_t = _t;
-
+                Triangle1.normal = Normal1;
+                mIntersectionTriangle = Triangle1;
                // std::cout << "_t = " << _t << std::endl;
                // break;
             }
+
+            else if(intersectTriangle(Triangle2, Normal2, _ray) && _t < temp_t){
+                temp_t = _t;
+                Triangle2.normal = Normal2;
+                mIntersectionTriangle = Triangle2;
+
+            }
+
             if(_t > temp_t){
-                                intersectionPoint = _ray.origin + temp_t * _ray.direction;
+                intersectionPoint = _ray.origin + temp_t * _ray.direction;
 
             }
         }
 
     }
+
+    DrawArc(intersectionPoint.x, intersectionPoint.y, intersectionPoint.z, 1.f);
+
 }
 
+
+int MultiLayeredHeightmap::GetNumCircleSegments(float r)
+{
+    return 10 * sqrtf(r);
+}
+
+
+
+void MultiLayeredHeightmap::DrawArc(float cx, float cy, float cz, float r)
+{
+
+    float theta = 0;
+
+glm::quat quaternion;
+
+
+
+    float x = r * cosf(theta);
+    float y = r * sinf(theta);
+    float z = 0.f;
+
+    glm::vec3 circle = {x, y, z};
+    glm::vec3 oldCircle = {x, y, z};
+
+    glm::vec3 upVec = {0.f, 0.f, 1.f};
+    glm::vec3 xAxis = glm::normalize(glm::cross(upVec, mIntersectionTriangle.normal));
+    float RotationAngle = glm::acos(glm::dot(upVec, mIntersectionTriangle.normal)) * 180 / 3.1459;
+
+    float cosTheta = glm::dot(upVec, mIntersectionTriangle.normal);
+
+    if (cosTheta < -1 + 0.001f){
+            // special case when vectors in opposite directions:
+            // there is no "ideal" rotation axis
+            // So guess one; any will do as long as it's perpendicular to start
+            xAxis = glm::cross(glm::vec3(0.0f, 0.0f, 1.0f), upVec);
+            if (glm::length2(xAxis) < 0.01 ) // bad luck, they were parallel, try again!
+                xAxis = glm::cross(glm::vec3(1.0f, 0.0f, 0.0f), upVec);
+
+            xAxis = glm::normalize(xAxis);
+            RotationAngle = glm::radians(180.0f) * 180 / 3.1459;
+            quaternion = glm::angleAxis(glm::radians(180.0f), xAxis);
+        }
+
+//    else{
+//    float s = sqrt( (1+cosTheta)*2 );
+//    float invs = 1 / s;
+//    quaternion = glm::quat(s * 0.5f,
+//                         xAxis.x * invs,
+//                         xAxis.y * invs,
+//                         xAxis.z * invs);
+//    }
+
+
+    glm::mat4 rotation = glm::rotate(RotationAngle, xAxis);
+    circle = glm::vec3(rotation * glm::vec4(circle, 1));
+
+
+//    float dotIC = glm::dot({1.f,1.f, -1.f}, mIntersectionTriangle.normal); //dot product intersection normal and circle normal
+//    float angleIC = glm::acos(dotIC) * 3.1459 / 180;
+
+//    glm::mat4 rotation = glm::rotate(angleIC, glm::vec3(1, 1, 1));
+//    circle = glm::vec3(rotation * glm::vec4(circle, 1));
+
+
+
+    for(int ii = 0; ii <= GetNumCircleSegments(10); ii++)
+    {
+
+        theta = 2.0f * 3.1415926f * float(ii) / float(GetNumCircleSegments(10));
+
+        oldCircle = circle;
+
+        x = r * cosf(theta);
+        y = r * sinf(theta);
+
+        circle.x = x;
+        circle.y = y;
+
+        glm::mat4 rotation = glm::rotate(RotationAngle, xAxis);
+        circle = glm::vec3(rotation * glm::vec4(circle, 1));
+//        glm::mat4 rotation = glm::toMat4(quaternion);
+//        circle = glm::vec3(rotation * glm::vec4(circle, 1));
+
+        //circle *= quaternion;
+
+        std::vector<glm::vec3> circlePositions = {{oldCircle.x + cx, oldCircle.y + cy, oldCircle.z + cz}, {circle.x + cx, circle.y + cy, circle.z + cz}};
+        auto ab = glow::ArrayBuffer::create();
+        ab->defineAttribute<glm::vec3>("aPosition");
+        ab->bind().setData(circlePositions);
+        ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Circle");
+        mCircleVao = glow::VertexArray::create(ab, GL_LINES);
+
+        mCircleVao->bind().draw();
+
+    }
+}
 
 
 

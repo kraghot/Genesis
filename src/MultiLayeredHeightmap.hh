@@ -14,6 +14,7 @@
 
 #include<glm/common.hpp>
 #include<glm/glm.hpp>
+#include <glm/ext.hpp>
 
 #include <glow/common/scoped_gl.hh>
 #include <glow/gl.hh>
@@ -67,6 +68,8 @@ struct Face
     glm::vec3 p0;
     glm::vec3 p1;
     glm::vec3 p2;
+
+    glm::vec3 normal;
 };
 
 
@@ -124,6 +127,9 @@ private:
     void MakeVertexArray();
     void FillData(std::vector<float>& heights);
     void CalculateNormalsTangents(int dimX, int dimY);
+    int GetNumCircleSegments(float r);
+    void DrawArc(float cx, float cy, float cz, float r);
+
     std::vector<glm::uvec2> GetNeighborhood(unsigned int i, unsigned int j);
     std::vector<glm::uvec2> GetNeighborhood(glm::uvec2 coord);
     glm::uvec2 GetLowestNeigh(std::vector<glm::uvec2>& neigh);
@@ -174,6 +180,9 @@ private:
     glm::vec3 intersectionPoint;
     float _t;
     float epsilon = 0.01;
+
+    Face mIntersectionTriangle;
+    glow::SharedVertexArray mCircleVao;
 
 };
 
