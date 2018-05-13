@@ -134,7 +134,7 @@ public:
     void DropletErodeTerrain(glm::vec2 coordinates, float strength=1.0f);
     float getMfHeightScale() const;
     float GetDisplacementAt(glm::uvec2 pos);
-    float SetDisplacementAt(glm::uvec2 pos, float value);
+    void SetDisplacementAt(glm::uvec2 pos, float value);
     /// @todo Add brushlike softening and deposition
     void AddDisplacementAt(glm::uvec2 pos, float addition);
     void AddClampedDisplacementAt(glm::uvec2 pos, float addition, float min);

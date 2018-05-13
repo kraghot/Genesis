@@ -583,7 +583,7 @@ float MultiLayeredHeightmap::GetDisplacementAt(glm::uvec2 pos)
     return mDisplacement.at(LOC(pos.x, pos.y));
 }
 
-float MultiLayeredHeightmap::SetDisplacementAt(glm::uvec2 pos, float value)
+void MultiLayeredHeightmap::SetDisplacementAt(glm::uvec2 pos, float value)
 {
     mDisplacement.at(LOC(pos.x, pos.y)) = value;
 }
