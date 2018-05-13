@@ -77,7 +77,7 @@ void GlowApp::init()
 
     PerlinNoiseGenerator noise(2924319);
     mPerlinTest = mHeightmap.GenerateTerrain(&noise, heightMapDim, heightMapDim);
-
+    mHeightmap.GenerateArc(1.0f);
 
     // load object
     mMeshCube = assimp::Importer().load("mesh/cube.obj");
@@ -233,6 +233,7 @@ void GlowApp::render(float elapsedSeconds)
             auto lineShader = mShaderLine->use();
             lineShader.setUniform("uView", view);
             lineShader.setUniform("uProj", proj);
+            lineShader.setUniform("uModel", glm::mat4());
 
             Ray testRay;
             testRay.origin = camPos;
@@ -241,6 +242,7 @@ void GlowApp::render(float elapsedSeconds)
             testRay.direction = glm::normalize(mMousePosFinal - camPos);
 
             mHeightmap.intersect(testRay);
+
 
             if(isKeyPressed(71)) // GLFW_KEY_G
             {
@@ -253,10 +255,10 @@ void GlowApp::render(float elapsedSeconds)
                 mLineVao = glow::VertexArray::create(ab, GL_LINES);
             }
 
-//
-
             mLineVao->bind().draw();
 
+            lineShader.setUniform("uModel", mHeightmap.GetCircleRotation());
+            mHeightmap.getCircleVao()->bind().draw();
 
             auto model = glm::mat4(1.f); //glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
             auto shader = mShaderObj->use();

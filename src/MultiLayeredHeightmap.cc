@@ -264,6 +264,21 @@ glm::uvec2 MultiLayeredHeightmap::GetLowestNeigh(std::vector<glm::uvec2> &neigh)
     return neigh.at(lowestIndex);
 }
 
+glow::SharedVertexArray MultiLayeredHeightmap::getCircleVao() const
+{
+    return mCircleVao;
+}
+
+glm::mat4 MultiLayeredHeightmap::GetCircleRotation()
+{
+    glm::vec3 xVector(0, 0, 1);
+    glm::mat4 rot = glm::lookAt(glm::vec3(0,0,0),
+                                xVector,
+                                mIntersectionTriangle.normal);
+    glm::mat4 translate = glm::translate(glm::mat4(1.0f), intersectionPoint);
+    return (translate* rot);
+}
+
 glm::dvec3 MultiLayeredHeightmap::getIntersectionPoint() const
 {
     return intersectionPoint;
@@ -940,9 +955,6 @@ void MultiLayeredHeightmap::intersect(const Ray& _ray )
         }
 
     }
-
-    DrawArc(intersectionPoint.x, intersectionPoint.y, intersectionPoint.z, 1.f);
-
 }
 
 
@@ -953,105 +965,18 @@ int MultiLayeredHeightmap::GetNumCircleSegments(float r)
 
 
 
-void MultiLayeredHeightmap::DrawArc(float cx, float cy, float cz, float r)
+void MultiLayeredHeightmap::GenerateArc(float r)
 {
 
-    float theta = 0;
-
-glm::quat quaternion;
-
-
-
-    float x = r * cosf(theta);
-    float y = r * sinf(theta);
-    float z = 0.f;
-
-    glm::vec3 circle = {x, y, z};
-    glm::vec3 oldCircle = {x, y, z};
-
-    glm::vec3 upVec = {0.f, 0.f, 1.f};
-    glm::vec3 xAxis = glm::normalize(glm::cross(upVec, mIntersectionTriangle.normal));
-    float RotationAngle = glm::acos(glm::dot(upVec, mIntersectionTriangle.normal)) * 180 / 3.1459;
-
-    float cosTheta = glm::dot(upVec, mIntersectionTriangle.normal);
-
-    if (cosTheta < -1 + 0.001f){
-            // special case when vectors in opposite directions:
-            // there is no "ideal" rotation axis
-            // So guess one; any will do as long as it's perpendicular to start
-            xAxis = glm::cross(glm::vec3(0.0f, 0.0f, 1.0f), upVec);
-            if (glm::length2(xAxis) < 0.01 ) // bad luck, they were parallel, try again!
-                xAxis = glm::cross(glm::vec3(1.0f, 0.0f, 0.0f), upVec);
-
-            xAxis = glm::normalize(xAxis);
-            RotationAngle = glm::radians(180.0f) * 180 / 3.1459;
-            quaternion = glm::angleAxis(glm::radians(180.0f), xAxis);
-        }
-
-//    else{
-//    float s = sqrt( (1+cosTheta)*2 );
-//    float invs = 1 / s;
-//    quaternion = glm::quat(s * 0.5f,
-//                         xAxis.x * invs,
-//                         xAxis.y * invs,
-//                         xAxis.z * invs);
-//    }
-
-
-    glm::mat4 rotation = glm::rotate(RotationAngle, xAxis);
-    circle = glm::vec3(rotation * glm::vec4(circle, 1));
-
-
-//    float dotIC = glm::dot({1.f,1.f, -1.f}, mIntersectionTriangle.normal); //dot product intersection normal and circle normal
-//    float angleIC = glm::acos(dotIC) * 3.1459 / 180;
-
-//    glm::mat4 rotation = glm::rotate(angleIC, glm::vec3(1, 1, 1));
-//    circle = glm::vec3(rotation * glm::vec4(circle, 1));
-
-
-
-    for(int ii = 0; ii <= GetNumCircleSegments(10); ii++)
+    std::vector<glm::vec3> circlePoints;
+    for(auto i=0.0f; i < 2.0f * M_PI; i+= 0.1f)
     {
-
-        theta = 2.0f * 3.1415926f * float(ii) / float(GetNumCircleSegments(10));
-
-        oldCircle = circle;
-
-        x = r * cosf(theta);
-        y = r * sinf(theta);
-
-        circle.x = x;
-        circle.y = y;
-
-        glm::mat4 rotation = glm::rotate(RotationAngle, xAxis);
-        circle = glm::vec3(rotation * glm::vec4(circle, 1));
-//        glm::mat4 rotation = glm::toMat4(quaternion);
-//        circle = glm::vec3(rotation * glm::vec4(circle, 1));
-
-        //circle *= quaternion;
-
-        std::vector<glm::vec3> circlePositions = {{oldCircle.x + cx, oldCircle.y + cy, oldCircle.z + cz}, {circle.x + cx, circle.y + cy, circle.z + cz}};
-        auto ab = glow::ArrayBuffer::create();
-        ab->defineAttribute<glm::vec3>("aPosition");
-        ab->bind().setData(circlePositions);
-        ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Circle");
-        mCircleVao = glow::VertexArray::create(ab, GL_LINES);
-
-        mCircleVao->bind().draw();
-
+        circlePoints.push_back(glm::vec3(sin(i) * r, 0.0f, cos(i) * r));
     }
+
+    auto ab = glow::ArrayBuffer::create();
+    ab->defineAttribute<glm::vec3>("aPosition");
+    ab->bind().setData(circlePoints);
+    ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Circle");
+    mCircleVao = glow::VertexArray::create(ab, GL_LINES);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

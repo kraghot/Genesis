@@ -123,12 +123,15 @@ public:
 
     glm::dvec3 getIntersectionPoint() const;
 
+    glow::SharedVertexArray getCircleVao() const;
+    glm::mat4 GetCircleRotation();
+    void GenerateArc(float r);
+
 private:
     void MakeVertexArray();
     void FillData(std::vector<float>& heights);
     void CalculateNormalsTangents(int dimX, int dimY);
     int GetNumCircleSegments(float r);
-    void DrawArc(float cx, float cy, float cz, float r);
 
     std::vector<glm::uvec2> GetNeighborhood(unsigned int i, unsigned int j);
     std::vector<glm::uvec2> GetNeighborhood(glm::uvec2 coord);
