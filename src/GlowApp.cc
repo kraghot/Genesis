@@ -27,20 +27,6 @@ bool button;
 using namespace glow;
 const int heightMapDim = 150;
 
-void TW_CALL GlowApp::randomTerrain(void *clientData){
-    static_cast<GlowApp *>(clientData)->setSeed(std::rand());
-}
-
-void TW_CALL GlowApp::setSeedTerrain(const void *value, void *clientData){
-    static_cast<GlowApp *>(clientData)->setSeed(*static_cast<const unsigned int *>(value));
-}
-
-void TW_CALL GlowApp::getSeedTerrain(void *value, void *clientData){
-
-     *static_cast<unsigned int *>(value) = static_cast<const GlowApp *>(clientData)->getSeed();
-}
-
-
 GlowApp::GlowApp():
     mHeightmap(20.0f,3.0f)
 {

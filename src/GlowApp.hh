@@ -65,9 +65,16 @@ public:
 
     void initTerrain();
 
-    static void TW_CALL randomTerrain(void *clientData);
-    static void TW_CALL setSeedTerrain(const void *value, void *clientData);
-    static void TW_CALL getSeedTerrain(void *value, void *clientData);
+    static void TW_CALL randomTerrain(void *clientData){
+        static_cast<GlowApp *>(clientData)->setSeed(std::rand());
+    }
+    static void TW_CALL setSeedTerrain(const void *value, void *clientData){
+        static_cast<GlowApp *>(clientData)->setSeed(*static_cast<const unsigned int *>(value));
+    }
+    static void TW_CALL getSeedTerrain(void *value, void *clientData){
+
+        *static_cast<unsigned int *>(value) = static_cast<const GlowApp *>(clientData)->getSeed();
+    }
 
     void setSeed(unsigned int var);
     unsigned int getSeed() const;
