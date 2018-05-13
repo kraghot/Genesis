@@ -252,9 +252,10 @@ glm::uvec2 MultiLayeredHeightmap::GetLowestNeigh(std::vector<glm::uvec2> &neigh)
 
     for(auto i = 0u; i < 4; i++)
     {
-        if (GetDisplacementAt(neigh.at(i)) < lowestDepth)
+        auto currDepth = GetDisplacementAt(neigh.at(i));
+        if (currDepth < lowestDepth)
         {
-            lowestDepth = GetDisplacementAt(neigh.at(i));
+            lowestDepth = currDepth;
             lowestIndex = i;
         }
     }
@@ -295,14 +296,11 @@ void MultiLayeredHeightmap::ThermalErodeTerrain()
             }
         }
     }
-#undef LOC
     std::cout << counter << std::endl;
 }
 
 void MultiLayeredHeightmap::HydraulicErodeTerrain()
 {
-#define LOC(a, b) b * mHeightmapDimensions.y + a
-
     const float rainfall = 0.01f;
     const float sediment = 0.01f * mfHeightScale;
 #pragma omp for
@@ -580,12 +578,12 @@ float MultiLayeredHeightmap::getMfHeightScale() const
 
 float MultiLayeredHeightmap::GetDisplacementAt(glm::uvec2 pos)
 {
-    return mDisplacement.at(LOC(pos.y, pos.x));
+    return mDisplacement.at(LOC(pos.x, pos.y));
 }
 
 void MultiLayeredHeightmap::AddDisplacementAt(glm::uvec2 pos, float addition)
 {
-    mDisplacement.at(LOC(pos.y, pos.x)) += addition;
+    mDisplacement.at(LOC(pos.x, pos.y)) += addition;
 }
 
 #undef LOC
