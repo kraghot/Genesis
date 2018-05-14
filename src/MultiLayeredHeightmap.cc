@@ -612,6 +612,7 @@ void MultiLayeredHeightmap::AddSoftDisplacement(glm::uvec2 pos, float addition)
 
 void MultiLayeredHeightmap::IterateDroplet(int num)
 {
+#pragma omp for
     for(auto i=0u; i < num; i++)
     {
         glm::uvec2 coords;
