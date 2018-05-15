@@ -186,8 +186,10 @@ private:
 
     Face mIntersectionTriangle;
     glow::SharedVertexArray mCircleVao;
-
-    glm::vec3 testFinalNormal;
+    unsigned int mIntersectionHeight = 0;
+    unsigned int mIntersectionWidth = 0;
+    float mIntersectinRadius;
+    bool intersection = false;
 
 };
 

@@ -276,6 +276,32 @@ glm::mat4 MultiLayeredHeightmap::GetCircleRotation()
     glm::mat4 rot = glm::lookAt(intersectionPoint,
                                 intersectionPoint + xVector,
                                 mIntersectionTriangle.normal);
+
+    for (unsigned int j = 0; j < mHeightmapDimensions.x; j++){ // 2m world = 2 u heightmapu
+        for (unsigned int i = 0; i < mHeightmapDimensions.x; i++){
+
+
+            float pointPositionx = glm::pow(mPositions.at((j * mHeightmapDimensions.x) + i).x - mPositions.at((mIntersectionHeight * mHeightmapDimensions.x) + mIntersectionWidth).x,2);
+            float pointPositiony  = glm::pow(mPositions.at((j * mHeightmapDimensions.x) + i).y -mPositions.at((mIntersectionHeight * mHeightmapDimensions.x) + mIntersectionWidth).y,2);
+            float pointPositionz = glm::pow(mPositions.at((j * mHeightmapDimensions.x) + i).z -mPositions.at((mIntersectionHeight * mHeightmapDimensions.x) + mIntersectionWidth).z,2);
+
+            float distance = pointPositionx + pointPositiony + pointPositionz;
+
+            if (distance < (mIntersectinRadius * mIntersectinRadius)){ // povisit snow za nez 20% i onda normalizirat cijeli vektor
+
+                float r = 1.f;
+                float g = 0.f;
+                float b = 0.f;
+                mSplatmap.at(j*mHeightmapDimensions.x + i) = {r,g,b};
+
+            }
+        }
+    }
+
+
+    mSplatmapTexture->bind().setData(GL_RGB, mHeightmapDimensions.x, mHeightmapDimensions.y, mSplatmap);
+    mSplatmapTexture->bind().generateMipmaps();
+
     return inverse(rot);
 }
 
@@ -905,13 +931,11 @@ void MultiLayeredHeightmap::intersect(const Ray& _ray )
     glm::vec3 Normal1, Normal2;
     float temp_t = 1000000.f;
 
-
-
     for (int j = 0; j < dimY-1; j++ )
     {
         for (int i = 0; i < dimX-1; i++ )
         {
-            unsigned int index = ( j * dimX ) + i;
+           // unsigned int index = ( j * dimX ) + i;
 
             Triangle1.p0 = mPositions.at((j * dimX ) + i);
             Triangle1.p1 = mPositions.at((j+1) * dimX  + i);
@@ -934,41 +958,40 @@ void MultiLayeredHeightmap::intersect(const Ray& _ray )
 
             if(intersectTriangle(Triangle1, Normal1, _ray) && _t < temp_t){
                 //std::cerr << "Intersection happened at: " << intersectionPoint.x << "," << intersectionPoint.y << ","<<  intersectionPoint.z << std::endl;
-                temp_t = _t* 0.9;
-                Triangle1.normal = Normal1;
-                 testFinalNormal = mNormalsFinal.at(index);
+                temp_t = _t;
+                Triangle1.normal = Normal1;  
                 mIntersectionTriangle = Triangle1;
                // std::cout << "_t = " << _t << std::endl;
                // break;
+                mIntersectionHeight = j;
+                mIntersectionWidth = i;
+
+                intersection = true;
             }
 
             else if(intersectTriangle(Triangle2, Normal2, _ray) && _t < temp_t){
-                temp_t = _t * 0.9;
+                temp_t = _t;
                 Triangle2.normal = Normal2;
                 mIntersectionTriangle = Triangle2;
-                testFinalNormal = mNormalsFinal.at(index);
-
+                mIntersectionHeight = j;
+                mIntersectionWidth = i;
+                intersection = true;
             }
 
-            if(_t > temp_t){
-                intersectionPoint = _ray.origin + temp_t * _ray.direction;
-
-            }
         }
 
     }
-}
 
+    if(intersection)
+        intersectionPoint = _ray.origin + temp_t * _ray.direction * 0.9;
 
-int MultiLayeredHeightmap::GetNumCircleSegments(float r)
-{
-    return 10 * sqrtf(r);
 }
 
 
 
 void MultiLayeredHeightmap::GenerateArc(float r)
 {
+    mIntersectinRadius = r;
 
     std::vector<glm::vec3> circlePoints;
     for(auto i=0.0f; i < 2.0f * M_PI; i+= 0.1f)
@@ -981,4 +1004,9 @@ void MultiLayeredHeightmap::GenerateArc(float r)
     ab->bind().setData(circlePoints);
     ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Circle");
     mCircleVao = glow::VertexArray::create(ab, GL_LINES);
+    std::cout << "test: "<< std::endl;
+
+
 }
+
+
