@@ -127,6 +127,8 @@ public:
     glm::mat4 GetCircleRotation();
     void GenerateArc(float r);
 
+    void SetTextureBrush();
+
 private:
     void MakeVertexArray();
     void FillData(std::vector<float>& heights);
@@ -136,6 +138,8 @@ private:
     std::vector<glm::uvec2> GetNeighborhood(unsigned int i, unsigned int j);
     std::vector<glm::uvec2> GetNeighborhood(glm::uvec2 coord);
     glm::uvec2 GetLowestNeigh(std::vector<glm::uvec2>& neigh);
+
+
 
     float mfHeightScale;
     float mfBlockScale;
@@ -188,7 +192,7 @@ private:
     glow::SharedVertexArray mCircleVao;
     unsigned int mIntersectionHeight = 0;
     unsigned int mIntersectionWidth = 0;
-    float mIntersectinRadius;
+    float mIntersectionRadius;
     bool intersection = false;
 
 };

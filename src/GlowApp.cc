@@ -260,7 +260,9 @@ void GlowApp::render(float elapsedSeconds)
             lineShader.setUniform("uModel", mHeightmap.GetCircleRotation());
             mHeightmap.getCircleVao()->bind().draw();
 
-            auto model = glm::mat4(1.f); //glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
+            mHeightmap.SetTextureBrush();
+
+            auto model = glm::mat4(1.f); // glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
             auto shader = mShaderObj->use();
             shader.setUniform("uView", view);
             shader.setUniform("uProj", proj);

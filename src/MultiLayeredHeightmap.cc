@@ -277,32 +277,51 @@ glm::mat4 MultiLayeredHeightmap::GetCircleRotation()
                                 intersectionPoint + xVector,
                                 mIntersectionTriangle.normal);
 
-    for (unsigned int j = 0; j < mHeightmapDimensions.x; j++){ // 2m world = 2 u heightmapu
-        for (unsigned int i = 0; i < mHeightmapDimensions.x; i++){
-
-
-            float pointPositionx = glm::pow(mPositions.at((j * mHeightmapDimensions.x) + i).x - mPositions.at((mIntersectionHeight * mHeightmapDimensions.x) + mIntersectionWidth).x,2);
-            float pointPositiony  = glm::pow(mPositions.at((j * mHeightmapDimensions.x) + i).y -mPositions.at((mIntersectionHeight * mHeightmapDimensions.x) + mIntersectionWidth).y,2);
-            float pointPositionz = glm::pow(mPositions.at((j * mHeightmapDimensions.x) + i).z -mPositions.at((mIntersectionHeight * mHeightmapDimensions.x) + mIntersectionWidth).z,2);
-
-            float distance = pointPositionx + pointPositiony + pointPositionz;
-
-            if (distance < (mIntersectinRadius * mIntersectinRadius)){ // povisit snow za nez 20% i onda normalizirat cijeli vektor
-
-                float r = 1.f;
-                float g = 0.f;
-                float b = 0.f;
-                mSplatmap.at(j*mHeightmapDimensions.x + i) = {r,g,b};
-
-            }
-        }
-    }
-
-
-    mSplatmapTexture->bind().setData(GL_RGB, mHeightmapDimensions.x, mHeightmapDimensions.y, mSplatmap);
-    mSplatmapTexture->bind().generateMipmaps();
-
     return inverse(rot);
+
+}
+
+void MultiLayeredHeightmap::SetTextureBrush(){
+    //    float r = 1.f;
+    //    float g = 0.f;
+    //    float b = 0.f;
+
+    float Radius2 = mIntersectionRadius * mIntersectionRadius;
+
+        for (unsigned int j = mIntersectionHeight - mIntersectionRadius; j < mIntersectionHeight + mIntersectionRadius; j++){ // 2m world = 2 u heightmapu
+            for (unsigned int i = mIntersectionWidth - mIntersectionRadius; i < mIntersectionWidth + mIntersectionRadius; i++){
+
+
+                float pointPositionx = glm::pow(mPositions.at((j * mHeightmapDimensions.x) + i).x - mPositions.at((mIntersectionHeight * mHeightmapDimensions.x) + mIntersectionWidth).x,2);
+                float pointPositiony  = glm::pow(mPositions.at((j * mHeightmapDimensions.x) + i).y -mPositions.at((mIntersectionHeight * mHeightmapDimensions.x) + mIntersectionWidth).y,2);
+                float pointPositionz = glm::pow(mPositions.at((j * mHeightmapDimensions.x) + i).z -mPositions.at((mIntersectionHeight * mHeightmapDimensions.x) + mIntersectionWidth).z,2);
+
+                float distance = pointPositionx + pointPositiony + pointPositionz;
+
+                //if (distance < (mIntersectinRadius * mIntersectinRadius)){ // povisit snow za nez 20% i onda normalizirat cijeli vektor
+
+                    if(distance < Radius2 && distance > (0.7 * Radius2)){
+                        mSplatmap.at(j*mHeightmapDimensions.x + i).x += 0.2;
+                        glm::normalize(mSplatmap.at(j*mHeightmapDimensions.x + i));
+                    }
+
+                    else if(distance < (0.7 * Radius2) && distance > (0.5 * Radius2)){
+                        mSplatmap.at(j*mHeightmapDimensions.x + i).x += 0.4;
+                        glm::normalize(mSplatmap.at(j*mHeightmapDimensions.x + i));
+                    }
+                    else if(distance < (0.5 * Radius2)){
+                        mSplatmap.at(j*mHeightmapDimensions.x + i).x += 0.8;
+                        glm::normalize(mSplatmap.at(j*mHeightmapDimensions.x + i));
+                    }
+                   // }
+
+
+                }
+            }
+
+
+        mSplatmapTexture->bind().setData(GL_RGB, mHeightmapDimensions.x, mHeightmapDimensions.y, mSplatmap);
+        mSplatmapTexture->bind().generateMipmaps();
 }
 
 glm::dvec3 MultiLayeredHeightmap::getIntersectionPoint() const
@@ -983,7 +1002,7 @@ void MultiLayeredHeightmap::intersect(const Ray& _ray )
     }
 
     if(intersection)
-        intersectionPoint = _ray.origin + temp_t * _ray.direction * 0.9;
+        intersectionPoint = _ray.origin + temp_t * _ray.direction;
 
 }
 
@@ -991,7 +1010,7 @@ void MultiLayeredHeightmap::intersect(const Ray& _ray )
 
 void MultiLayeredHeightmap::GenerateArc(float r)
 {
-    mIntersectinRadius = r;
+    mIntersectionRadius = r;
 
     std::vector<glm::vec3> circlePoints;
     for(auto i=0.0f; i < 2.0f * M_PI; i+= 0.1f)
