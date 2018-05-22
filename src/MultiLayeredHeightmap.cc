@@ -103,7 +103,8 @@ void MultiLayeredHeightmap::DumpSplatmapToFile()
 
 void MultiLayeredHeightmap::MakeVertexArray()
 {
-    auto ab = glow::ArrayBuffer::create();
+
+    ab = glow::ArrayBuffer::create();
     ab->defineAttribute<glm::vec3>("aPosition");
     ab->bind().setData(mPositions, GL_DYNAMIC_DRAW);
     mAbs.push_back(ab);
@@ -136,6 +137,11 @@ void MultiLayeredHeightmap::MakeVertexArray()
     ab = glow::ArrayBuffer::create();
     ab->defineAttribute<glm::vec2>("aHeightCoord");
     ab->bind().setData(mHeightCoords);
+    mAbs.push_back(ab);
+
+    ab = glow::ArrayBuffer::create();
+    ab->defineAttribute<float>("aHeightBrush");
+    ab->bind().setData(mHeightBrush);
     mAbs.push_back(ab);
 
     for (auto const& ab : mAbs)
@@ -175,6 +181,8 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
 
     mSlopeY.resize(mNumberOfVertices);
 
+    mHeightBrush.resize(mNumberOfVertices);
+
     mHeightCoords.resize(mNumberOfVertices);
 
     int dimX = mHeightmapDimensions.x, dimY = mHeightmapDimensions.y;
@@ -213,6 +221,7 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
             mPositions.at(CURRPOS) = glm::vec3(X, Y, Z);
             mTexCoords.at(CURRPOS) = glm::vec2(S * fTextureU, T * fTextureV);
             mHeightCoords.at(CURRPOS) = glm::vec2(S, T);
+            mHeightBrush.at(CURRPOS) = 0.f;
 
              if(i != dimY - 1)
              {
@@ -264,6 +273,11 @@ glm::uvec2 MultiLayeredHeightmap::GetLowestNeigh(std::vector<glm::uvec2> &neigh)
     return neigh.at(lowestIndex);
 }
 
+glow::SharedVertexArray MultiLayeredHeightmap::getVao() const
+{
+    return mVao;
+}
+
 glow::SharedVertexArray MultiLayeredHeightmap::getCircleVao() const
 {
     return mCircleVao;
@@ -281,10 +295,9 @@ glm::mat4 MultiLayeredHeightmap::GetCircleRotation()
 
 }
 
-void MultiLayeredHeightmap::SetTextureBrush(){
-    //    float r = 1.f;
-    //    float g = 0.f;
-    //    float b = 0.f;
+void MultiLayeredHeightmap::SetTextureBrush(int seletedTexture){
+
+    float sum;
 
     float Radius2 = mIntersectionRadius * mIntersectionRadius;
 
@@ -298,23 +311,21 @@ void MultiLayeredHeightmap::SetTextureBrush(){
 
                 float distance = pointPositionx + pointPositiony + pointPositionz;
 
-                //if (distance < (mIntersectinRadius * mIntersectinRadius)){ // povisit snow za nez 20% i onda normalizirat cijeli vektor
-
                     if(distance < Radius2 && distance > (0.7 * Radius2)){
-                        mSplatmap.at(j*mHeightmapDimensions.x + i).x += 0.2;
-                        glm::normalize(mSplatmap.at(j*mHeightmapDimensions.x + i));
+                        mSplatmap.at(j*mHeightmapDimensions.x + i)[seletedTexture] += 0.2;
                     }
 
                     else if(distance < (0.7 * Radius2) && distance > (0.5 * Radius2)){
-                        mSplatmap.at(j*mHeightmapDimensions.x + i).x += 0.4;
-                        glm::normalize(mSplatmap.at(j*mHeightmapDimensions.x + i));
+                        mSplatmap.at(j*mHeightmapDimensions.x + i)[seletedTexture] += 0.4;
                     }
                     else if(distance < (0.5 * Radius2)){
-                        mSplatmap.at(j*mHeightmapDimensions.x + i).x += 0.8;
-                        glm::normalize(mSplatmap.at(j*mHeightmapDimensions.x + i));
+                        mSplatmap.at(j*mHeightmapDimensions.x + i)[seletedTexture] += 0.8;
                     }
-                   // }
 
+                    sum = mSplatmap.at(j*mHeightmapDimensions.x + i).x + mSplatmap.at(j*mHeightmapDimensions.x + i).y + mSplatmap.at(j*mHeightmapDimensions.x + i).z;
+                    mSplatmap.at(j*mHeightmapDimensions.x + i).y /= sum;
+                    mSplatmap.at(j*mHeightmapDimensions.x + i).x /= sum;
+                    mSplatmap.at(j*mHeightmapDimensions.x + i).z /= sum;
 
                 }
             }
@@ -322,6 +333,41 @@ void MultiLayeredHeightmap::SetTextureBrush(){
 
         mSplatmapTexture->bind().setData(GL_RGB, mHeightmapDimensions.x, mHeightmapDimensions.y, mSplatmap);
         mSplatmapTexture->bind().generateMipmaps();
+}
+
+void MultiLayeredHeightmap::SetHeightBrush(float factor){
+    float Radius2 = mIntersectionRadius * mIntersectionRadius;
+
+    for (unsigned int j = mIntersectionHeight - mIntersectionRadius; j < mIntersectionHeight + mIntersectionRadius; j++){ // 2m world = 2 u heightmapu
+        for (unsigned int i = mIntersectionWidth - mIntersectionRadius; i < mIntersectionWidth + mIntersectionRadius; i++){
+
+
+            float pointPositionx = glm::pow(mPositions.at((j * mHeightmapDimensions.x) + i).x - mPositions.at((mIntersectionHeight * mHeightmapDimensions.x) + mIntersectionWidth).x,2);
+            float pointPositiony  = glm::pow(mPositions.at((j * mHeightmapDimensions.x) + i).y -mPositions.at((mIntersectionHeight * mHeightmapDimensions.x) + mIntersectionWidth).y,2);
+            float pointPositionz = glm::pow(mPositions.at((j * mHeightmapDimensions.x) + i).z -mPositions.at((mIntersectionHeight * mHeightmapDimensions.x) + mIntersectionWidth).z,2);
+
+            float distance = pointPositionx + pointPositiony + pointPositionz;
+
+                if(distance < Radius2 && distance > (0.7 * Radius2)){
+                    mPositions.at(j*mHeightmapDimensions.x + i).y += 0.1f;
+                    mDisplacement.at(j*mHeightmapDimensions.x + i) += factor < 0.004f? 0.f : factor - 0.004f;
+                }
+
+                else if(distance < (0.7 * Radius2) && distance > (0.5 * Radius2)){
+                    mPositions.at(j*mHeightmapDimensions.x + i).y += 0.1f;
+                    mDisplacement.at(j*mHeightmapDimensions.x + i) += factor < 0.002f? 0.f : factor - 0.002f;
+                }
+                else if(distance < (0.5 * Radius2)){
+                     mPositions.at(j*mHeightmapDimensions.x + i).y += 0.1f;
+                     mDisplacement.at(j*mHeightmapDimensions.x + i) += factor;
+                }
+
+            }
+        }
+
+    CalculateNormalsTangents(mHeightmapDimensions.x, mHeightmapDimensions.y);
+    LoadSplatmap();
+    MakeVertexArray();
 }
 
 glm::dvec3 MultiLayeredHeightmap::getIntersectionPoint() const
@@ -817,39 +863,7 @@ bool MultiLayeredHeightmap::intersectTriangle(const Face& _face, const glm::vec3
     auto temp_t = _t;
     auto temp_intersection = intersectionPoint;
 
-//    auto edge1 = _face.p1 - _face.p0;
-//    auto edge2 = _face.p2 - _face.p0;
-
-//    auto h = glm::cross(_ray.direction, edge2);
-//    auto a = glm::dot(edge1, h);
-
-//    auto f = 1/a;
-//    auto s = _ray.origin - _face.p0;
-//    auto q = glm::cross(s, edge1);
-
-//    _t = f * (glm::dot(edge2, q));
-
-//    auto w = _ray.origin - _face.p0;
-
-
-
-//    auto N = - glm::dot(_normal, w);
-//    //std::cout << "_t = " << w.x << std::endl;
-
-//    auto D = glm::dot(_normal, _ray.direction);
-
-//    _t = N / D;
-
-
-
-    //_t *= mfBlockScale;
-
-
-
     float dotRN = glm::dot(_ray.direction, _normal);
-
-//    if (fabs(dotRN) < epsilon)
-//        return false;
 
     float planeDist = glm::dot((_face.p0 - _ray.origin), _normal);
 
@@ -878,7 +892,6 @@ bool MultiLayeredHeightmap::bary_coord(const glm::vec3& _p, const glm::vec3& _u,
     glm::vec3 wu = _w - _u;
     glm::vec3 pu = _p - _u;
 
-    // find largest absolute coordinate of normal
     double nx = vu[1] * wu[2] - vu[2] * wu[1];
     double ny = vu[2] * wu[0] - vu[0] * wu[2];
     double nz = vu[0] * wu[1] - vu[1] * wu[0];
@@ -911,7 +924,6 @@ bool MultiLayeredHeightmap::bary_coord(const glm::vec3& _p, const glm::vec3& _u,
         }
     }
 
-    // solve 2D problem
     switch (max_coord)
     {
     case 0:
@@ -976,12 +988,9 @@ void MultiLayeredHeightmap::intersect(const Ray& _ray )
             Normal2 = glm::normalize(glm::cross(Triangle2.p0-Triangle2.p1, Triangle2.p1-Triangle2.p2));
 
             if(intersectTriangle(Triangle1, Normal1, _ray) && _t < temp_t){
-                //std::cerr << "Intersection happened at: " << intersectionPoint.x << "," << intersectionPoint.y << ","<<  intersectionPoint.z << std::endl;
                 temp_t = _t;
                 Triangle1.normal = Normal1;  
                 mIntersectionTriangle = Triangle1;
-               // std::cout << "_t = " << _t << std::endl;
-               // break;
                 mIntersectionHeight = j;
                 mIntersectionWidth = i;
 
@@ -1023,8 +1032,6 @@ void MultiLayeredHeightmap::GenerateArc(float r)
     ab->bind().setData(circlePoints);
     ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Circle");
     mCircleVao = glow::VertexArray::create(ab, GL_LINES);
-    std::cout << "test: "<< std::endl;
-
 
 }
 

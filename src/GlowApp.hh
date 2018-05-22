@@ -34,6 +34,9 @@ private:
     glm::vec4 mMousePosWorld;
     glm::vec4 mMouseNDC;
 
+    float mHeightBrushFactor = 0.f;
+    float mCircleRadius = 4.f;
+
 private:
     glow::SharedProgram mShaderOutput;
     glow::SharedVertexArray mMeshQuad;
@@ -58,6 +61,11 @@ private:
     glow::SharedTextureCubeMap mBackgroundTexture;
     glow::SharedProgram mShaderBg;
 
+
+    typedef enum { TEXTURE_SNOW, TEXTURE_GRASS, TEXTURE_ROCK} SelectedTexture;
+
+    SelectedTexture m_selectedTexture = TEXTURE_GRASS;
+
 public:
     GlowApp();
     // load resources, initialize app
@@ -69,6 +77,7 @@ public:
     // called after window is resized
     void onResize(int w, int h) override;
 
+    void randomTerrain();
     void initTerrain();
 
     static void TW_CALL randomTerrain(void *clientData);
@@ -77,6 +86,8 @@ public:
 
     void setSeed(unsigned int var);
     unsigned int getSeed() const;
+
+
 
 };
 

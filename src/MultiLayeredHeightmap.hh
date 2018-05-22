@@ -127,7 +127,10 @@ public:
     glm::mat4 GetCircleRotation();
     void GenerateArc(float r);
 
-    void SetTextureBrush();
+    void SetTextureBrush(int seletedTexture);
+    void SetHeightBrush(float factor);
+
+    glow::SharedVertexArray getVao() const;
 
 private:
     void MakeVertexArray();
@@ -164,6 +167,8 @@ private:
 
     std::vector<float> mSlopeY;
 
+    std::vector<float> mHeightBrush;
+
     std::vector<glm::vec3> mSplatmap;
     glow::SharedTexture2D mSplatmapTexture;
 
@@ -174,6 +179,7 @@ private:
     std::vector<glow::SharedTextureData> mTextureNormal;
     std::vector<glow::SharedSurfaceData> mNormalSurface;
 
+    glow::SharedArrayBuffer ab;
     std::vector<glow::SharedArrayBuffer> mAbs;
     glow::SharedElementArrayBuffer mEab;
     glow::SharedVertexArray mVao;
@@ -184,15 +190,15 @@ private:
     glm::uvec2 mHeightmapDimensions;
     unsigned int mNumberOfVertices;
 
-    glm::vec3 intersectionPoint;
-    float _t;
-    float epsilon = 0.01;
+    glm::vec3 intersectionPoint = {0.f, 0.f, 0.f};
+    float _t = 0.f;
+    float epsilon = 0.001f;
 
     Face mIntersectionTriangle;
     glow::SharedVertexArray mCircleVao;
     unsigned int mIntersectionHeight = 0;
     unsigned int mIntersectionWidth = 0;
-    float mIntersectionRadius;
+    float mIntersectionRadius = 0.f;
     bool intersection = false;
 
 };

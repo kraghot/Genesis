@@ -243,9 +243,9 @@ bool GlfwApp::onMouseButton(double x, double y, int button, int action, int mods
         return true;
 
     if (button == GLFW_MOUSE_BUTTON_LEFT && action != GLFW_RELEASE)
-        mMouseLeft = false;
+        mMouseLeft = true;
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action != GLFW_RELEASE)
-        mMouseRight = true;
+        mMouseRight = false;
 
     // Double [MMB] (no mods) -> reset view
     if (button == GLFW_MOUSE_BUTTON_MIDDLE && action != GLFW_RELEASE && clickCount > 1 && mods == 0)

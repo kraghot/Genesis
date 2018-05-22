@@ -26,7 +26,7 @@ unsigned int seed;
 bool button;
 
 using namespace glow;
-const int heightMapDim = 150;
+//const int heightMapDim = 150;
 
 void TW_CALL GlowApp::randomTerrain(void *clientData){
     static_cast<GlowApp *>(clientData)->setSeed(std::rand());
@@ -63,6 +63,14 @@ void GlowApp::init()
     // configure GlfwApp
     setTitle("Genesis");
 
+
+    TwEnumVal TextureChoices[] = { {TEXTURE_SNOW, "Snow"},{TEXTURE_GRASS, "Grass"}, {TEXTURE_ROCK, "Rock"} };
+
+    TwType TextureTwType = TwDefineEnum("TextureType", TextureChoices, 3);
+
+    TwAddVarRW(tweakbar(), "Texture Brush", TextureTwType, &m_selectedTexture, NULL);
+
+
     // set up tweakbar
     TwAddVarRW(tweakbar(), "bg color", TW_TYPE_COLOR3F, &mClearColor, "group=rendering");
     TwAddVarRW(tweakbar(), "light direction", TW_TYPE_DIR3F, &mLightDir, "group=scene");
@@ -70,6 +78,8 @@ void GlowApp::init()
     TwAddVarRW(tweakbar(), "rotation speed", TW_TYPE_FLOAT, &mSpeed, "group=scene step=0.1");
     TwAddVarCB(tweakbar(), "seed", TW_TYPE_UINT16, GlowApp::setSeedTerrain, GlowApp::getSeedTerrain, &seed, "group=scene step=1");
     TwAddButton(tweakbar(), "terrain", GlowApp::randomTerrain, NULL, " label='Generate random terrain '");
+    TwAddVarRW(tweakbar(), "Height Brush", TW_TYPE_FLOAT, &mHeightBrushFactor, "group=scene step=0.001");
+    TwAddVarRW(tweakbar(), "Circle radius", TW_TYPE_FLOAT, &mCircleRadius, "group=scene step=0.5");
 
 
 
@@ -77,7 +87,7 @@ void GlowApp::init()
 
    // PerlinNoiseGenerator noise(2924319);
     //mPerlinTest = mHeightmap.GenerateTerrain(&noise, heightMapDim, heightMapDim);
-    mHeightmap.GenerateArc(5.0f);
+
 
     // load object
     mMeshCube = assimp::Importer().load("mesh/cube.obj");
@@ -156,8 +166,7 @@ void GlowApp::render(float elapsedSeconds)
         button = false;
     }
 
-
-
+    mHeightmap.GenerateArc(mCircleRadius);
 
     GlfwApp::render(elapsedSeconds); // call to base!
 
@@ -194,18 +203,9 @@ void GlowApp::render(float elapsedSeconds)
 
             shader.setTexture("uTexture", mBackgroundTexture);
             auto invProj = inverse(cam->getProjectionMatrix());
-//            auto invView = inverse(cam->getViewMatrix());
             auto invView = cam->getInverseViewMatrix();
 
-            //world space mouse position
 
-//            if(GlfwApp::isMouseButtonPressed(mLeftClick)){
-//                std::cout << "mouse x: " << mMousePosFinal.x << " mouse pos y: " << mMousePosFinal.y << " mouse pos z: " << mMousePosFinal.z << std::endl;
-//            }
-
-
-
-            //std::cout << "mouse x: " << testRay.direction.x << "mouse x: " << testRay.direction.y << std::endl;
 
             shader.setUniform("uInvProj", invProj);
             shader.setUniform("uInvView", invView);
@@ -216,17 +216,17 @@ void GlowApp::render(float elapsedSeconds)
             glEnable(GL_DEPTH_TEST);
             glDepthMask(GL_TRUE);
 
+            //world space mouse position
             mMousePosWin = GlfwApp::getMousePosition();
             mMouseNDC = glm::vec4((mMousePosWin.x/(getWindowWidth()/2.f) - 1.f), ((getWindowHeight()-mMousePosWin.y)/(getWindowHeight()/2.f) - 1.f), -1.0f, 1.f);
             mMousePosWorld =invProj *  mMouseNDC;
             mMousePosWorld /= mMousePosWorld.w;
             mMousePosWorld = invView * mMousePosWorld;
             mMousePosFinal = glm::vec3(mMousePosWorld);
-//            mMousePosFinal = invView * glm::vec4(mMousePosWorld.x, mMousePosWorld.y, -1.f, 0.f);
-//            mMousePosFinal = glm::vec3(mMousePosWorld.x/mMousePosWorld.w, mMousePosWorld.y/mMousePosWorld.w, mMousePosWorld.z/mMousePosWorld.w);
+
         }
 
-//        std::cout << mMousePosFinal.x << " " << mMousePosFinal.y << " " << mMousePosFinal.z << std::endl;
+
 
         // draw object
         {
@@ -237,8 +237,6 @@ void GlowApp::render(float elapsedSeconds)
 
             Ray testRay;
             testRay.origin = camPos;
-
-//            mMousePosFinal = glm::normalize(mMousePosFinal);
             testRay.direction = glm::normalize(mMousePosFinal - camPos);
 
             mHeightmap.intersect(testRay);
@@ -260,7 +258,10 @@ void GlowApp::render(float elapsedSeconds)
             lineShader.setUniform("uModel", mHeightmap.GetCircleRotation());
             mHeightmap.getCircleVao()->bind().draw();
 
-            mHeightmap.SetTextureBrush();
+            if(GlfwApp::isMouseButtonPressed(mRightClick))
+                //mHeightmap.SetHeightBrush(mHeightBrushFactor);
+                mHeightmap.SetTextureBrush(m_selectedTexture);
+
 
             auto model = glm::mat4(1.f); // glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
             auto shader = mShaderObj->use();
@@ -283,8 +284,9 @@ void GlowApp::render(float elapsedSeconds)
 
             shader.setUniform("fRenderHeight", mHeightmap.getMfHeightScale());
 
-            mPerlinTest->bind().draw();
+            //mPerlinTest->bind().draw();
             //mMeshCube->bind().draw();
+            mHeightmap.getVao()->bind().draw();
         }
     }
 
