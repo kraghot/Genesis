@@ -18,7 +18,9 @@ private:
     // Get with wrapping
     float GetValue(unsigned x, unsigned y);
     // Set with wrapping
-    void SetValue(float value, unsigned x, unsigned y);
+    void SetValue(unsigned x, unsigned y, float value);
+    /// @warning Returns clamped between zero and X only
+    float TerrainClamp(float value);
     float fRand();
     unsigned mDimX;
     unsigned mDimY;
