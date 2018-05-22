@@ -1,4 +1,5 @@
 #include"MultiLayeredHeightmap.hh"
+#include "Brush.hh"
 
 #include <AntTweakBar.h>
 
@@ -60,6 +61,8 @@ private:
 
     glow::SharedTextureCubeMap mBackgroundTexture;
     glow::SharedProgram mShaderBg;
+
+    Brush mBrush;
 
 
     typedef enum { TEXTURE_SNOW, TEXTURE_GRASS, TEXTURE_ROCK} SelectedTexture;

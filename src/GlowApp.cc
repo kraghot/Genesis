@@ -43,7 +43,9 @@ void TW_CALL GlowApp::getSeedTerrain(void *value, void *clientData){
 
 
 GlowApp::GlowApp():
-    mHeightmap(20.0f,3.0f)
+     mHeightmap(20.0f,3.0f),
+     mBrush(&mHeightmap)
+
 {
 
 }
@@ -166,7 +168,7 @@ void GlowApp::render(float elapsedSeconds)
         button = false;
     }
 
-    mHeightmap.GenerateArc(mCircleRadius);
+    mBrush.GenerateArc(mCircleRadius);
 
     GlfwApp::render(elapsedSeconds); // call to base!
 
@@ -239,12 +241,12 @@ void GlowApp::render(float elapsedSeconds)
             testRay.origin = camPos;
             testRay.direction = glm::normalize(mMousePosFinal - camPos);
 
-            mHeightmap.intersect(testRay);
+            mBrush.intersect(testRay);
 
 
             if(isKeyPressed(71)) // GLFW_KEY_G
             {
-                std::vector<glm::vec3> linePositions = {testRay.origin, mHeightmap.getIntersectionPoint()};
+                std::vector<glm::vec3> linePositions = {testRay.origin, mBrush.getIntersectionPoint()};
                 auto ab = glow::ArrayBuffer::create();
                 ab->defineAttribute<glm::vec3>("aPosition");
                 ab->bind().setData(linePositions);
@@ -255,12 +257,12 @@ void GlowApp::render(float elapsedSeconds)
 
             mLineVao->bind().draw();
 
-            lineShader.setUniform("uModel", mHeightmap.GetCircleRotation());
-            mHeightmap.getCircleVao()->bind().draw();
+            lineShader.setUniform("uModel", mBrush.GetCircleRotation());
+            mBrush.getCircleVao()->bind().draw();
 
             if(GlfwApp::isMouseButtonPressed(mRightClick))
                 //mHeightmap.SetHeightBrush(mHeightBrushFactor);
-                mHeightmap.SetTextureBrush(m_selectedTexture);
+                mBrush.SetTextureBrush(m_selectedTexture);
 
 
             auto model = glm::mat4(1.f); // glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
@@ -327,6 +329,3 @@ void GlowApp::setSeed(unsigned int var){
 unsigned int GlowApp::getSeed() const{
   return seed;
 }
-
-
-

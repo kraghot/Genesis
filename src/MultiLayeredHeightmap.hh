@@ -57,21 +57,6 @@ inline int getFileLength(std::istream& file){
     return length;
 }
 
-struct Ray
-{
-    glm::vec3 origin = {0, 0, 0};
-    glm::vec3 direction = {0, 0, 0};
-};
-
-struct Face
-{
-    glm::vec3 p0;
-    glm::vec3 p1;
-    glm::vec3 p2;
-
-    glm::vec3 normal;
-};
-
 
 class MultiLayeredHeightmap
 {
@@ -116,27 +101,20 @@ public:
     glow::SharedTexture2D GetDisplacementTexture() const;
 
     glow::SharedTexture2D getSplatmapTexture() const;
-
-    bool bary_coord(const glm::vec3& _p, const glm::vec3& _u, const glm::vec3& _v, const glm::vec3& _w, glm::vec3& _result) const;
-    bool intersectTriangle(const Face& _face, const glm::vec3 &_normal, const Ray &_ray);
-    void intersect(const Ray& _ray );
-
-    glm::dvec3 getIntersectionPoint() const;
-
-    glow::SharedVertexArray getCircleVao() const;
-    glm::mat4 GetCircleRotation();
-    void GenerateArc(float r);
-
-    void SetTextureBrush(int seletedTexture);
-    void SetHeightBrush(float factor);
-
+void CalculateNormalsTangents(int dimX, int dimY);
     glow::SharedVertexArray getVao() const;
+ std::vector<glm::vec3> mPositions;
+ std::vector<float> mDisplacement;
 
-private:
-    void MakeVertexArray();
+void MakeVertexArray();
+
+glow::SharedTexture2D mSplatmapTexture;
+ glm::uvec2 mHeightmapDimensions;
+ std::vector<glm::vec3> mSplatmap;
+protected:
+
     void FillData(std::vector<float>& heights);
-    void CalculateNormalsTangents(int dimX, int dimY);
-    int GetNumCircleSegments(float r);
+
 
     std::vector<glm::uvec2> GetNeighborhood(unsigned int i, unsigned int j);
     std::vector<glm::uvec2> GetNeighborhood(glm::uvec2 coord);
@@ -148,8 +126,8 @@ private:
     float mfBlockScale;
     float mHeightValue;
 
-    std::vector<glm::vec3> mPositions;
-    std::vector<float> mDisplacement;
+
+
     std::vector<glm::vec3> mNormals;
     std::vector<glm::vec4> mColors;
     std::vector<uint32_t> mIndices;
@@ -167,10 +145,8 @@ private:
 
     std::vector<float> mSlopeY;
 
-    std::vector<float> mHeightBrush;
 
-    std::vector<glm::vec3> mSplatmap;
-    glow::SharedTexture2D mSplatmapTexture;
+
 
 
     std::vector<glow::SharedTextureData> mTexture;
@@ -179,7 +155,6 @@ private:
     std::vector<glow::SharedTextureData> mTextureNormal;
     std::vector<glow::SharedSurfaceData> mNormalSurface;
 
-    glow::SharedArrayBuffer ab;
     std::vector<glow::SharedArrayBuffer> mAbs;
     glow::SharedElementArrayBuffer mEab;
     glow::SharedVertexArray mVao;
@@ -187,19 +162,9 @@ private:
 
     glm::mat4x4 mLocalToWorldMatrix;
     // The dimensions of the heightmap texture
-    glm::uvec2 mHeightmapDimensions;
+
     unsigned int mNumberOfVertices;
 
-    glm::vec3 intersectionPoint = {0.f, 0.f, 0.f};
-    float _t = 0.f;
-    float epsilon = 0.001f;
-
-    Face mIntersectionTriangle;
-    glow::SharedVertexArray mCircleVao;
-    unsigned int mIntersectionHeight = 0;
-    unsigned int mIntersectionWidth = 0;
-    float mIntersectionRadius = 0.f;
-    bool intersection = false;
 
 };
 
