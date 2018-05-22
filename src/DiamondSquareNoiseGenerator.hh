@@ -20,7 +20,7 @@ private:
     // Set with wrapping
     void SetValue(unsigned x, unsigned y, float value);
     /// @warning Returns clamped between zero and X only
-    float TerrainClamp(float value);
+    unsigned TerrainWrap(unsigned value);
     float fRand();
     unsigned mDimX;
     unsigned mDimY;

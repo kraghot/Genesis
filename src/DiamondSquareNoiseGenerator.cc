@@ -92,25 +92,21 @@ void DiamondSquareNoiseGenerator::SquareStep(unsigned x, unsigned y, unsigned si
 
 float DiamondSquareNoiseGenerator::GetValue(unsigned x, unsigned y)
 {
-    unsigned sX = TerrainClamp(x);
-    unsigned sY = TerrainClamp(y);
+    unsigned sX = TerrainWrap(x);
+    unsigned sY = TerrainWrap(y);
     return mData.at(LOC(sX, sY));
 }
 
 void DiamondSquareNoiseGenerator::SetValue(unsigned x, unsigned y, float value)
 {
-    unsigned sX = TerrainClamp(x);
-    unsigned sY = TerrainClamp(y);
+    unsigned sX = TerrainWrap(x);
+    unsigned sY = TerrainWrap(y);
     mData.at(LOC(sX, sY)) = value;
 }
 
-float DiamondSquareNoiseGenerator::TerrainClamp(float value)
+unsigned DiamondSquareNoiseGenerator::TerrainWrap(unsigned value)
 {
-    if(value < 0)
-        return 0;
-    if(value > mDimX -1)
-        return mDimX - 1;
-    return value;
+    return value % mDimX;
 }
 
 float DiamondSquareNoiseGenerator::fRand()
