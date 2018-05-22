@@ -687,16 +687,16 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(NoiseGenerator *g
         {
             glm::vec2 normalizedCoord((float)i / dimY, (float)j/dimX);
 
-            float x = 10 * normalizedCoord.x,  y = 10 * normalizedCoord.y;
-            heights.push_back(0.0f);
-            float amp = maxHeight;
-            float temp = 0.0f;
-            for(auto oct = 0u; oct < octaves; oct++)
-            {
-                temp += generator->noise(x, y, 0.8f) * amp;
-                x /= freqScale; y /= freqScale; amp *= 0.5f;
-            }
-             heights.back() =  temp + 0.5f;
+//            float x = 10 * normalizedCoord.x,  y = 10 * normalizedCoord.y;
+            heights.push_back(generator->noise(normalizedCoord.x, normalizedCoord.y, 0.0f));
+//            float amp = maxHeight;
+//            float temp = 0.0f;
+//            for(auto oct = 0u; oct < octaves; oct++)
+//            {
+//                temp += generator->noise(x, y, 0.8f) * amp;
+//                x /= freqScale; y /= freqScale; amp *= 0.5f;
+//            }
+//             heights.back() =  temp + 0.5f;
         }
     }
 

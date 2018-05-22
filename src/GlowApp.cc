@@ -21,11 +21,14 @@
 #include <glow-extras/geometry/Quad.hh>
 #include <glow/objects/ElementArrayBuffer.hh>
 
+#include "DiamondSquareNoiseGenerator.hh"
+
 unsigned int seed;
 bool button;
 
 using namespace glow;
 const int heightMapDim = 150;
+DiamondSquareNoiseGenerator generator(heightMapDim, heightMapDim, 50);
 
 GlowApp::GlowApp():
     mHeightmap(20.0f,3.0f)
@@ -58,9 +61,10 @@ void GlowApp::init()
     TwAddButton(tweakbar(), "Erode Terrain", GlowApp::dropletErode, this, "label='Erode Terrain'");
 
 
-    PerlinNoiseGenerator noise(2924319);
-    mPerlinTest = mHeightmap.GenerateTerrain(&noise, heightMapDim, heightMapDim);
+//    PerlinNoiseGenerator noise(2924319);
+//    mPerlinTest = mHeightmap.GenerateTerrain(&noise, heightMapDim, heightMapDim);
 
+    mPerlinTest = mHeightmap.GenerateTerrain(&generator, heightMapDim, heightMapDim);
 
     // load object
     //mMeshCube = assimp::Importer().load("mesh/cube.obj");
@@ -209,8 +213,8 @@ void GlowApp::render(float elapsedSeconds)
 
 void GlowApp::initTerrain(){
 
-    PerlinNoiseGenerator noise(seed);
-    mPerlinTest = mHeightmap.GenerateTerrain(&noise, heightMapDim, heightMapDim);
+//    PerlinNoiseGenerator noise(seed);
+    mPerlinTest = mHeightmap.GenerateTerrain(&generator, heightMapDim, heightMapDim);
 
     //define textures for terrain
     std::vector<std::string> mTerrainTextures = {"texture/snow009.jpg", "texture/grass007.jpg", "texture/rock007.jpg"};
