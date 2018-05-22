@@ -77,7 +77,7 @@ void DiamondSquareNoiseGenerator::DiamondStep(unsigned x, unsigned y, unsigned s
     float s2 = GetValue(x + hSize,  y);
     float s3 = GetValue(x,          y - hSize);
     float s4 = GetValue(x,          y + hSize);
-    SetValue(value + ((s1 + s2 + s3 + s4) / 4.0f), x, y);
+    SetValue(x, y, value + ((s1 + s2 + s3 + s4) / 4.0f));
 }
 
 void DiamondSquareNoiseGenerator::SquareStep(unsigned x, unsigned y, unsigned size, float value)
@@ -87,7 +87,7 @@ void DiamondSquareNoiseGenerator::SquareStep(unsigned x, unsigned y, unsigned si
     float s2 = GetValue(x + hSize, y - hSize);
     float s3 = GetValue(x - hSize, y + hSize);
     float s4 = GetValue(x + hSize, y + hSize);
-    SetValue(value + ((s1 + s2 + s3 + s4) / 4.0f), x, y);
+    SetValue(x, y, value + ((s1 + s2 + s3 + s4) / 4.0f));
 }
 
 float DiamondSquareNoiseGenerator::GetValue(unsigned x, unsigned y)
