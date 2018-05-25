@@ -8,9 +8,9 @@ DiamondSquareNoiseGenerator::DiamondSquareNoiseGenerator(const unsigned dimX, co
     mDimX(dimX),
     mDimY(dimY)
 {
-    // Check if terrain power of 2 and square
-//    if(((dimX & (dimX - 1)) != 0) || (dimX != dimY))
-//        throw std::runtime_error("Terrain must be power of 2 and square");
+    // Check if feature size is power of 2
+    if((featureSize & (featureSize - 1)) != 0)
+        throw std::runtime_error("Terrain must be power of 2 and square");
 
     mData.resize(dimX * dimY);
 
