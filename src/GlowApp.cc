@@ -28,7 +28,7 @@ bool button;
 
 using namespace glow;
 const int heightMapDim = 150;
-DiamondSquareNoiseGenerator generator(heightMapDim, heightMapDim, 50);
+DiamondSquareNoiseGenerator generator(heightMapDim, heightMapDim, 64);
 
 GlowApp::GlowApp():
     mHeightmap(20.0f,3.0f)
