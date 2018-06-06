@@ -8,6 +8,9 @@
 #define ENABLE_SLOPE_BASED_BLEND 1
 #endif
 
+#define LOC(a, b) b * mHeightmapDimensions.y + a
+#define LOCV(var) LOC(var.x, var.y)
+
 typedef std::basic_ios<char> ios;
 
 GlowApp GlowAppObject;
@@ -170,6 +173,7 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
     tangents_final.resize(mNumberOfVertices);
     mDisplacement.resize(mNumberOfVertices);
     mHeightCoords.resize(mNumberOfVertices);
+    mWaterLevel.resize(mNumberOfVertices, 0.0f);
 
     slope_y.resize(mNumberOfVertices);
 
@@ -265,7 +269,6 @@ glm::uvec2 MultiLayeredHeightmap::GetLowestNeigh(std::vector<glm::uvec2> &neigh)
 
 void MultiLayeredHeightmap::ThermalErodeTerrain()
 {
-#define LOC(a, b) b * mHeightmapDimensions.y + a
 
     float T = 8.0f / (float) mHeightmapDimensions.x;
     int counter = 0;
@@ -623,8 +626,6 @@ void MultiLayeredHeightmap::IterateDroplet(int num)
     MakeVertexArray();
 }
 
-#undef LOC
-
 glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filename, unsigned char bitsPerPixel){
 
     //===========verifies the file we are trying to load exists and it is the size we are expecting based on the passed-in parameters===========
@@ -674,42 +675,49 @@ glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filenam
 
 }
 
-glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(NoiseGenerator *generator, unsigned int dimX, unsigned int dimY, unsigned int octaves, float freqScale, float maxHeight)
+glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(std::vector<GeneratorProperties>& properties, unsigned int dimX, unsigned int dimY)
 {
     mHeightmapDimensions = glm::uvec2(dimX, dimY);
     mNumberOfVertices = dimX * dimY;
     std::vector<float> heights;
-    heights.reserve(dimX * dimY);
+    heights.resize(dimX * dimY, 0.0f);
 
-    for(auto i = 0u; i < dimY; i++)
+
+    for(auto prop: properties)
     {
-        for(auto j = 0u; j < dimX; j++)
-        {
-            glm::vec2 normalizedCoord((float)i / dimY, (float)j/dimX);
+        float freq = prop.freq;
+        float amplitude = prop.amplitude;
 
-//            float x = 10 * normalizedCoord.x,  y = 10 * normalizedCoord.y;
-            heights.push_back(generator->noise(normalizedCoord.x, normalizedCoord.y, 0.0f) * maxHeight);
-//            float amp = maxHeight;
-//            float temp = 0.0f;
-//            for(auto oct = 0u; oct < octaves; oct++)
-//            {
-//                temp += generator->noise(x, y, 0.8f) * amp;
-//                x /= freqScale; y /= freqScale; amp *= 0.5f;
-//            }
-//             heights.back() =  temp + 0.5f;
+        for(auto octave = 0u; octave < prop.numOctaves; octave++)
+        {
+            // Use OpenMp here. It can't be used in for loops above because
+            // the same element could be accessed by different threads at once
+#pragma omp for
+            for(auto i = 0u; i < dimY; i++)
+            {
+                for(auto j = 0u; j < dimX; j++)
+                {
+                    // Use many variables for easier debugging, will get optimized anyway in Release mode
+                    glm::vec2 normalizedCoord((float)i / dimY, (float)j/dimX);
+                    normalizedCoord *= freq;
+                    // 0.8 is a magic number for Perlin which seems to give better results
+                    // In order noise generators it is ignored.
+                    float value = prop.generator.noise(normalizedCoord.x, normalizedCoord.y, 0.8f);
+                    value *= amplitude;
+
+                    auto loc = LOC(i, j);
+                    // Use [] accessor to avoid bounds check of .at()
+                    heights[loc] += value;
+                }
+            }
+
+            freq *= prop.freqScale;
+            amplitude *= prop.amplitudeScale;
         }
     }
 
     FillData(heights);
-    mWaterLevel.resize(mNumberOfVertices);
-//    for(int i = 0; i < 100; i++)
-//    {
-//        std::cout << "Iteration " << i << ". Changed heights: ";
-//        HydraulicErodeTerrain();
-//        ThermalErodeTerrain();
 
-//    }
-//    DropletErodeTerrain(glm::uvec2(50, 50), 50);
     MakeVertexArray();
 
     return mVao;
@@ -783,3 +791,4 @@ void MultiLayeredHeightmap::LoadSplatmap(){
 
 
 }
+#undef LOC

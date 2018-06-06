@@ -79,12 +79,32 @@ public:
         Down = 3
     };
 
+    struct GeneratorProperties
+    {
+        NoiseGenerator& generator;
+        unsigned numOctaves;
+        float freq;
+        float freqScale;
+        float amplitude;
+        float amplitudeScale;
+
+        /// Constructor for usage with emplace_back
+        GeneratorProperties(NoiseGenerator& inGenerator, unsigned inNumOctaves, float inFreq,
+                            float inFreqScale, float inAmplitude, float inAmplitudeScale):
+            generator(inGenerator)
+          , numOctaves(inNumOctaves)
+          , freq(inFreq)
+          , freqScale(inFreqScale)
+          , amplitude(inAmplitude)
+          , amplitudeScale(inAmplitudeScale) {}
+    };
+
     // float heightScale: determines the maximum height of the terrain in world units.
     // float blockScale: determines the space between terrain vertices in world units for both the X and Z axes.
     MultiLayeredHeightmap(float heightScale, float blockScale);
     virtual ~MultiLayeredHeightmap();
     glow::SharedVertexArray LoadHeightmap(const char *filename, unsigned char bitsPerPixel);
-    glow::SharedVertexArray GenerateTerrain(NoiseGenerator* generator, unsigned int dimX, unsigned int dimY, unsigned int octaves = 4, float freqScale = 0.5f, float maxHeight = 30.0f);
+    glow::SharedVertexArray GenerateTerrain(std::vector<GeneratorProperties>& properties, unsigned int dimX, unsigned int dimY);
 
     // Get the height of the terrain at a position in world space, position = world space position
     float GetHeightAt(const glm::vec3& position);
