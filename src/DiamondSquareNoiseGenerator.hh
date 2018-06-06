@@ -7,6 +7,7 @@
 class DiamondSquareNoiseGenerator : public NoiseGenerator
 {
 public:
+    DiamondSquareNoiseGenerator(const unsigned seed, const unsigned dimX, const unsigned dimY, const unsigned featureSize);
     DiamondSquareNoiseGenerator(const unsigned dimX, const unsigned dimY, const unsigned featureSize);
     double noise(double x, double y, double z);
 
@@ -25,6 +26,7 @@ private:
     unsigned mDimX;
     unsigned mDimY;
     std::vector<float> mData;
+    unsigned mSeed;
 };
 
 #endif // DIAMONDSQUARENOISEGENERATOR_HH

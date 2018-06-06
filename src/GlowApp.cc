@@ -25,11 +25,10 @@ unsigned int seed;
 bool button;
 
 using namespace glow;
-const int heightMapDim = 150;
+const int heightMapDim = 256;
 
 GlowApp::GlowApp():
-    mHeightmap(20.0f,3.0f),
-    mGenerator(heightMapDim, heightMapDim, 64)
+    mHeightmap(20.0f, 3.0f)
 {
 
 }
@@ -206,15 +205,25 @@ void GlowApp::render(float elapsedSeconds)
 
 void GlowApp::initTerrain(){
 
-//    PerlinNoiseGenerator noise(seed);
+    PerlinNoiseGenerator perlinNoise(seed);
+    DiamondSquareNoiseGenerator diamondNoise(heightMapDim, heightMapDim, 128);
+
     std::vector<MultiLayeredHeightmap::GeneratorProperties> properties;
 
-    properties.emplace_back(mGenerator,
+    properties.emplace_back(diamondNoise,
                             1,
                             1.0f,
                             0.0f, // unused
-                            30.0f,
+                            60.0f,
                             0.0f // unused
+                            );
+
+    properties.emplace_back(perlinNoise,
+                            4,
+                            1.0f,
+                            0.5f,
+                            10.0f,
+                            0.5f
                             );
 
     mPerlinTest = mHeightmap.GenerateTerrain(properties, heightMapDim, heightMapDim);
