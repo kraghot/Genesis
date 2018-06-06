@@ -57,11 +57,6 @@ void GlowApp::init()
     TwAddVarRW(tweakbar(), "Number of Iterations", TW_TYPE_UINT16, &mNumIterations, "group=scene step=1");
     TwAddButton(tweakbar(), "Erode Terrain", GlowApp::dropletErode, this, "label='Erode Terrain'");
 
-
-    PerlinNoiseGenerator noise(2924319);
-    mPerlinTest = mHeightmap.GenerateTerrain(&noise, heightMapDim, heightMapDim);
-
-
     // load object
     //mMeshCube = assimp::Importer().load("mesh/cube.obj");
     mShaderObj = Program::createFromFile("shader/obj");
