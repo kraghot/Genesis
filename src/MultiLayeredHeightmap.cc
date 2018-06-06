@@ -701,7 +701,7 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(std::vector<Gener
                     glm::vec2 normalizedCoord((float)i / dimY, (float)j/dimX);
                     normalizedCoord *= freq;
                     // 0.8 is a magic number for Perlin which seems to give better results
-                    // In order noise generators it is ignored.
+                    // In other noise generators it is ignored.
                     float value = prop.generator.noise(normalizedCoord.x, normalizedCoord.y, 0.8f);
                     value *= amplitude;
 
