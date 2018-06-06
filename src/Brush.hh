@@ -49,7 +49,6 @@ private:
     unsigned int mIntersectionHeight = 0;
     unsigned int mIntersectionWidth = 0;
     float mIntersectionRadius = 0.f;
-    bool intersection = false;
 
     MultiLayeredHeightmap *mHeightmap;
 };

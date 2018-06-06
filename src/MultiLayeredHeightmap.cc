@@ -15,9 +15,9 @@ typedef std::basic_ios<char> ios;
 GlowApp GlowAppObject;
 
 MultiLayeredHeightmap::MultiLayeredHeightmap(float heightScale, float blockScale):
+    mHeightmapDimensions(0,0),
     mfHeightScale(heightScale),
-    mfBlockScale(blockScale),
-    mHeightmapDimensions(0,0)
+    mfBlockScale(blockScale)
     {
 
 }
@@ -357,11 +357,11 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
           // Water evaporation speed
           Cw=0.001f,
           // Erosion speed
-          Cr=0.9f,
+          //Cr=0.9f,
           // Deposition speed
-          Cd=0.02f,
+          //Cd=0.02f,
           // Direction inertia
-          Ci=0.1f,
+          //Ci=0.1f,
           // Gravity acceleration
           Cg=20;
     const unsigned maxPathLength = mHeightmapDimensions.x;

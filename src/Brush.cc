@@ -1,6 +1,6 @@
 #include "Brush.hh"
 
-Brush::Brush(MultiLayeredHeightmap *    h){
+Brush::Brush(MultiLayeredHeightmap *h){
 
    mHeightmap = h;
 }
@@ -239,8 +239,7 @@ void Brush::intersect(const Ray& _ray )
                 mIntersectionTriangle = Triangle1;
                 mIntersectionHeight = j;
                 mIntersectionWidth = i;
-
-                intersection = true;
+                intersectionPoint = _ray.origin + temp_t * _ray.direction;
             }
 
             else if(intersectTriangle(Triangle2, Normal2, _ray) && _t < temp_t){
@@ -249,15 +248,15 @@ void Brush::intersect(const Ray& _ray )
                 mIntersectionTriangle = Triangle2;
                 mIntersectionHeight = j;
                 mIntersectionWidth = i;
-                intersection = true;
+                intersectionPoint = _ray.origin + temp_t * _ray.direction;
             }
 
         }
 
     }
 
-    if(intersection)
-        intersectionPoint = _ray.origin + temp_t * _ray.direction;
+//    if(intersection)
+//        intersectionPoint = _ray.origin + temp_t * _ray.direction;
 
 }
 
