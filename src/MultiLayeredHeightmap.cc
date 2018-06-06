@@ -16,8 +16,8 @@ GlowApp GlowAppObject;
 
 MultiLayeredHeightmap::MultiLayeredHeightmap(float heightScale, float blockScale):
     mHeightmapDimensions(0,0),
-    mfHeightScale(heightScale),
-    mfBlockScale(blockScale)
+    mfBlockScale(blockScale),
+    mfHeightScale(heightScale)
     {
 
 }
@@ -181,7 +181,7 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
     float terrainWidth = ( dimX - 1 ) * mfBlockScale;
     float terrainHeight = ( dimY - 1 ) * mfBlockScale;
 
-    float halfTerrainWidth = terrainWidth * 0.5f;
+    halfTerrainWidth = terrainWidth * 0.5f;
     float halfTerrainHeight = terrainHeight * 0.5f;
 
     float fTextureU = float(dimX)*0.1f;

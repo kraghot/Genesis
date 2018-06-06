@@ -25,6 +25,8 @@
 unsigned int seed;
 bool button;
 
+
+
 using namespace glow;
 //const int heightMapDim = 150;
 
@@ -44,7 +46,8 @@ void TW_CALL GlowApp::getSeedTerrain(void *value, void *clientData){
 
 GlowApp::GlowApp():
      mHeightmap(20.0f,3.0f),
-     mBrush(&mHeightmap)
+     mBrush(&mHeightmap),
+     mBiomes(&mHeightmap)
 
 {
 
@@ -142,6 +145,10 @@ void GlowApp::init()
 
     mLineVao = glow::VertexArray::create(ab, GL_LINES);
 
+    mBiomes.randomWindDirection();
+debugflag = true;
+
+
 }
 
 void GlowApp::onResize(int w, int h)
@@ -172,8 +179,13 @@ void GlowApp::render(float elapsedSeconds)
 
     GlfwApp::render(elapsedSeconds); // call to base!
 
-    auto cam = getCamera(); // internal camera from GlfwApp with some default input handling
+    auto cam = getCamera();
+    if(debugflag){
+       debugflag = false;
+        cam->setLookAtMatrix({0, 0, mHeightmap.halfTerrainWidth/2}, mBiomes.rightVector, mBiomes.upVector);// internal camera from GlfwApp with some default input handling
+    }
     auto view = cam->getViewMatrix();
+    //auto view = mBiomes.ScanlineProjection();
     auto proj = cam->getProjectionMatrix();
     auto camPos = cam->getPosition();
 
@@ -206,8 +218,6 @@ void GlowApp::render(float elapsedSeconds)
             shader.setTexture("uTexture", mBackgroundTexture);
             auto invProj = inverse(cam->getProjectionMatrix());
             auto invView = cam->getInverseViewMatrix();
-
-
 
             shader.setUniform("uInvProj", invProj);
             shader.setUniform("uInvView", invView);
@@ -246,7 +256,7 @@ void GlowApp::render(float elapsedSeconds)
 
             if(isKeyPressed(71)) // GLFW_KEY_G
             {
-                std::vector<glm::vec3> linePositions = {testRay.origin, mBrush.getIntersectionPoint()};
+                std::vector<glm::vec3> linePositions = {glm::vec3(0, 0, 0), glm::vec3(0, 100, 0)};
                 auto ab = glow::ArrayBuffer::create();
                 ab->defineAttribute<glm::vec3>("aPosition");
                 ab->bind().setData(linePositions);
@@ -265,7 +275,7 @@ void GlowApp::render(float elapsedSeconds)
                 mBrush.SetTextureBrush(m_selectedTexture);
 
 
-            auto model = glm::mat4(1.f); // glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
+            auto model = glm::translate(glm::mat4(1.f), glm::vec3(0, -50, -400));
             auto shader = mShaderObj->use();
             shader.setUniform("uView", view);
             shader.setUniform("uProj", proj);

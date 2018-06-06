@@ -101,16 +101,20 @@ public:
     glow::SharedTexture2D GetDisplacementTexture() const;
 
     glow::SharedTexture2D getSplatmapTexture() const;
-void CalculateNormalsTangents(int dimX, int dimY);
+    void CalculateNormalsTangents(int dimX, int dimY);
     glow::SharedVertexArray getVao() const;
- std::vector<glm::vec3> mPositions;
- std::vector<float> mDisplacement;
+    std::vector<glm::vec3> mPositions;
+    std::vector<float> mDisplacement;
 
-void MakeVertexArray();
+    void MakeVertexArray();
 
-glow::SharedTexture2D mSplatmapTexture;
- glm::uvec2 mHeightmapDimensions;
- std::vector<glm::vec3> mSplatmap;
+    glow::SharedTexture2D mSplatmapTexture;
+    glm::uvec2 mHeightmapDimensions;
+    std::vector<glm::vec3> mSplatmap;
+
+    float mfBlockScale;
+    float halfTerrainWidth;
+
 protected:
 
     void FillData(std::vector<float>& heights);
@@ -123,7 +127,6 @@ protected:
 
 
     float mfHeightScale;
-    float mfBlockScale;
     float mHeightValue;
 
 

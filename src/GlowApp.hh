@@ -1,5 +1,6 @@
 #include"MultiLayeredHeightmap.hh"
 #include "Brush.hh"
+#include "Biomes.hh"
 
 #include <AntTweakBar.h>
 
@@ -14,7 +15,6 @@
 
 #ifndef GLOWAPP
 #define GLOWAPP
-
 
 class GlowApp : public glow::glfw::GlfwApp
 {
@@ -63,6 +63,9 @@ private:
     glow::SharedProgram mShaderBg;
 
     Brush mBrush;
+    Biomes mBiomes;
+    bool debugflag;
+
 
 
     typedef enum { TEXTURE_SNOW, TEXTURE_GRASS, TEXTURE_ROCK} SelectedTexture;
