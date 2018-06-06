@@ -28,7 +28,8 @@ using namespace glow;
 const int heightMapDim = 150;
 
 GlowApp::GlowApp():
-    mHeightmap(20.0f,3.0f)
+    mHeightmap(20.0f,3.0f),
+    mGenerator(heightMapDim, heightMapDim, 64)
 {
 
 }
@@ -90,13 +91,14 @@ void GlowApp::init()
 
     //setup background
     auto pbt = util::pathOf(__FILE__) + "/../bin/cubemap/mountain/";
-    mBackgroundTexture = glow::TextureCubeMap::createFromData(glow::TextureData::createFromFileCube(pbt + "posx.jpg",
-                                                                                                    pbt + "negx.jpg",
-                                                                                                    pbt + "posy.jpg",
-                                                                                                    pbt + "negy.jpg",
-                                                                                                    pbt + "posz.jpg",
-                                                                                                    pbt + "negz.jpg",
-                                                                                                    glow::ColorSpace::sRGB));
+    mBackgroundTexture = glow::TextureCubeMap::createFromData(
+                glow::TextureData::createFromFileCube(pbt + "posx.jpg",
+                                                      pbt + "negx.jpg",
+                                                      pbt + "posy.jpg",
+                                                      pbt + "negy.jpg",
+                                                      pbt + "posz.jpg",
+                                                      pbt + "negz.jpg",
+                                                      glow::ColorSpace::sRGB));
     mShaderBg = glow::Program::createFromFile("shader/bg");
 }
 
@@ -204,8 +206,8 @@ void GlowApp::render(float elapsedSeconds)
 
 void GlowApp::initTerrain(){
 
-    PerlinNoiseGenerator noise(seed);
-    mPerlinTest = mHeightmap.GenerateTerrain(&noise, heightMapDim, heightMapDim);
+//    PerlinNoiseGenerator noise(seed);
+    mPerlinTest = mHeightmap.GenerateTerrain(&mGenerator, heightMapDim, heightMapDim, 1, 1, 30.0f);
 
     //define textures for terrain
     std::vector<std::string> mTerrainTextures = {"texture/snow009.jpg", "texture/grass007.jpg", "texture/rock007.jpg"};

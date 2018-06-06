@@ -1,4 +1,5 @@
 #include"MultiLayeredHeightmap.hh"
+#include "DiamondSquareNoiseGenerator.hh"
 
 #include <AntTweakBar.h>
 
@@ -48,6 +49,8 @@ private:
 
     glow::SharedTextureCubeMap mBackgroundTexture;
     glow::SharedProgram mShaderBg;
+
+    DiamondSquareNoiseGenerator mGenerator;
 
 public:
     GlowApp();
