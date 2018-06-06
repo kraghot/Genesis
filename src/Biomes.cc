@@ -10,13 +10,12 @@ Biomes::Biomes(MultiLayeredHeightmap *h){
 void Biomes::randomWindDirection(){
     glm::vec3 possibleValuesX = {-mHeightmap->halfTerrainWidth/2, mHeightmap->halfTerrainWidth/2, 0}; //because x and z have the same dimensions, leaves room for otherwise
 
-    int randIndex;
+    mWindDir.x = possibleValuesX[(std::rand() % 3)];
 
-    randIndex = std::rand() % 3;
-    mWindDir.x = possibleValuesX[2];
+    mWindDir.z = possibleValuesX[(std::rand() % 3)];
 
-    randIndex = std::rand() % 3;
-    mWindDir.z = possibleValuesX[2];
+    if(mWindDir.x == 0 && mWindDir.z == 0)
+        mWindDir.z = possibleValuesX[(std::rand() % 2)];
 
     glm::normalize(mWindDir);
 
@@ -31,12 +30,12 @@ void Biomes::randomWindDirection(){
 
 glm::mat4 Biomes::ScanlineProjection(){
 
-    mWindDir = {0, 0, -mHeightmap->halfTerrainWidth/2};
+   // mWindDir = {0, 0, -mHeightmap->halfTerrainWidth/2};
 
-    mWindPos = {0, 0, mHeightmap->halfTerrainWidth/2};
+    mWindPos = -mWindDir;
 
     viewVector = mWindDir - mWindPos;
-    float mWindLookAtDistance = glm::length(forwardVector);
+    float mWindLookAtDistance = glm::length(viewVector);
 
     viewVector = viewVector / (float)mWindLookAtDistance;
     rightVector = glm::normalize(glm::cross(viewVector, mWindUp));

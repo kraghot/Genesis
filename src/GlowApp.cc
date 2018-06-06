@@ -180,12 +180,15 @@ void GlowApp::render(float elapsedSeconds)
     GlfwApp::render(elapsedSeconds); // call to base!
 
     auto cam = getCamera();
+
+    //-----biomes debug-------
     if(debugflag){
        debugflag = false;
-        cam->setLookAtMatrix({0, 0, mHeightmap.halfTerrainWidth/2}, mBiomes.rightVector, mBiomes.upVector);// internal camera from GlfwApp with some default input handling
+        cam->setLookAtMatrix(mBiomes.mWindPos, mBiomes.rightVector, mBiomes.upVector);// internal camera from GlfwApp with some default input handling
     }
+    //------------------------
+
     auto view = cam->getViewMatrix();
-    //auto view = mBiomes.ScanlineProjection();
     auto proj = cam->getProjectionMatrix();
     auto camPos = cam->getPosition();
 
@@ -275,7 +278,7 @@ void GlowApp::render(float elapsedSeconds)
                 mBrush.SetTextureBrush(m_selectedTexture);
 
 
-            auto model = glm::translate(glm::mat4(1.f), glm::vec3(0, -50, -400));
+            auto model = glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
             auto shader = mShaderObj->use();
             shader.setUniform("uView", view);
             shader.setUniform("uProj", proj);
