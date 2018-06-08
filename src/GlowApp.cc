@@ -214,7 +214,7 @@ void GlowApp::initTerrain(){
                             1,
                             1.0f,
                             0.0f, // unused
-                            60.0f,
+                            100.0f,
                             0.0f // unused
                             );
 
@@ -222,7 +222,7 @@ void GlowApp::initTerrain(){
                             4,
                             1.0f,
                             0.5f,
-                            10.0f,
+                            50.0f,
                             0.5f
                             );
 
