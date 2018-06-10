@@ -41,6 +41,13 @@ private:
         if(scaledX > 1.0) scaledX = 1.0;
         if(scaledY > 1.0) scaledY = 1.0;
 
+//        double flippedX = 1.0 - scaledX;
+//        double flippedY = 1.0 - scaledY;
+
+//        double average = (flippedX * flippedY);
+//        average = 1.0 - average;
+//        return average - 1.0;
+//        return ((scaledX + scaledY) / 2.0f) - 1.0;
         return scaledX * scaledY - 1.0;
     }
 

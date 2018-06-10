@@ -208,7 +208,7 @@ void GlowApp::initTerrain(){
 
     PerlinNoiseGenerator perlinNoise(seed);
     DiamondSquareNoiseGenerator diamondNoise(heightMapDim, heightMapDim, 128);
-    IslandMaskGenerator islandFilter(glm::vec2(heightMapDim - 50, heightMapDim - 50), glm::vec2(heightMapDim, heightMapDim), seed);
+    IslandMaskGenerator islandFilter(glm::vec2(heightMapDim - 100, heightMapDim - 100), glm::vec2(heightMapDim, heightMapDim), seed);
 
     std::vector<MultiLayeredHeightmap::GeneratorProperties> properties;
 
