@@ -23,7 +23,55 @@ IslandMaskGenerator::IslandMaskGenerator(glm::vec2 innerSquare, glm::vec2 outerS
 double IslandMaskGenerator::noise(double x, double y, double z)
 {
     double val = 0.0f;
-    if(x < mRelRanges.x)
+    if(x < mRelRanges.x && y < mRelRanges.y)
+    {
+        double xNoise = GetRandomFactor(0, y * 10.0, z);
+        double yNoise = GetRandomFactor(x * 10.0, 0, z);
+        double currentRelPosX = x / mRelRanges.x;
+        double currentRelPosY = y / mRelRanges.y;
+
+        if(currentRelPosX > xNoise && currentRelPosY > yNoise)
+            val = 0.0f;
+        else
+            val = -1.0f;
+    }
+    else if(x < mRelRanges.x && y > (1.0 - mRelRanges.y))
+    {
+        double xNoise = GetRandomFactor(0, y * 10.0, z);
+        double yNoise = GetRandomFactor(x * 10.0, 1, z);
+        double currentRelPosX = x / mRelRanges.x;
+        double currentRelPosY = (1.0 - y) / mRelRanges.y;
+
+        if(currentRelPosX > xNoise && currentRelPosY > yNoise)
+            val = 0.0f;
+        else
+            val = -1.0f;
+    }
+    else if(x > (1.0 - mRelRanges.x) && y < mRelRanges.y)
+    {
+        double xNoise = GetRandomFactor(1, y * 10.0, z);
+        double yNoise = GetRandomFactor(x * 10.0, 0, z);
+        double currentRelPosX = (1.0 - x) / mRelRanges.x;
+        double currentRelPosY = y / mRelRanges.y;
+
+        if(currentRelPosX > xNoise && currentRelPosY > yNoise)
+            val = 0.0f;
+        else
+            val = -1.0f;
+    }
+    else if(x > (1.0 - mRelRanges.x) && y > (1.0 - mRelRanges.y))
+    {
+        double xNoise = GetRandomFactor(1, y * 10.0, z);
+        double yNoise = GetRandomFactor(x * 10.0, 1, z);
+        double currentRelPosX = (1.0 - x) / mRelRanges.x;
+        double currentRelPosY = (1.0 - y) / mRelRanges.y;
+
+        if(currentRelPosX > xNoise && currentRelPosY > yNoise)
+            val = 0.0f;
+        else
+            val = -1.0f;
+    }
+    else if(x < mRelRanges.x)
     {
         double noise = GetRandomFactor(0, y * 10, z);
 
