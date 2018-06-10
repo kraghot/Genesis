@@ -25,9 +25,7 @@ double IslandMaskGenerator::noise(double x, double y, double z)
     double val = 0.0f;
     if(x < mRelRanges.x)
     {
-        double noise = mPerlin.noise(0, y * 10.0, z);
-        noise /= 2.0;
-        noise += 0.5;
+        double noise = GetRandomFactor(0, y * 10, z);
 
         double currentRelPos = x / mRelRanges.x;
 
@@ -38,9 +36,7 @@ double IslandMaskGenerator::noise(double x, double y, double z)
     }
     else if(x > (1.0 - mRelRanges.x))
     {
-        double noise = mPerlin.noise(1.0, y * 10.0, z);
-        noise /= 2.0;
-        noise += 0.5;
+        double noise = GetRandomFactor(1.0, y * 10.0, z);
 
         double currentRelPos = (1.0 - x) / mRelRanges.x;
 
@@ -52,9 +48,7 @@ double IslandMaskGenerator::noise(double x, double y, double z)
     }
     else if(y < mRelRanges.y)
     {
-        double noise = mPerlin.noise(x * 10.0, 0, z);
-        noise /= 2.0;
-        noise += 0.5;
+        double noise = GetRandomFactor(x * 10.0, 0, z);
 
         double currentRelPos = y / mRelRanges.y;
 
@@ -65,9 +59,7 @@ double IslandMaskGenerator::noise(double x, double y, double z)
     }
     else if(y > (1.0 - mRelRanges.y))
     {
-        double noise = mPerlin.noise(x * 10.0, 1.0, z);
-        noise /= 2.0;
-        noise += 0.5;
+        double noise = GetRandomFactor(x * 10.0, 1.0, z);
 
         double currentRelPos = (1.0 - y) / mRelRanges.y;
 

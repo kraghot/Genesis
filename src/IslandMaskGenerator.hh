@@ -13,6 +13,15 @@ public:
 
     double noise(double x, double y, double z);
 
+private:
+    inline double GetRandomFactor(double x, double y, double z)
+    {
+        double noise = mPerlin.noise(x, y, z);
+        noise /= 2.0;
+        noise += 0.5;
+        return noise;
+    }
+
     PerlinNoiseGenerator mPerlin;
     glm::vec2 mInnerSquare;
     glm::vec2 mOuterSquare;
