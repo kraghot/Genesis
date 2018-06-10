@@ -26,11 +26,22 @@ private:
     {
         if(currPos > noise)
             return 0.0;
-        else
-        {
-            double scaled = currPos / noise;
-            return scaled - 1.0;
-        }
+
+        double scaled = currPos / noise;
+        return scaled - 1.0;
+    }
+
+    inline double Get2DLerp(double currPosX, double xNoise, double currPosY, double yNoise)
+    {
+        if(currPosX > xNoise && currPosY > yNoise)
+            return 0.0;
+
+        double scaledX = currPosX / xNoise;
+        double scaledY = currPosY / yNoise;
+        if(scaledX > 1.0) scaledX = 1.0;
+        if(scaledY > 1.0) scaledY = 1.0;
+
+        return scaledX * scaledY - 1.0;
     }
 
     PerlinNoiseGenerator mPerlin;
