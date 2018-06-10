@@ -207,7 +207,7 @@ void GlowApp::render(float elapsedSeconds)
 void GlowApp::initTerrain(){
 
     PerlinNoiseGenerator perlinNoise(seed);
-    DiamondSquareNoiseGenerator diamondNoise(heightMapDim, heightMapDim, 128);
+    DiamondSquareNoiseGenerator diamondNoise(heightMapDim, heightMapDim, 64);
     IslandMaskGenerator islandFilter(glm::vec2(heightMapDim - 100, heightMapDim - 100), glm::vec2(heightMapDim, heightMapDim), seed);
 
     std::vector<MultiLayeredHeightmap::GeneratorProperties> properties;
@@ -221,21 +221,21 @@ void GlowApp::initTerrain(){
                             );
 
 
-//    properties.emplace_back(diamondNoise,
-//                            1,
-//                            1.0f,
-//                            0.0f, // unused
-//                            100.0f,
-//                            0.0f // unused
-//                            );
+    properties.emplace_back(diamondNoise,
+                            1,
+                            1.0f,
+                            0.0f, // unused
+                            60.0f,
+                            0.0f // unused
+                            );
 
-//    properties.emplace_back(perlinNoise,
-//                            4,
-//                            1.0f,
-//                            0.5f,
-//                            50.0f,
-//                            0.5f
-//                            );
+    properties.emplace_back(perlinNoise,
+                            4,
+                            1.0f,
+                            0.5f,
+                            20.0f,
+                            0.5f
+                            );
 
     mPerlinTest = mHeightmap.GenerateTerrain(properties, heightMapDim, heightMapDim);
 
