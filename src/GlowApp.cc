@@ -1,5 +1,6 @@
 #include "GlowApp.hh"
 #include "PerlinNoiseGenerator.hh"
+#include "IslandMaskGenerator.hh"
 
 #include <AntTweakBar.h>
 
@@ -207,10 +208,11 @@ void GlowApp::initTerrain(){
 
     PerlinNoiseGenerator perlinNoise(seed);
     DiamondSquareNoiseGenerator diamondNoise(heightMapDim, heightMapDim, 128);
+    IslandMaskGenerator islandFilter(glm::vec2(heightMapDim - 50, heightMapDim - 50), glm::vec2(heightMapDim, heightMapDim), seed);
 
     std::vector<MultiLayeredHeightmap::GeneratorProperties> properties;
 
-    properties.emplace_back(diamondNoise,
+    properties.emplace_back(islandFilter,
                             1,
                             1.0f,
                             0.0f, // unused
@@ -218,13 +220,22 @@ void GlowApp::initTerrain(){
                             0.0f // unused
                             );
 
-    properties.emplace_back(perlinNoise,
-                            4,
-                            1.0f,
-                            0.5f,
-                            50.0f,
-                            0.5f
-                            );
+
+//    properties.emplace_back(diamondNoise,
+//                            1,
+//                            1.0f,
+//                            0.0f, // unused
+//                            100.0f,
+//                            0.0f // unused
+//                            );
+
+//    properties.emplace_back(perlinNoise,
+//                            4,
+//                            1.0f,
+//                            0.5f,
+//                            50.0f,
+//                            0.5f
+//                            );
 
     mPerlinTest = mHeightmap.GenerateTerrain(properties, heightMapDim, heightMapDim);
 

@@ -191,7 +191,7 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
     float fTextureV = float(dimY)*0.1f;
 
 
-#define CURRPOS i*dimX + j
+#define CURRPOS i*dimY + j
 
     for(int i = 0; i < dimY; ++i)
     {
@@ -698,7 +698,7 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(std::vector<Gener
                 for(auto j = 0u; j < dimX; j++)
                 {
                     // Use many variables for easier debugging, will get optimized anyway in Release mode
-                    glm::vec2 normalizedCoord((float)i / dimY, (float)j/dimX);
+                    glm::vec2 normalizedCoord((float)j / dimX, (float)i/dimY);
                     normalizedCoord *= freq;
                     // 0.8 is a magic number for Perlin which seems to give better results
                     // In other noise generators it is ignored.

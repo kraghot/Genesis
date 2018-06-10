@@ -1,0 +1,82 @@
+#include "IslandMaskGenerator.hh"
+
+IslandMaskGenerator::IslandMaskGenerator(glm::vec2 innerSquare, glm::vec2 outerSquare, unsigned seed):
+    mPerlin(seed),
+    mInnerSquare(innerSquare),
+    mOuterSquare(outerSquare)
+{
+    mRanges = glm::vec2(outerSquare - innerSquare);
+    mRelRanges = mRanges / mOuterSquare;
+    mRelRanges /= 2.0;
+}
+
+IslandMaskGenerator::IslandMaskGenerator(glm::vec2 innerSquare, glm::vec2 outerSquare, PerlinNoiseGenerator &perlin):
+    mPerlin(perlin),
+    mInnerSquare(innerSquare),
+    mOuterSquare(outerSquare)
+{
+    mRanges = glm::vec2(outerSquare - innerSquare);
+    mRelRanges = mRanges / mOuterSquare;
+    mRelRanges /= 2.0;
+}
+
+double IslandMaskGenerator::noise(double x, double y, double z)
+{
+    double val = 0.0f;
+    if(x < mRelRanges.x)
+    {
+        double noise = mPerlin.noise(0, y * 10.0, z);
+        noise /= 2.0;
+        noise += 0.5;
+
+        double currentRelPos = x / mRelRanges.x;
+
+        if(currentRelPos > noise)
+            val = 0.0;
+        else
+            val = -1.0;
+    }
+    else if(x > (1.0 - mRelRanges.x))
+    {
+        double noise = mPerlin.noise(1.0, y * 10.0, z);
+        noise /= 2.0;
+        noise += 0.5;
+
+        double currentRelPos = (1.0 - x) / mRelRanges.x;
+
+        if(currentRelPos > noise)
+            val = 0.0;
+        else
+            val = -1.0;
+
+    }
+    else if(y < mRelRanges.y)
+    {
+        double noise = mPerlin.noise(x * 10.0, 0, z);
+        noise /= 2.0;
+        noise += 0.5;
+
+        double currentRelPos = y / mRelRanges.y;
+
+        if(currentRelPos > noise)
+            val = 0.0;
+        else
+            val = -1.0;
+    }
+    else if(y > (1.0 - mRelRanges.y))
+    {
+        double noise = mPerlin.noise(x * 10.0, 1.0, z);
+        noise /= 2.0;
+        noise += 0.5;
+
+        double currentRelPos = (1.0 - y) / mRelRanges.y;
+
+        if(currentRelPos > noise)
+            val = 0.0;
+        else
+            val = -1.0;
+
+    }
+
+    return val;
+}
