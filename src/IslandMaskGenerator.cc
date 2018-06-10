@@ -22,7 +22,7 @@ IslandMaskGenerator::IslandMaskGenerator(glm::vec2 innerSquare, glm::vec2 outerS
 
 double IslandMaskGenerator::noise(double x, double y, double z)
 {
-    double val = 0.0f;
+    double val = 0.0;
     if(x < mRelRanges.x && y < mRelRanges.y)
     {
         double xNoise = GetRandomFactor(0, y * 10.0, z);
@@ -31,9 +31,9 @@ double IslandMaskGenerator::noise(double x, double y, double z)
         double currentRelPosY = y / mRelRanges.y;
 
         if(currentRelPosX > xNoise && currentRelPosY > yNoise)
-            val = 0.0f;
+            val = 0.0;
         else
-            val = -1.0f;
+            val = -1.0;
     }
     else if(x < mRelRanges.x && y > (1.0 - mRelRanges.y))
     {
@@ -43,9 +43,9 @@ double IslandMaskGenerator::noise(double x, double y, double z)
         double currentRelPosY = (1.0 - y) / mRelRanges.y;
 
         if(currentRelPosX > xNoise && currentRelPosY > yNoise)
-            val = 0.0f;
+            val = 0.0;
         else
-            val = -1.0f;
+            val = -1.0;
     }
     else if(x > (1.0 - mRelRanges.x) && y < mRelRanges.y)
     {
@@ -55,9 +55,9 @@ double IslandMaskGenerator::noise(double x, double y, double z)
         double currentRelPosY = y / mRelRanges.y;
 
         if(currentRelPosX > xNoise && currentRelPosY > yNoise)
-            val = 0.0f;
+            val = 0.0;
         else
-            val = -1.0f;
+            val = -1.0;
     }
     else if(x > (1.0 - mRelRanges.x) && y > (1.0 - mRelRanges.y))
     {
@@ -67,9 +67,9 @@ double IslandMaskGenerator::noise(double x, double y, double z)
         double currentRelPosY = (1.0 - y) / mRelRanges.y;
 
         if(currentRelPosX > xNoise && currentRelPosY > yNoise)
-            val = 0.0f;
+            val = 0.0;
         else
-            val = -1.0f;
+            val = -1.0;
     }
     else if(x < mRelRanges.x)
     {
@@ -77,10 +77,7 @@ double IslandMaskGenerator::noise(double x, double y, double z)
 
         double currentRelPos = x / mRelRanges.x;
 
-        if(currentRelPos > noise)
-            val = 0.0;
-        else
-            val = -1.0;
+        val = Get1DLerp(currentRelPos, noise);
     }
     else if(x > (1.0 - mRelRanges.x))
     {
@@ -88,11 +85,7 @@ double IslandMaskGenerator::noise(double x, double y, double z)
 
         double currentRelPos = (1.0 - x) / mRelRanges.x;
 
-        if(currentRelPos > noise)
-            val = 0.0;
-        else
-            val = -1.0;
-
+        val = Get1DLerp(currentRelPos, noise);
     }
     else if(y < mRelRanges.y)
     {
@@ -100,10 +93,7 @@ double IslandMaskGenerator::noise(double x, double y, double z)
 
         double currentRelPos = y / mRelRanges.y;
 
-        if(currentRelPos > noise)
-            val = 0.0;
-        else
-            val = -1.0;
+        val = Get1DLerp(currentRelPos, noise);
     }
     else if(y > (1.0 - mRelRanges.y))
     {
@@ -111,11 +101,7 @@ double IslandMaskGenerator::noise(double x, double y, double z)
 
         double currentRelPos = (1.0 - y) / mRelRanges.y;
 
-        if(currentRelPos > noise)
-            val = 0.0;
-        else
-            val = -1.0;
-
+        val = Get1DLerp(currentRelPos, noise);
     }
 
     return val;

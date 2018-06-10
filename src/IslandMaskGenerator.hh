@@ -22,6 +22,17 @@ private:
         return noise;
     }
 
+    inline double Get1DLerp(double currPos, double noise)
+    {
+        if(currPos > noise)
+            return 0.0;
+        else
+        {
+            double scaled = currPos / noise;
+            return scaled - 1.0;
+        }
+    }
+
     PerlinNoiseGenerator mPerlin;
     glm::vec2 mInnerSquare;
     glm::vec2 mOuterSquare;
