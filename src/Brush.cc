@@ -64,6 +64,7 @@ void Brush::SetTextureBrush(int seletedTexture){
 
 void Brush::SetHeightBrush(float factor){
     float Radius2 = mIntersectionRadius * mIntersectionRadius;
+    factor /= 1000;
 
     for (unsigned int j = mIntersectionHeight - mIntersectionRadius; j < mIntersectionHeight + mIntersectionRadius; j++){ // 2m world = 2 u heightmapu
         for (unsigned int i = mIntersectionWidth - mIntersectionRadius; i < mIntersectionWidth + mIntersectionRadius; i++){
@@ -82,7 +83,7 @@ void Brush::SetHeightBrush(float factor){
 
                 else if(distance < (0.7 * Radius2) && distance > (0.5 * Radius2)){
                     mHeightmap->mPositions.at(j*mHeightmap->mHeightmapDimensions.x + i).y += 0.1f;
-                    mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i) += factor < 0.002f? 0.f : factor - 0.002f;
+                    mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i) += factor < 0.002f? 0.001f : factor - 0.002f;
                 }
                 else if(distance < (0.5 * Radius2)){
                      mHeightmap->mPositions.at(j*mHeightmap->mHeightmapDimensions.x + i).y += 0.1f;

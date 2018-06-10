@@ -20,6 +20,9 @@ public:
     glm::vec3 rightVector = {0, 0, 0};
     glm::vec3 upVector = {0, 0, 0};
 
+    std::vector<glm::vec3> mRainMap;
+    float mRainLoss = 0;
+
 private:
     //glm::vec3 randomWindDirection();
     MultiLayeredHeightmap *mHeightmap;

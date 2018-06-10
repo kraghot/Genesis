@@ -213,6 +213,8 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
             mTexCoords.at(CURRPOS) = glm::vec2(S * fTextureU, T * fTextureV);
             mHeightCoords.at(CURRPOS) = glm::vec2(S, T);
 
+            //std::cout << "Y: " << mPositions.at(CURRPOS).y << std::endl;
+
              if(i != dimY - 1)
              {
                  mIndices.push_back(CURRPOS);

@@ -83,7 +83,7 @@ void GlowApp::init()
     TwAddVarRW(tweakbar(), "rotation speed", TW_TYPE_FLOAT, &mSpeed, "group=scene step=0.1");
     TwAddVarCB(tweakbar(), "seed", TW_TYPE_UINT16, GlowApp::setSeedTerrain, GlowApp::getSeedTerrain, &seed, "group=scene step=1");
     TwAddButton(tweakbar(), "terrain", GlowApp::randomTerrain, NULL, " label='Generate random terrain '");
-    TwAddVarRW(tweakbar(), "Height Brush", TW_TYPE_FLOAT, &mHeightBrushFactor, "group=scene step=0.001");
+    TwAddVarRW(tweakbar(), "Height Brush", TW_TYPE_FLOAT, &mHeightBrushFactor, "group=scene step=0.5");
     TwAddVarRW(tweakbar(), "Circle radius", TW_TYPE_FLOAT, &mCircleRadius, "group=scene step=0.5");
 
 
@@ -146,7 +146,7 @@ void GlowApp::init()
     mLineVao = glow::VertexArray::create(ab, GL_LINES);
 
     mBiomes.randomWindDirection();
-debugflag = true;
+    //debugflag = true;
 
 
 }
@@ -171,7 +171,8 @@ void GlowApp::update(float elapsedSeconds)
 void GlowApp::render(float elapsedSeconds)
 {
     if(button){
-        GlowApp::initTerrain();
+       // GlowApp::initTerrain();
+        mBiomes.randomWindDirection();
         button = false;
     }
 
@@ -182,10 +183,10 @@ void GlowApp::render(float elapsedSeconds)
     auto cam = getCamera();
 
     //-----biomes debug-------
-    if(debugflag){
-       debugflag = false;
-        cam->setLookAtMatrix(mBiomes.mWindPos, mBiomes.rightVector, mBiomes.upVector);// internal camera from GlfwApp with some default input handling
-    }
+//    if(debugflag){
+//       debugflag = false;
+//        cam->setLookAtMatrix(mBiomes.mWindPos, mBiomes.rightVector, mBiomes.upVector);// internal camera from GlfwApp with some default input handling
+//    }
     //------------------------
 
     auto view = cam->getViewMatrix();
@@ -274,11 +275,11 @@ void GlowApp::render(float elapsedSeconds)
             mBrush.getCircleVao()->bind().draw();
 
             if(GlfwApp::isMouseButtonPressed(mRightClick))
-                //mHeightmap.SetHeightBrush(mHeightBrushFactor);
-                mBrush.SetTextureBrush(m_selectedTexture);
+                mBrush.SetHeightBrush(mHeightBrushFactor);
+                //mBrush.SetTextureBrush(m_selectedTexture);
 
 
-            auto model = glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
+            auto model = glm::mat4(1.f); // glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
             auto shader = mShaderObj->use();
             shader.setUniform("uView", view);
             shader.setUniform("uProj", proj);
