@@ -78,7 +78,7 @@ void Brush::SetHeightBrush(float factor){
 
                 if(distance < Radius2 && distance > (0.7 * Radius2)){
                     mHeightmap->mPositions.at(j*mHeightmap->mHeightmapDimensions.x + i).y += 0.1f;
-                    mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i) += factor < 0.004f? 0.f : factor - 0.004f;
+                    mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i) += factor < 0.004f? 0.002f : factor - 0.004f;
                 }
 
                 else if(distance < (0.7 * Radius2) && distance > (0.5 * Radius2)){

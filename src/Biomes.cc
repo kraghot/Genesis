@@ -33,40 +33,53 @@ void Biomes::randomWindDirection(){
 
     unsigned int randomWindDir = rand() % 4; //0 = N->S, 1 = S->N, 2 = W->E, 3 = E->W
 
-    double maxY = 3;
+    //double maxY = 3;
     bool higher = false;
     bool noFirstMountain = true;
+    std::vector<std::vector<double>> rainAmount(mHeightmap->mHeightmapDimensions.x,std::vector<double>(mHeightmap->mHeightmapDimensions.x,0) );
+    rainAmount.reserve(mHeightmap->mNumberOfVertices);
 
     //todo: for cases where dimX != dimY we need to check that winddir hasnt 2 dimXs or dimYs
-    //#define CURRPOS i*mHeightmap->mHeightmapDimensions.x + j // S->N, N->S
-    #define CURRPOS i-j // E->W, W->E
+    #define CURRPOS i*mHeightmap->mHeightmapDimensions.x + j // S->N, N->S
+    //#define CURRPOS i-j // E->W, W->E
 
-    //for(unsigned int i = 0; i < mHeightmap->mHeightmapDimensions.x; i++){ // S->N
+    for(unsigned int i = 0; i < mHeightmap->mHeightmapDimensions.x; i++){ // S->N
     //for(int i = mHeightmap->mHeightmapDimensions.x - 1; i >= 0; i--){ // N->S
     //for(int i = mHeightmap->mHeightmapDimensions.x * (mHeightmap->mHeightmapDimensions.x -1); i < mHeightmap->mHeightmapDimensions.x * mHeightmap->mHeightmapDimensions.x; i++){ // E->W
-    for(int i = mHeightmap->mHeightmapDimensions.x * mHeightmap->mHeightmapDimensions.x - 1; i >= mHeightmap->mHeightmapDimensions.x * (mHeightmap->mHeightmapDimensions.x -1); i--){ // W->E
-        if(!higher && !noFirstMountain)
-            continue;
+    //for(int i = mHeightmap->mHeightmapDimensions.x * mHeightmap->mHeightmapDimensions.x - 1; i >= mHeightmap->mHeightmapDimensions.x * (mHeightmap->mHeightmapDimensions.x -1); i--){ // W->E
+//        if(!higher && !noFirstMountain)
+//            continue;
 
-        higher = false;
+//        higher = false;
 
-        //for(unsigned int j = 0; j < mHeightmap->mHeightmapDimensions.y; j++){ // S->N
+        for(unsigned int j = 0; j < mHeightmap->mHeightmapDimensions.y; j++){ // S->N
         //for(unsigned int j = 0; j < mHeightmap->mHeightmapDimensions.y; j++){ // N->S
         //for(unsigned int j = 0; j < mHeightmap->mHeightmapDimensions.y * mHeightmap->mHeightmapDimensions.y; j+=mHeightmap->mHeightmapDimensions.y){ // E->W
-        for(unsigned int j = 0; j < mHeightmap->mHeightmapDimensions.y * mHeightmap->mHeightmapDimensions.y; j+= mHeightmap->mHeightmapDimensions.y){ // W->E
+        //for(unsigned int j = 0; j < mHeightmap->mHeightmapDimensions.y * mHeightmap->mHeightmapDimensions.y; j+= mHeightmap->mHeightmapDimensions.y){ // W->E
             //mRainMap.at(CURRPOS) = {1.f, 0.f, 0.f};
 
-            mHeightmap->mSplatmap.at(CURRPOS) = {1.f, 0.f, 0.f};
 
 
-            std::cout << "Y: " << mHeightmap->mDisplacement.at(CURRPOS) << std::endl;
+           // mHeightmap->mSplatmap.at(CURRPOS) = {1.f, 0.f, 0.f};
+            if(!i)
+                    rainAmount[i][j] = 1.f - (mHeightmap->mDisplacement.at(CURRPOS)/100);
 
-            if(mHeightmap->mDisplacement.at(CURRPOS) > maxY){
-                maxY = mHeightmap->mPositions.at(CURRPOS).y;
-                higher = true;
-                noFirstMountain = false;
-                //break;
-            }
+            else if(rainAmount[i-1][j] > 0)
+                rainAmount[i][j] = rainAmount[i-1][j] - ((mHeightmap->mDisplacement.at(CURRPOS)/100));
+            rainAmount[i][j] = rainAmount[i][j] < 0.0 ? 0.0 : rainAmount[i][j];
+
+            std::cout << "rainAmount: " << rainAmount[i][j] << std::endl;
+
+            mHeightmap->mSplatmap.at(CURRPOS) ={rainAmount[i][j], 1 - rainAmount[i][j], 0.f};
+
+
+
+//            if(mHeightmap->mDisplacement.at(CURRPOS) > maxY){
+//                maxY = mHeightmap->mPositions.at(CURRPOS).y;
+//                higher = true;
+//                noFirstMountain = false;
+//                //break;
+//            }
 
 //            if(mHeightmap->mPositions.at(CURRPOS) >= 30){
 //                mRainLoss = 1.f;

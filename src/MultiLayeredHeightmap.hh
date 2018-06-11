@@ -69,6 +69,7 @@ public:
     };
 
 
+    unsigned int mNumberOfVertices;
 
     // float heightScale: determines the maximum height of the terrain in world units.
     // float blockScale: determines the space between terrain vertices in world units for both the X and Z axes.
@@ -166,7 +167,6 @@ protected:
     glm::mat4x4 mLocalToWorldMatrix;
     // The dimensions of the heightmap texture
 
-    unsigned int mNumberOfVertices;
 
 
 };
