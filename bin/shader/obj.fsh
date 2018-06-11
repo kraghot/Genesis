@@ -57,5 +57,5 @@ void main()
     float diffuse = kd * max(0, dot(N, L));
     float specular = ks * pow(max(0, dot(N, H)), shininess);
 //    fColor = color * (albedo + diffuse + specular);
-    fColor = vFinalTexColor * (albedo + diffuse + specular);
+    fColor = pow(vFinalTexColor, vec4(1/2.224)) * (albedo + diffuse + specular);
 }

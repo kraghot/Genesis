@@ -29,6 +29,8 @@
 #include<glow/data/TextureData.hh>
 #include<glow/data/SurfaceData.hh>
 
+#include <AntTweakBar.h>
+
 #include "NoiseGenerator.hh"
 
 

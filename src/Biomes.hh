@@ -2,23 +2,22 @@
 #define BIOMES_H
 
 #include "MultiLayeredHeightmap.hh"
+#include<glow/data/TextureData.hh>
 
 
 class Biomes
 {
 public:
     Biomes(MultiLayeredHeightmap *h);
+    void generateRainMap(unsigned int randomWindDir);
+    glow::SharedTexture2D getRainTexture() const;
     void randomWindDirection();
-    //glm::mat4 ScanlineProjection();
-
-    std::vector<glm::vec3> mRainMap;
 
 private:
     //glm::vec3 randomWindDirection();
     MultiLayeredHeightmap *mHeightmap;
-
-
-
+    glow::SharedTexture2D mRainTexture;
+    std::vector<glm::vec3> mRainMap;
 };
 
 #endif //BIOMES_H

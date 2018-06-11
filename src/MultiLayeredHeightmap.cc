@@ -150,9 +150,7 @@ void MultiLayeredHeightmap::MakeVertexArray()
     mDisplacementTexture->bind().setData(GL_R32F, mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RED, GL_FLOAT, mDisplacement.data());
     mDisplacementTexture->bind().generateMipmaps();
 
-    mSplatmapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RGB);
-    mSplatmapTexture->bind().setData(GL_RGB, mHeightmapDimensions.x, mHeightmapDimensions.y, mSplatmap);
-    mSplatmapTexture->bind().generateMipmaps();
+
 }
 
 void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
@@ -175,6 +173,7 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
 
     mSlopeY.resize(mNumberOfVertices);
     mHeightCoords.resize(mNumberOfVertices);
+    mSplatmap.resize(mNumberOfVertices);
 
     int dimX = mHeightmapDimensions.x, dimY = mHeightmapDimensions.y;
 
@@ -686,7 +685,7 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(NoiseGenerator *g
 
 void MultiLayeredHeightmap::LoadSplatmap(){
 
-    mSplatmap.resize(mNumberOfVertices);
+    //mSplatmap.resize(mNumberOfVertices);
 
     const float fRange1 = 0.01f;
     const float fRange2 = 0.01667f;
@@ -749,4 +748,9 @@ void MultiLayeredHeightmap::LoadSplatmap(){
 
         mSplatmap.at(i) = {r,g,b};
     }
+
+    mSplatmapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RGB);
+    mSplatmapTexture->bind().setData(GL_RGB, mHeightmapDimensions.x, mHeightmapDimensions.y, mSplatmap);
+    mSplatmapTexture->bind().generateMipmaps();
 }
+

@@ -22,7 +22,7 @@ private:
     glow::SharedVertexArray createPerlinTerrain();
     glm::vec3 mClearColor = {0 / 255.0f, 85 / 255.0f, 159 / 255.0f};
     glm::vec3 mLightDir = normalize(glm::vec3(.2, .7, .7));
-    float mLightDis = 100.0f;
+    float mLightDis = 300.0f;
 
     float mAngle = 0.0f;
     float mSpeed = 0.0f;
@@ -35,8 +35,8 @@ private:
     glm::vec4 mMousePosWorld;
     glm::vec4 mMouseNDC;
 
-    float mHeightBrushFactor = 0.f;
-    float mCircleRadius = 4.f;
+    float mHeightBrushFactor = 60.f;
+    float mCircleRadius = 30.f;
 
 private:
     glow::SharedProgram mShaderOutput;
@@ -64,13 +64,18 @@ private:
 
     Brush mBrush;
     Biomes mBiomes;
-    bool debugflag;
-
-
 
     typedef enum { TEXTURE_SNOW, TEXTURE_GRASS, TEXTURE_ROCK} SelectedTexture;
-
     SelectedTexture m_selectedTexture = TEXTURE_GRASS;
+
+    typedef enum { BRUSH_TEXTURE, BRUSH_HEIGHT} SelectedBrush;
+    SelectedBrush m_selectedBrush = BRUSH_TEXTURE;
+
+    typedef enum { MAP_SPLAT, MAP_RAIN} SelectedMap;
+    SelectedMap m_selectedMap = MAP_SPLAT;
+
+    typedef enum { NS, SN, WE, EW} SelectedWind;
+    SelectedWind m_selectedWind = NS;
 
 public:
     GlowApp();
@@ -93,7 +98,12 @@ public:
     void setSeed(unsigned int var);
     unsigned int getSeed() const;
 
+    void SetSplatmap();
+    //void SetSplatm();
+    static void TW_CALL TweakSetSplatmap(void *clientData);
 
+    static void TW_CALL TweakRandomWind(void *clientData);
+    void SetRandomWind();
 
 };
 

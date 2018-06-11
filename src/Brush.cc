@@ -28,8 +28,9 @@ void Brush::SetTextureBrush(int seletedTexture){
 
     float Radius2 = mIntersectionRadius * mIntersectionRadius;
 
-        for (unsigned int j = mIntersectionHeight - mIntersectionRadius; j < mIntersectionHeight + mIntersectionRadius; j++){ // 2m world = 2 u heightmapu
-            for (unsigned int i = mIntersectionWidth - mIntersectionRadius; i < mIntersectionWidth + mIntersectionRadius; i++){
+        for (unsigned int j = 0; j < mHeightmap->mHeightmapDimensions.x; j++){ // NEEDS OPTIMIZATION; old: for (unsigned int j = mIntersectionHeight - mIntersectionRadius; j < mIntersectionHeight + mIntersectionRadius; j++)
+
+            for (unsigned int i = 0; i < mHeightmap->mHeightmapDimensions.x; i++){
 
 
                 float pointPositionx = glm::pow(mHeightmap->mPositions.at((j * mHeightmap->mHeightmapDimensions.x) + i).x - mHeightmap->mPositions.at((mIntersectionHeight * mHeightmap->mHeightmapDimensions.x) + mIntersectionWidth).x,2);
@@ -66,8 +67,8 @@ void Brush::SetHeightBrush(float factor){
     float Radius2 = mIntersectionRadius * mIntersectionRadius;
     factor /= 1000;
 
-    for (unsigned int j = mIntersectionHeight - mIntersectionRadius; j < mIntersectionHeight + mIntersectionRadius; j++){ // 2m world = 2 u heightmapu
-        for (unsigned int i = mIntersectionWidth - mIntersectionRadius; i < mIntersectionWidth + mIntersectionRadius; i++){
+    for (unsigned int j = 0; j < mHeightmap->mHeightmapDimensions.x; j++){ // 2m world = 2 u heightmapu
+        for (unsigned int i = 0; i < mHeightmap->mHeightmapDimensions.x; i++){
 
 
             float pointPositionx = glm::pow(mHeightmap->mPositions.at((j * mHeightmap->mHeightmapDimensions.x) + i).x - mHeightmap->mPositions.at((mIntersectionHeight * mHeightmap->mHeightmapDimensions.x) + mIntersectionWidth).x,2);
@@ -94,7 +95,7 @@ void Brush::SetHeightBrush(float factor){
         }
 
     mHeightmap->CalculateNormalsTangents(mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y);
-    mHeightmap->LoadSplatmap();
+    //mHeightmap->LoadSplatmap();
     mHeightmap->MakeVertexArray();
 }
 
