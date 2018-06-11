@@ -2,123 +2,150 @@
 
 #include <random>
 
+#define CURRPOS_NS i*mHeightmap->mHeightmapDimensions.x + j // S->N, N->S
+#define CURRPOS_WE i-j // E->W, W->E
+
 Biomes::Biomes(MultiLayeredHeightmap *h){
     mHeightmap = h;
 }
 
 
 void Biomes::randomWindDirection(){
-//    glm::vec3 possibleValuesX = {-mHeightmap->halfTerrainWidth/2, mHeightmap->halfTerrainWidth/2, 0}; //because x and z have the same dimensions, leaves room for otherwise
-
-//    mWindDir.x = possibleValuesX[(std::rand() % 3)];
-
-//    mWindDir.z = possibleValuesX[(std::rand() % 3)];
-
-//    if(mWindDir.x == 0 && mWindDir.z == 0) // we do not want to look from one corner to its vertical/horizontal neighbour corner, only diagonal
-//        mWindDir.z = possibleValuesX[(std::rand() % 2)];
-
-//    glm::normalize(mWindDir);
-
-//    std::cout << "winddir(" << mWindDir.x << ", " << mWindDir.y << ", " << mWindDir.z << ")" << std::endl;
-
-//    glm::mat4 ScanlineLookAt = ScanlineProjection();
-
-//    std::vector<unsigned int> possibleValuesX = {(mHeightmap->mHeightmapDimensions.x -1)/2, (mHeightmap->mHeightmapDimensions.y - 1)/2, mHeightmap->mHeightmapDimensions.y, mHeightmap->mHeightmapDimensions.x, 0};
-
-//    mWindDir.x = possibleValuesX[(std::rand() % 5)];
-
-//    mWindDir.z = possibleValuesX[(std::rand() % 5)];
 
    // mRainMap.resize(mHeightmap->mNumberOfVertices);
 
+    std::vector<std::vector<double>> rainAmount(mHeightmap->mHeightmapDimensions.x,std::vector<double>(mHeightmap->mHeightmapDimensions.y,0));
+    unsigned int x = 0, y = 0, i, j;
+    bool firstIteration = true;
     unsigned int randomWindDir = rand() % 4; //0 = N->S, 1 = S->N, 2 = W->E, 3 = E->W
 
-    //double maxY = 3;
-    bool higher = false;
-    bool noFirstMountain = true;
-    std::vector<std::vector<double>> rainAmount(mHeightmap->mHeightmapDimensions.x,std::vector<double>(mHeightmap->mHeightmapDimensions.x,0) );
-    rainAmount.reserve(mHeightmap->mNumberOfVertices);
+    switch(randomWindDir){
+        case 0: goto NS;
+        case 1: goto SN;
+        case 2: goto WE;
+        case 3: goto EW;
 
-    //todo: for cases where dimX != dimY we need to check that winddir hasnt 2 dimXs or dimYs
-    #define CURRPOS i*mHeightmap->mHeightmapDimensions.x + j // S->N, N->S
-    //#define CURRPOS i-j // E->W, W->E
-
-    for(unsigned int i = 0; i < mHeightmap->mHeightmapDimensions.x; i++){ // S->N
-    //for(int i = mHeightmap->mHeightmapDimensions.x - 1; i >= 0; i--){ // N->S
-    //for(int i = mHeightmap->mHeightmapDimensions.x * (mHeightmap->mHeightmapDimensions.x -1); i < mHeightmap->mHeightmapDimensions.x * mHeightmap->mHeightmapDimensions.x; i++){ // E->W
-    //for(int i = mHeightmap->mHeightmapDimensions.x * mHeightmap->mHeightmapDimensions.x - 1; i >= mHeightmap->mHeightmapDimensions.x * (mHeightmap->mHeightmapDimensions.x -1); i--){ // W->E
-//        if(!higher && !noFirstMountain)
-//            continue;
-
-//        higher = false;
-
-        for(unsigned int j = 0; j < mHeightmap->mHeightmapDimensions.y; j++){ // S->N
-        //for(unsigned int j = 0; j < mHeightmap->mHeightmapDimensions.y; j++){ // N->S
-        //for(unsigned int j = 0; j < mHeightmap->mHeightmapDimensions.y * mHeightmap->mHeightmapDimensions.y; j+=mHeightmap->mHeightmapDimensions.y){ // E->W
-        //for(unsigned int j = 0; j < mHeightmap->mHeightmapDimensions.y * mHeightmap->mHeightmapDimensions.y; j+= mHeightmap->mHeightmapDimensions.y){ // W->E
-            //mRainMap.at(CURRPOS) = {1.f, 0.f, 0.f};
-
-
-
-           // mHeightmap->mSplatmap.at(CURRPOS) = {1.f, 0.f, 0.f};
-            if(!i)
-                    rainAmount[i][j] = 1.f - (mHeightmap->mDisplacement.at(CURRPOS)/100);
-
-            else if(rainAmount[i-1][j] > 0)
-                rainAmount[i][j] = rainAmount[i-1][j] - ((mHeightmap->mDisplacement.at(CURRPOS)/100));
-            rainAmount[i][j] = rainAmount[i][j] < 0.0 ? 0.0 : rainAmount[i][j];
-
-            std::cout << "rainAmount: " << rainAmount[i][j] << std::endl;
-
-            mHeightmap->mSplatmap.at(CURRPOS) ={rainAmount[i][j], 1 - rainAmount[i][j], 0.f};
-
-
-
-//            if(mHeightmap->mDisplacement.at(CURRPOS) > maxY){
-//                maxY = mHeightmap->mPositions.at(CURRPOS).y;
-//                higher = true;
-//                noFirstMountain = false;
-//                //break;
-//            }
-
-//            if(mHeightmap->mPositions.at(CURRPOS) >= 30){
-//                mRainLoss = 1.f;
-//                goto writeRainMap;
-//            }
-
-//            else if(mHeightmap->mPositions.at(CURRPOS) >= 20)
-//                mRainLoss += .75f;
-
-//            else if(mHeightmap->mPositions.at(CURRPOS) >= 20)
-//                mRainLoss += .25f;
-
-//            if(mRainLoss <= 0)
-//                goto writeRainMap;
-        }
     }
 
-   // writeRainMap:
+
+NS:
+    for(i = mHeightmap->mHeightmapDimensions.x - 1; i > 0; i--){
+        for(j = 0; j < mHeightmap->mHeightmapDimensions.y; j++){
+
+            if(firstIteration)
+                    rainAmount[y][x] = 1.f - (mHeightmap->mDisplacement.at(CURRPOS_NS)/100);
+
+            else if(rainAmount[y-1][x] > 0)
+                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_NS)/100));
+
+            rainAmount[y][x] = rainAmount[y][x] < 0.0 ? 0.0 : rainAmount[y][x];
+
+            mHeightmap->mSplatmap.at(CURRPOS_NS) ={rainAmount[y][x], 1 - rainAmount[y][x], 0.f};
+
+            x++;
+        }
+
+        firstIteration = false;
+        x = 0;
+        y++;
+    }
+
+    goto bindRainMap;
+
+SN:
+    for(i = 0; i < mHeightmap->mHeightmapDimensions.x; i++){
+        for(j = 0; j < mHeightmap->mHeightmapDimensions.y; j++){
+
+            if(firstIteration)
+                    rainAmount[y][x] = 1.f - (mHeightmap->mDisplacement.at(CURRPOS_NS)/100);
+
+            else if(rainAmount[y-1][x] > 0)
+                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_NS)/100));
+
+            rainAmount[y][x] = rainAmount[y][x] < 0.0 ? 0.0 : rainAmount[y][x];
+
+            mHeightmap->mSplatmap.at(CURRPOS_NS) ={rainAmount[y][x], 1 - rainAmount[y][x], 0.f};
+
+            x++;
+        }
+
+        firstIteration = false;
+        x = 0;
+        y++;
+    }
+
+    goto bindRainMap;
+
+WE:
+    for(i = mHeightmap->mHeightmapDimensions.x * mHeightmap->mHeightmapDimensions.x - 1; i >= mHeightmap->mHeightmapDimensions.x * (mHeightmap->mHeightmapDimensions.x -1); i--){
+        for(j = 0; j < mHeightmap->mHeightmapDimensions.y * mHeightmap->mHeightmapDimensions.y; j+= mHeightmap->mHeightmapDimensions.y){
+
+            if(firstIteration)
+                    rainAmount[y][x] = 1.f - (mHeightmap->mDisplacement.at(CURRPOS_WE)/100);
+
+            else if(rainAmount[y-1][x] > 0)
+                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_WE)/100));
+
+            rainAmount[y][x] = rainAmount[y][x] < 0.0 ? 0.0 : rainAmount[y][x];
+
+            mHeightmap->mSplatmap.at(CURRPOS_WE) ={rainAmount[y][x], 1 - rainAmount[y][x], 0.f};
+
+            x++;
+        }
+
+        firstIteration = false;
+        x = 0;
+        y++;
+    }
+
+    goto bindRainMap;
+
+EW:
+    for(i = mHeightmap->mHeightmapDimensions.x * (mHeightmap->mHeightmapDimensions.x -1); i < mHeightmap->mHeightmapDimensions.x * mHeightmap->mHeightmapDimensions.x; i++){
+        for(j = 0; j < mHeightmap->mHeightmapDimensions.y * mHeightmap->mHeightmapDimensions.y; j+=mHeightmap->mHeightmapDimensions.y){
+
+            if(firstIteration)
+                    rainAmount[y][x] = 1.f - (mHeightmap->mDisplacement.at(CURRPOS_WE)/100);
+
+            else if(rainAmount[y-1][x] > 0)
+                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_WE)/100));
+
+            rainAmount[y][x] = rainAmount[y][x] < 0.0 ? 0.0 : rainAmount[y][x];
+
+            mHeightmap->mSplatmap.at(CURRPOS_WE) ={rainAmount[y][x], 1 - rainAmount[y][x], 0.f};
+
+            x++;
+        }
+
+        firstIteration = false;
+        x = 0;
+        y++;
+    }
+
+bindRainMap:
 
     mHeightmap->mSplatmapTexture->bind().setData(GL_RGB, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mHeightmap->mSplatmap);
     mHeightmap->mSplatmapTexture->bind().generateMipmaps();
+
 }
 
-glm::mat4 Biomes::ScanlineProjection(){
+
+//glm::mat4 Biomes::ScanlineProjection(){
 
 
-    mWindPos = -mWindDir;
+//    mWindPos = -mWindDir;
 
-    viewVector = mWindDir - mWindPos;
-    float mWindLookAtDistance = glm::length(viewVector);
+//    viewVector = mWindDir - mWindPos;
+//    float mWindLookAtDistance = glm::length(viewVector);
 
-    viewVector = viewVector / (float)mWindLookAtDistance;
-    rightVector = glm::normalize(glm::cross(viewVector, mWindUp));
-    upVector = glm::cross(rightVector, viewVector);
+//    viewVector = viewVector / (float)mWindLookAtDistance;
+//    rightVector = glm::normalize(glm::cross(viewVector, mWindUp));
+//    upVector = glm::cross(rightVector, viewVector);
 
 
-    glm::mat4 lookAt = glm::lookAt(viewVector,
-                                   rightVector,
-                                   upVector);
+//    glm::mat4 lookAt = glm::lookAt(viewVector,
+//                                   rightVector,
+//                                   upVector);
 
-    return lookAt;
-}
+//    return lookAt;
+//}
