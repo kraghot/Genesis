@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 #include <experimental/random>
+#include <glm/gtc/quaternion.hpp>
+#include<glm/gtx/quaternion.hpp>
 
 #ifndef ENABLE_SLOPE_BASED_BLEND
 #define ENABLE_SLOPE_BASED_BLEND 1
@@ -15,11 +17,10 @@ typedef std::basic_ios<char> ios;
 
 GlowApp GlowAppObject;
 
-
 MultiLayeredHeightmap::MultiLayeredHeightmap(float heightScale, float blockScale):
-    mfHeightScale(heightScale),
+    mHeightmapDimensions(0,0),
     mfBlockScale(blockScale),
-    mHeightmapDimensions(0,0)
+    mfHeightScale(heightScale)
     {
 
 }
@@ -104,6 +105,7 @@ void MultiLayeredHeightmap::DumpSplatmapToFile()
 
 void MultiLayeredHeightmap::MakeVertexArray()
 {
+
     auto ab = glow::ArrayBuffer::create();
     ab->defineAttribute<glm::vec3>("aPosition");
     ab->bind().setData(mPositions, GL_DYNAMIC_DRAW);
@@ -111,7 +113,7 @@ void MultiLayeredHeightmap::MakeVertexArray()
 
     ab = glow::ArrayBuffer::create();
     ab->defineAttribute<glm::vec3>("aNormal");
-    ab->bind().setData(normals_final);
+    ab->bind().setData(mNormalsFinal);
     mAbs.push_back(ab);
 
     ab = glow::ArrayBuffer::create();
@@ -126,12 +128,12 @@ void MultiLayeredHeightmap::MakeVertexArray()
 
     ab = glow::ArrayBuffer::create();
     ab->defineAttribute<glm::vec3>("aTangent");
-    ab->bind().setData(tangents_final);
+    ab->bind().setData(mTangentsFinal);
     mAbs.push_back(ab);
 
     ab = glow::ArrayBuffer::create();
     ab->defineAttribute<float>("aSlopeY");
-    ab->bind().setData(slope_y);
+    ab->bind().setData(mSlopeY);
     mAbs.push_back(ab);
 
     ab = glow::ArrayBuffer::create();
@@ -151,9 +153,6 @@ void MultiLayeredHeightmap::MakeVertexArray()
     mDisplacementTexture->bind().setData(GL_R32F, mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RED, GL_FLOAT, mDisplacement.data());
     mDisplacementTexture->bind().generateMipmaps();
 
-    mSplatmapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RGBA);
-    mSplatmapTexture->bind().setData(GL_RGBA, mHeightmapDimensions.x, mHeightmapDimensions.y, mSplatmap);
-    mSplatmapTexture->bind().generateMipmaps();
 }
 
 void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
@@ -165,26 +164,26 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
     mIndices.resize(mNumberOfVertices);
     mNormals.resize(mNumberOfVertices);
 
-    normals1.resize(mNumberOfVertices);
-    normals2.resize(mNumberOfVertices);
-    normals_final.resize(mNumberOfVertices);
-    tangents1.resize(mNumberOfVertices);
-    tangents2.resize(mNumberOfVertices);
-    tangents_final.resize(mNumberOfVertices);
+    mNormals1.resize(mNumberOfVertices);
+    mNormals2.resize(mNumberOfVertices);
+    mNormalsFinal.resize(mNumberOfVertices);
+    mTangents1.resize(mNumberOfVertices);
+    mTangents2.resize(mNumberOfVertices);
+    mTangentsFinal.resize(mNumberOfVertices);
     mDisplacement.resize(mNumberOfVertices);
     mHeightCoords.resize(mNumberOfVertices);
     mWaterLevel.resize(mNumberOfVertices, 0.0f);
 
-    slope_y.resize(mNumberOfVertices);
-
-    mHeightCoords.resize(mNumberOfVertices);
+    mSlopeY.resize(mNumberOfVertices);
+    //mHeightCoords.resize(mNumberOfVertices);
+    mSplatmap.resize(mNumberOfVertices);
 
     int dimX = mHeightmapDimensions.x, dimY = mHeightmapDimensions.y;
 
     float terrainWidth = ( dimX - 1 ) * mfBlockScale;
     float terrainHeight = ( dimY - 1 ) * mfBlockScale;
 
-    float halfTerrainWidth = terrainWidth * 0.5f;
+    halfTerrainWidth = terrainWidth * 0.5f;
     float halfTerrainHeight = terrainHeight * 0.5f;
 
     float fTextureU = float(dimX)*0.1f;
@@ -211,7 +210,7 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
             float Y = 0.0f;
             float Z = ( T * terrainHeight ) - halfTerrainHeight;
 
-            normals_final.at(CURRPOS) = glm::vec3(0);
+            mNormalsFinal.at(CURRPOS) = glm::vec3(0);
             mPositions.at(CURRPOS) = glm::vec3(X, Y, Z);
             mTexCoords.at(CURRPOS) = glm::vec2(S * fTextureU, T * fTextureV);
             mHeightCoords.at(CURRPOS) = glm::vec2(S, T);
@@ -265,6 +264,11 @@ glm::uvec2 MultiLayeredHeightmap::GetLowestNeigh(std::vector<glm::uvec2> &neigh)
     }
 
     return neigh.at(lowestIndex);
+}
+
+glow::SharedVertexArray MultiLayeredHeightmap::getVao() const
+{
+    return mVao;
 }
 
 void MultiLayeredHeightmap::ThermalErodeTerrain()
@@ -352,11 +356,11 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
           // Water evaporation speed
           Cw=0.001f,
           // Erosion speed
-          Cr=0.9f,
+          //Cr=0.9f,
           // Deposition speed
-          Cd=0.02f,
+          //Cd=0.02f,
           // Direction inertia
-          Ci=0.1f,
+          //Ci=0.1f,
           // Gravity acceleration
           Cg=20;
     const unsigned maxPathLength = mHeightmapDimensions.x;
@@ -380,8 +384,6 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
         auto next = GetLowestNeigh(neigh);
 
         float heightDifference = GetDisplacementAt(currPos) - GetDisplacementAt(next);
-//        std::cout << "Currently at position " << currPos.x << " " << currPos.y << std::endl;
-//        std::cout << "Height " << GetDisplacementAt(currPos) << " " << heightDifference << std::endl;
 
         /// @todo Add handling when the differece is negligible
         /// Move in random direction
@@ -451,9 +453,9 @@ void MultiLayeredHeightmap::CalculateNormalsTangents(int dimX, int dimY){
                 mPositions.at((j+1) * dimX + i+1)
             };
 
-            vTriangle0[0].y = mDisplacement.at((j * dimX ) + i);
-            vTriangle0[1].y = mDisplacement.at((j+1) * dimX  + i);
-            vTriangle0[2].y = mDisplacement.at((j+1) * dimX + i+1);
+             vTriangle0[0].y = mDisplacement.at((j * dimX ) + i);
+             vTriangle0[1].y = mDisplacement.at((j+1) * dimX  + i);
+             vTriangle0[2].y = mDisplacement.at((j+1) * dimX + i+1);
 
             glm::vec3 vTriangle1[] =
             {
@@ -462,9 +464,9 @@ void MultiLayeredHeightmap::CalculateNormalsTangents(int dimX, int dimY){
                  mPositions.at((j * dimX ) + i)
             };
 
-            vTriangle1[0].y = mDisplacement.at((j+1) * dimX + i+1);
-            vTriangle1[1].y = mDisplacement.at((j* dimX) + i+1);
-            vTriangle1[2].y = mDisplacement.at((j * dimX ) + i);
+             vTriangle1[0].y = mDisplacement.at((j+1) * dimX + i+1);
+             vTriangle1[1].y = mDisplacement.at((j* dimX) + i+1);
+             vTriangle1[2].y = mDisplacement.at((j * dimX ) + i);
 
             glm::vec2 vUV0[] =
             {
@@ -484,8 +486,8 @@ void MultiLayeredHeightmap::CalculateNormalsTangents(int dimX, int dimY){
             glm::vec3 vTriangleNorm0 = glm::cross(vTriangle0[0]-vTriangle0[1], vTriangle0[1]-vTriangle0[2]);
             glm::vec3 vTriangleNorm1 = glm::cross(vTriangle1[0]-vTriangle1[1], vTriangle1[1]-vTriangle1[2]);
 
-            normals1.at(index) = glm::normalize(vTriangleNorm0);
-            normals2.at(index) = glm::normalize(vTriangleNorm1);
+            mNormals1.at(index) = glm::normalize(vTriangleNorm0);
+            mNormals2.at(index) = glm::normalize(vTriangleNorm1);
 
             //tangents
             glm::vec3 deltaPos1 = vTriangle0[0]-vTriangle0[1];
@@ -508,8 +510,8 @@ void MultiLayeredHeightmap::CalculateNormalsTangents(int dimX, int dimY){
             tangent1 = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y)*r;
             tangent2 = (deltaPos3 * deltaUV4.y - deltaPos4 * deltaUV3.y)*r;
 
-            tangents1.at(index) = tangent1;
-            tangents2.at(index) = tangent2;
+            mTangents1.at(index) = tangent1;
+            mTangents2.at(index) = tangent2;
 
         }
     }
@@ -524,48 +526,48 @@ void MultiLayeredHeightmap::CalculateNormalsTangents(int dimX, int dimY){
 
             // Look for upper-left triangles
             if(j != 0 && i != 0){
-                tempNormals += normals1.at(( (i-1) * dimX ) + j - 1);
-                tempNormals += normals2.at(( (i-1) * dimX ) + j - 1);
+                tempNormals += mNormals1.at(( (i-1) * dimX ) + j - 1);
+                tempNormals += mNormals2.at(( (i-1) * dimX ) + j - 1);
 
-                tempTangents += tangents1.at(( (i-1) * dimX ) + j - 1);
-                tempTangents += tangents2.at(( (i-1) * dimX ) + j - 1);
+                tempTangents += mTangents1.at(( (i-1) * dimX ) + j - 1);
+                tempTangents += mTangents2.at(( (i-1) * dimX ) + j - 1);
             }
 
             // Look for upper-right triangles
             if(i != 0 && j != dimX-1){
-                tempNormals += normals1.at(( (i-1) * dimX ) + j);
-                tempNormals += normals2.at(( (i-1) * dimX ) + j);
+                tempNormals += mNormals1.at(( (i-1) * dimX ) + j);
+                tempNormals += mNormals2.at(( (i-1) * dimX ) + j);
 
-                tempTangents += tangents1.at(( (i-1) * dimX ) + j);
-                tempTangents += tangents2.at(( (i-1) * dimX ) + j);
+                tempTangents += mTangents1.at(( (i-1) * dimX ) + j);
+                tempTangents += mTangents2.at(( (i-1) * dimX ) + j);
             }
 
             // Look for bottom-right triangles
             if(i != dimY-1 && j != dimX-1){
-                tempNormals += normals1.at(( i * dimX ) + j);
-                tempNormals += normals2.at(( i * dimX ) + j);
+                tempNormals += mNormals1.at(( i * dimX ) + j);
+                tempNormals += mNormals2.at(( i * dimX ) + j);
 
-                tempTangents += tangents1.at(( i * dimX ) + j);
-                tempTangents += tangents2.at(( i * dimX ) + j);
+                tempTangents += mTangents1.at(( i * dimX ) + j);
+                tempTangents += mTangents2.at(( i * dimX ) + j);
             }
 
             // Look for bottom-left triangles
             if(i != dimY-1 && j != 0){
-                tempNormals += normals1.at(( i * dimX ) + j - 1);
-                tempNormals += normals2.at(( i * dimX ) + j - 1);
+                tempNormals += mNormals1.at(( i * dimX ) + j - 1);
+                tempNormals += mNormals2.at(( i * dimX ) + j - 1);
 
-                tempTangents += tangents1.at(( i * dimX ) + j - 1);
-                tempTangents += tangents2.at(( i * dimX ) + j - 1);
+                tempTangents += mTangents1.at(( i * dimX ) + j - 1);
+                tempTangents += mTangents2.at(( i * dimX ) + j - 1);
             }
 
             tempNormals = glm::normalize(tempNormals);
-            normals_final.at(( i * dimX ) + j) = tempNormals; // Store final normal of j-th vertex in i-th row
+            mNormalsFinal.at(( i * dimX ) + j) = tempNormals; // Store final normal of j-th vertex in i-th row
 
 
-            tangents_final.at(( i * dimX ) + j) = tempTangents;
+            mTangentsFinal.at(( i * dimX ) + j) = tempTangents;
 
             //in radians
-            slope_y.at(( i * dimX ) + j) = glm::acos(tempNormals.y);
+            mSlopeY.at(( i * dimX ) + j) = glm::acos(tempNormals.y);
 
         }
     }
@@ -725,7 +727,7 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(std::vector<Gener
 
 void MultiLayeredHeightmap::LoadSplatmap(){
 
-    mSplatmap.resize(mNumberOfVertices);
+    //mSplatmap.resize(mNumberOfVertices);
 
     const float fRange1 = 0.01f;
     const float fRange2 = 0.01667f;
@@ -744,7 +746,7 @@ void MultiLayeredHeightmap::LoadSplatmap(){
         b = 0.0f;
 
 #if ENABLE_SLOPE_BASED_BLEND
-    fScale = slope_y.at(i);
+    fScale = mSlopeY.at(i);
 #else
     fScale = mPositions.at(i).y/mfHeightScale;
 #endif
@@ -789,6 +791,9 @@ void MultiLayeredHeightmap::LoadSplatmap(){
         mSplatmap.at(i) = {r,g,b,0.0f};
     }
 
-
+    mSplatmapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RGB);
+    mSplatmapTexture->bind().setData(GL_RGB, mHeightmapDimensions.x, mHeightmapDimensions.y, mSplatmap);
+    mSplatmapTexture->bind().generateMipmaps();
 }
+
 #undef LOC

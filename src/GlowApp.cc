@@ -8,6 +8,7 @@
 
 #include <glm/ext.hpp>
 
+#include<glow-extras/glfw/GlfwApp.hh>
 #include <glow/common/scoped_gl.hh>
 #include <glow/common/str_utils.hh>
 #include <glow/gl.hh>
@@ -23,19 +24,32 @@
 #include <glow/objects/ElementArrayBuffer.hh>
 
 unsigned int seed;
-bool button;
+bool buttonTerrain;
+bool recalculateSplatmap;
+bool randomWind;
 
 using namespace glow;
 const int heightMapDim = 256;
 
+void TW_CALL GlowApp::TweakSetSplatmap(void *clientData){
+    static_cast<GlowApp *>(clientData)->SetSplatmap();
+}
+
+void TW_CALL GlowApp::TweakRandomWind(void *clientData){
+    static_cast<GlowApp *>(clientData)->SetRandomWind();
+}
+
 GlowApp::GlowApp():
-    mHeightmap(20.0f, 3.0f)
+     mHeightmap(20.0f,3.0f),
+     mBrush(&mHeightmap),
+     mBiomes(&mHeightmap)
 {
 
 }
 
 void GlowApp::init()
 {
+
     GlfwApp::init(); // call to base!
 
     // check correct working dir
@@ -48,18 +62,40 @@ void GlowApp::init()
     // configure GlfwApp
     setTitle("Genesis");
 
+
+    TwEnumVal TextureChoices[] = { {TEXTURE_SNOW, "Snow"},{TEXTURE_GRASS, "Grass"}, {TEXTURE_ROCK, "Rock"} };
+    TwType TextureTwType = TwDefineEnum("TextureType", TextureChoices, 3);
+    TwAddVarRW(tweakbar(), "Texture Brush", TextureTwType, &m_selectedTexture, NULL);
+
+    TwEnumVal BrushChoices[] = { {BRUSH_TEXTURE, "Texture Brush"}, {BRUSH_HEIGHT, "Height Brush"}};
+    TwType BrushTwType = TwDefineEnum("BrushType", BrushChoices, 2);
+    TwAddVarRW(tweakbar(), "Brush Type", BrushTwType, &m_selectedBrush, NULL);
+
+    TwEnumVal MapChoices[] = { {MAP_SPLAT, "Splatmap"}, {MAP_RAIN, "Rain map"}};
+    TwType MapTwType = TwDefineEnum("MapType", MapChoices, 2);
+    TwAddVarRW(tweakbar(), "Map Type", MapTwType, &m_selectedMap, NULL);
+
+    TwEnumVal WindChoices[] = { {NS, "North -> South"}, {SN, "South -> North"}, {WE, "West -> East"}, {EW, "East -> West"}};
+    TwType WindTwType = TwDefineEnum("WindType", WindChoices, 4);
+    TwAddVarRW(tweakbar(), "Wind direction", WindTwType, &m_selectedWind, NULL);
+
+
     // set up tweakbar
-    TwAddVarRW(tweakbar(), "bg color", TW_TYPE_COLOR3F, &mClearColor, "group=rendering");
-    TwAddVarRW(tweakbar(), "light direction", TW_TYPE_DIR3F, &mLightDir, "group=scene");
-    TwAddVarRW(tweakbar(), "light distance", TW_TYPE_FLOAT, &mLightDis, "group=scene step=0.1 min=1 max=100");
-    TwAddVarRW(tweakbar(), "rotation speed", TW_TYPE_FLOAT, &mSpeed, "group=scene step=0.1");
+    //TwAddVarRW(tweakbar(), "bg color", TW_TYPE_COLOR3F, &mClearColor, "group=rendering");
+    //TwAddVarRW(tweakbar(), "light direction", TW_TYPE_DIR3F, &mLightDir, "group=scene");
+    TwAddVarRW(tweakbar(), "light distance", TW_TYPE_FLOAT, &mLightDis, "group=scene step=0.1 min=1 max=1000");
+    //TwAddVarRW(tweakbar(), "rotation speed", TW_TYPE_FLOAT, &mSpeed, "group=scene step=0.1");
     TwAddVarCB(tweakbar(), "seed", TW_TYPE_UINT16, GlowApp::setSeedTerrain, GlowApp::getSeedTerrain, &seed, "group=scene step=1");
-    TwAddButton(tweakbar(), "terrain", GlowApp::randomTerrain, this, " label='Generate random terrain '");
+    TwAddButton(tweakbar(), "terrain", GlowApp::randomTerrain, NULL, " label='Generate random terrain '");
     TwAddVarRW(tweakbar(), "Number of Iterations", TW_TYPE_UINT16, &mNumIterations, "group=scene step=1");
     TwAddButton(tweakbar(), "Erode Terrain", GlowApp::dropletErode, this, "label='Erode Terrain'");
+    TwAddVarRW(tweakbar(), "Height Brush", TW_TYPE_FLOAT, &mHeightBrushFactor, "group=scene step=0.5");
+    TwAddVarRW(tweakbar(), "Circle radius", TW_TYPE_FLOAT, &mCircleRadius, "group=scene step=0.5");
+    TwAddButton(tweakbar(), "splatmap", GlowApp::TweakSetSplatmap, NULL, " label='Recalculate textures '");
+    TwAddButton(tweakbar(), "wind", GlowApp::TweakRandomWind, NULL, " label='Random wind direction '");
 
     // load object
-    //mMeshCube = assimp::Importer().load("mesh/cube.obj");
+    mMeshCube = assimp::Importer().load("mesh/cube.obj");
     mShaderObj = Program::createFromFile("shader/obj");
     mTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
     mTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
@@ -100,6 +136,18 @@ void GlowApp::init()
                                                       pbt + "negz.jpg",
                                                       glow::ColorSpace::sRGB));
     mShaderBg = glow::Program::createFromFile("shader/bg");
+    mShaderLine = glow::Program::createFromFile("shader/line");
+
+    std::vector<glm::vec3> linePositions = {{0, 50, 0}, {0, 0, 0}};
+    auto ab = glow::ArrayBuffer::create();
+    ab->defineAttribute<glm::vec3>("aPosition");
+    ab->bind().setData(linePositions);
+    ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Line");
+
+    mLineVao = glow::VertexArray::create(ab, GL_LINES);
+
+    mBiomes.randomWindDirection();
+
 }
 
 void GlowApp::onResize(int w, int h)
@@ -121,19 +169,25 @@ void GlowApp::update(float elapsedSeconds)
 
 void GlowApp::render(float elapsedSeconds)
 {
-    if(button){
+    if(buttonTerrain){
         GlowApp::initTerrain();
-        button = false;
+        mBiomes.randomWindDirection();
+        buttonTerrain = false;
     }
+
+    mBrush.GenerateArc(mCircleRadius);
 
     GlfwApp::render(elapsedSeconds); // call to base!
 
-    auto cam = getCamera(); // internal camera from GlfwApp with some default input handling
+    auto cam = getCamera();
     auto view = cam->getViewMatrix();
     auto proj = cam->getProjectionMatrix();
     auto camPos = cam->getPosition();
 
     auto lightPos = normalize(mLightDir) * mLightDis;
+
+
+
 
     // render to framebuffer
     {
@@ -145,8 +199,8 @@ void GlowApp::render(float elapsedSeconds)
 
         // clear buffer (color + depth)
         {
-            auto c = pow(mClearColor, glm::vec3(2.224f)); // inverse gamma correction
-            GLOW_SCOPED(clearColor, c.r, c.g, c.b, 1.0f);
+            //auto c = pow(mClearColor, glm::vec3(2.224f)); // inverse gamma correction
+            //GLOW_SCOPED(clearColor, c.r, c.g, c.b, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
 
@@ -158,7 +212,8 @@ void GlowApp::render(float elapsedSeconds)
 
             shader.setTexture("uTexture", mBackgroundTexture);
             auto invProj = inverse(cam->getProjectionMatrix());
-            auto invView = inverse(cam->getViewMatrix());
+            auto invView = cam->getInverseViewMatrix();
+
             shader.setUniform("uInvProj", invProj);
             shader.setUniform("uInvView", invView);
 
@@ -167,14 +222,68 @@ void GlowApp::render(float elapsedSeconds)
 
             glEnable(GL_DEPTH_TEST);
             glDepthMask(GL_TRUE);
+
+            //world space mouse position
+            mMousePosWin = GlfwApp::getMousePosition();
+            mMouseNDC = glm::vec4((mMousePosWin.x/(getWindowWidth()/2.f) - 1.f), ((getWindowHeight()-mMousePosWin.y)/(getWindowHeight()/2.f) - 1.f), -1.0f, 1.f);
+            mMousePosWorld =invProj *  mMouseNDC;
+            mMousePosWorld /= mMousePosWorld.w;
+            mMousePosWorld = invView * mMousePosWorld;
+            mMousePosFinal = glm::vec3(mMousePosWorld);
+
         }
 
 
 
         // draw object
         {
-            auto model = glm::rotate(mAngle, glm::vec3(0, 1, 0)) * glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
+            auto lineShader = mShaderLine->use();
+            lineShader.setUniform("uView", view);
+            lineShader.setUniform("uProj", proj);
+            lineShader.setUniform("uModel", glm::mat4());
 
+            Ray testRay;
+            testRay.origin = camPos;
+            testRay.direction = glm::normalize(mMousePosFinal - camPos);
+
+            mBrush.intersect(testRay);
+
+
+            if(isKeyPressed(71)) // GLFW_KEY_G
+            {
+                std::vector<glm::vec3> linePositions = {glm::vec3(0, 0, 0), glm::vec3(0, 100, 0)};
+                auto ab = glow::ArrayBuffer::create();
+                ab->defineAttribute<glm::vec3>("aPosition");
+                ab->bind().setData(linePositions);
+                ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Line");
+
+                mLineVao = glow::VertexArray::create(ab, GL_LINES);
+            }
+
+            if(isKeyPressed(66)) //GLFW_KEY_B
+                mBiomes.generateRainMap(m_selectedWind);
+
+            mLineVao->bind().draw();
+
+            lineShader.setUniform("uModel", mBrush.GetCircleRotation());
+            mBrush.getCircleVao()->bind().draw();
+
+            if(recalculateSplatmap){
+                mHeightmap.LoadSplatmap();
+                recalculateSplatmap = false;
+            }
+
+            if(randomWind){
+                mBiomes.randomWindDirection();
+                randomWind = false;
+            }
+
+            if(GlfwApp::isMouseButtonPressed(mRightClick))
+                m_selectedBrush == 0? mBrush.SetTextureBrush(m_selectedTexture) : mBrush.SetHeightBrush(mHeightBrushFactor);
+
+            std::vector<glow::SharedTexture2D> selectedMap = {mHeightmap.getSplatmapTexture(), mBiomes.getRainTexture()};
+
+            auto model = glm::mat4(1.f); // glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
             auto shader = mShaderObj->use();
             shader.setUniform("uView", view);
             shader.setUniform("uProj", proj);
@@ -186,7 +295,7 @@ void GlowApp::render(float elapsedSeconds)
             shader.setTexture("uTexColor", mTextureColor);
             shader.setTexture("uTexNormal", mTextureNormal);
 
-            shader.setTexture("uSplatmapTex", mHeightmap.getSplatmapTexture());
+            shader.setTexture("uSplatmapTex", selectedMap[m_selectedMap]);
 
             //terrain 2d texture array
             shader.setTexture("uTerrainTex", mTexture);
@@ -195,7 +304,7 @@ void GlowApp::render(float elapsedSeconds)
 
             shader.setUniform("fRenderHeight", mHeightmap.getMfHeightScale());
 
-            mPerlinTest->bind().draw();
+            mHeightmap.getVao()->bind().draw();
         }
     }
 
@@ -256,11 +365,11 @@ void GlowApp::setSeed(unsigned int var){
 
     if(seed != var){
       seed = var;
-      button = true;
+      buttonTerrain = true;
   }
 
   else
-      button = false;
+      buttonTerrain = false;
 }
 
 unsigned int GlowApp::getSeed() const{
@@ -270,4 +379,12 @@ unsigned int GlowApp::getSeed() const{
 void GlowApp::dropletErodeIterations()
 {
     mHeightmap.IterateDroplet(mNumIterations);
+}
+
+void GlowApp::SetSplatmap(){
+    recalculateSplatmap = true;
+}
+
+void GlowApp::SetRandomWind(){
+    randomWind = true;
 }

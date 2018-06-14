@@ -1,6 +1,8 @@
 #include"MultiLayeredHeightmap.hh"
 #include "DiamondSquareNoiseGenerator.hh"
 #include "PerlinNoiseGenerator.hh"
+#include "Brush.hh"
+#include "Biomes.hh"
 
 #include <AntTweakBar.h>
 
@@ -16,17 +18,27 @@
 #ifndef GLOWAPP
 #define GLOWAPP
 
-
 class GlowApp : public glow::glfw::GlfwApp
 {
 private:
     glm::vec3 mClearColor = {0 / 255.0f, 85 / 255.0f, 159 / 255.0f};
     glm::vec3 mLightDir = normalize(glm::vec3(.2, .7, .7));
-    float mLightDis = 100.0f;
+    float mLightDis = 300.0f;
 
     float mAngle = 0.0f;
     float mSpeed = 0.0f;
     unsigned int mNumIterations = 1;
+
+    glm::vec2 mMousePosWin;
+    const int mLeftClick = 0;
+    const int mRightClick = 1;
+
+    glm::vec3 mMousePosFinal;
+    glm::vec4 mMousePosWorld;
+    glm::vec4 mMouseNDC;
+
+    float mHeightBrushFactor = 40.f;
+    float mCircleRadius = 30.f;
 
 private:
     glow::SharedProgram mShaderOutput;
@@ -36,8 +48,10 @@ private:
     glow::SharedTextureRectangle mTargetDepth;
 
     glow::SharedProgram mShaderObj;
+    glow::SharedProgram mShaderLine;
     glow::SharedVertexArray mMeshCube;
     glow::SharedVertexArray mPerlinTest;
+    glow::SharedVertexArray mLineVao;
     glow::SharedTexture2D mTextureColor;
     glow::SharedTexture2D mTextureNormal;
 
@@ -50,6 +64,21 @@ private:
     glow::SharedTextureCubeMap mBackgroundTexture;
     glow::SharedProgram mShaderBg;
 
+    Brush mBrush;
+    Biomes mBiomes;
+
+    typedef enum { TEXTURE_SNOW, TEXTURE_GRASS, TEXTURE_ROCK} SelectedTexture;
+    SelectedTexture m_selectedTexture = TEXTURE_GRASS;
+
+    typedef enum { BRUSH_TEXTURE, BRUSH_HEIGHT} SelectedBrush;
+    SelectedBrush m_selectedBrush = BRUSH_TEXTURE;
+
+    typedef enum { MAP_SPLAT, MAP_RAIN} SelectedMap;
+    SelectedMap m_selectedMap = MAP_SPLAT;
+
+    typedef enum { NS, SN, WE, EW} SelectedWind;
+    SelectedWind m_selectedWind = NS;
+
 public:
     GlowApp();
     // load resources, initialize app
@@ -61,6 +90,7 @@ public:
     // called after window is resized
     void onResize(int w, int h) override;
 
+    void randomTerrain();
     void initTerrain();
 
     static void TW_CALL randomTerrain(void *clientData){
@@ -80,6 +110,11 @@ public:
     void setSeed(unsigned int var);
     unsigned int getSeed() const;
     void dropletErodeIterations();
+    void SetSplatmap();
+    static void TW_CALL TweakSetSplatmap(void *clientData);
+
+    static void TW_CALL TweakRandomWind(void *clientData);
+    void SetRandomWind();
 
 };
 

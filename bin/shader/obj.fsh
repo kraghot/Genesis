@@ -1,8 +1,3 @@
-////change to 1 to enable, 0 to disable slope based blending (in case of 0, height based blending is enabled
-#ifndef ENABLE_SLOPE_BASED_BLEND
-#define ENABLE_SLOPE_BASED_BLEND 1
-#endif
-
 uniform vec3 uLightPos;
 uniform vec3 uCamPos;
 
@@ -76,5 +71,5 @@ void main()
     float diffuse = kd * max(0, dot(N, L));
     float specular = ks * pow(max(0, dot(N, H)), shininess);
 //    fColor = color * (albedo + diffuse + specular);
-    fColor = vFinalTexColor * (albedo + diffuse + specular);
+    fColor = pow(vFinalTexColor, vec4(1/2.224)) * (albedo + diffuse + specular);
 }
