@@ -206,8 +206,8 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
             float T = ( i / (float)(dimY - 1) );
 
             float X = ( S * terrainWidth ) - halfTerrainWidth;
-            //float Y = heights.at(CURRPOS) * 30;
-            float Y = 0.0f;
+            float Y = heights.at(CURRPOS);
+//            float Y = 0.0f;
             float Z = ( T * terrainHeight ) - halfTerrainHeight;
 
             mNormalsFinal.at(CURRPOS) = glm::vec3(0);

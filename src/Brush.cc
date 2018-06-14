@@ -88,7 +88,7 @@ void Brush::SetHeightBrush(float factor){
                      mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i) += factor;
                 }
 
-                mHeightmap->mPositions.at(j*mHeightmap->mHeightmapDimensions.x + i).y = mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i) * 30;
+                mHeightmap->mPositions.at(j*mHeightmap->mHeightmapDimensions.x + i).y = mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i);
 
             }
         }
