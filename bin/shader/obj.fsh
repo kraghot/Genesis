@@ -34,7 +34,7 @@ void main()
     {
         float val = SplatmapColor.a;
         if(val >= 0.95f)
-            vFinalTexColor = vec4(1.0f, 0, 0, 1.0f);
+            vFinalTexColor = vec4(0.0f, 0.0f, 1.0f, 1.0f);
         else
             vFinalTexColor = texture(uTerrainTex, vec3(vTexCoord, 0.0)) * SplatmapColor.r  + texture(uTerrainTex, vec3(vTexCoord, 1.0)) * SplatmapColor.g + texture(uTerrainTex, vec3(vTexCoord, 2.0)) * SplatmapColor.b;
     }
