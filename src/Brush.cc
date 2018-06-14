@@ -78,18 +78,17 @@ void Brush::SetHeightBrush(float factor){
             float distance = pointPositionx + pointPositiony + pointPositionz;
 
                 if(distance < Radius2 && distance > (0.7 * Radius2)){
-                    mHeightmap->mPositions.at(j*mHeightmap->mHeightmapDimensions.x + i).y += 0.1f;
                     mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i) += factor < 0.004f? 0.002f : factor - 0.004f;
                 }
 
                 else if(distance < (0.7 * Radius2) && distance > (0.5 * Radius2)){
-                    mHeightmap->mPositions.at(j*mHeightmap->mHeightmapDimensions.x + i).y += 0.1f;
                     mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i) += factor < 0.002f? 0.001f : factor - 0.002f;
                 }
                 else if(distance < (0.5 * Radius2)){
-                     mHeightmap->mPositions.at(j*mHeightmap->mHeightmapDimensions.x + i).y += 0.1f;
                      mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i) += factor;
                 }
+
+                mHeightmap->mPositions.at(j*mHeightmap->mHeightmapDimensions.x + i).y = mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i) * 30;
 
             }
         }
@@ -220,17 +219,17 @@ void Brush::intersect(const Ray& _ray )
             Triangle1.p1 = mHeightmap->mPositions.at((j+1) * dimX  + i);
             Triangle1.p2 = mHeightmap->mPositions.at((j+1) * dimX + i+1);
 
-//            Triangle1.p0.y = mDisplacement.at((j * dimX ) + i);
-//            Triangle1.p1.y = mDisplacement.at((j+1) * dimX  + i);
-//            Triangle1.p2.y = mDisplacement.at((j+1) * dimX + i+1);
+//            Triangle1.p0.y = mHeightmap->mDisplacement.at((j * dimX ) + i);
+//            Triangle1.p1.y = mHeightmap->mDisplacement.at((j+1) * dimX  + i);
+//            Triangle1.p2.y = mHeightmap->mDisplacement.at((j+1) * dimX + i+1);
 
             Triangle2.p0 = mHeightmap->mPositions.at((j+1) * dimX + i+1);
             Triangle2.p1 = mHeightmap->mPositions.at((j* dimX) + i+1);
             Triangle2.p2 = mHeightmap->mPositions.at((j * dimX ) + i);
 
-//            Triangle2.p0.y = mDisplacement.at((j+1) * dimX + i+1);
-//            Triangle2.p1.y = mDisplacement.at((j* dimX) + i+1);
-//            Triangle2.p2.y = mDisplacement.at((j * dimX ) + i);
+//            Triangle2.p0.y = mHeightmap->mDisplacement.at((j+1) * dimX + i+1);
+//            Triangle2.p1.y = mHeightmap->mDisplacement.at((j* dimX) + i+1);
+//            Triangle2.p2.y = mHeightmap->mDisplacement.at((j * dimX ) + i);
 
             Normal1 = glm::normalize(glm::cross(Triangle1.p0-Triangle1.p1, Triangle1.p1-Triangle1.p2));
             Normal2 = glm::normalize(glm::cross(Triangle2.p0-Triangle2.p1, Triangle2.p1-Triangle2.p2));
@@ -241,7 +240,7 @@ void Brush::intersect(const Ray& _ray )
                 mIntersectionTriangle = Triangle1;
                 mIntersectionHeight = j;
                 mIntersectionWidth = i;
-                intersectionPoint = _ray.origin + temp_t * _ray.direction;
+                intersectionPoint = _ray.origin + temp_t * _ray.direction * 0.9;
             }
 
             else if(intersectTriangle(Triangle2, Normal2, _ray) && _t < temp_t){
@@ -250,7 +249,7 @@ void Brush::intersect(const Ray& _ray )
                 mIntersectionTriangle = Triangle2;
                 mIntersectionHeight = j;
                 mIntersectionWidth = i;
-                intersectionPoint = _ray.origin + temp_t * _ray.direction;
+                intersectionPoint = _ray.origin + temp_t * _ray.direction* 0.9;
             }
 
         }

@@ -35,7 +35,7 @@ private:
     glm::vec4 mMousePosWorld;
     glm::vec4 mMouseNDC;
 
-    float mHeightBrushFactor = 60.f;
+    float mHeightBrushFactor = 40.f;
     float mCircleRadius = 30.f;
 
 private:

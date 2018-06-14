@@ -172,7 +172,7 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
     mHeightCoords.resize(mNumberOfVertices);
 
     mSlopeY.resize(mNumberOfVertices);
-    mHeightCoords.resize(mNumberOfVertices);
+    //mHeightCoords.resize(mNumberOfVertices);
     mSplatmap.resize(mNumberOfVertices);
 
     int dimX = mHeightmapDimensions.x, dimY = mHeightmapDimensions.y;
