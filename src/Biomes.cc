@@ -30,10 +30,10 @@ NS:
         for(j = 0; j < mHeightmap->mHeightmapDimensions.y; j++){
 
             if(firstIteration)
-                    rainAmount[y][x] = 1.f - (mHeightmap->mDisplacement.at(CURRPOS_NS)/80); // default: /100
+                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/10000.f); // default: /100
 
             else if(rainAmount[y-1][x] > 0)
-                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_NS)/80));
+                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/10000.f);
 
             rainAmount[y][x] = rainAmount[y][x] < 0.0 ? 0.0 : rainAmount[y][x];
 
@@ -54,10 +54,10 @@ SN:
         for(j = 0; j < mHeightmap->mHeightmapDimensions.y; j++){
 
             if(firstIteration)
-                    rainAmount[y][x] = 1.f - (mHeightmap->mDisplacement.at(CURRPOS_NS)/80);
+                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/10000.f);
 
             else if(rainAmount[y-1][x] > 0)
-                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_NS)/80));
+                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/10000.f);
 
             rainAmount[y][x] = rainAmount[y][x] < 0.0 ? 0.0 : rainAmount[y][x];
 
@@ -78,10 +78,10 @@ WE:
         for(j = 0; j < mHeightmap->mHeightmapDimensions.y * mHeightmap->mHeightmapDimensions.y; j+= mHeightmap->mHeightmapDimensions.y){
 
             if(firstIteration)
-                    rainAmount[y][x] = 1.f - (mHeightmap->mDisplacement.at(CURRPOS_WE)/80);
+                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/10000.f);
 
             else if(rainAmount[y-1][x] > 0)
-                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_WE)/80));
+                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/10000.f);
 
             rainAmount[y][x] = rainAmount[y][x] < 0.0 ? 0.0 : rainAmount[y][x];
 
@@ -102,10 +102,10 @@ EW:
         for(j = 0; j < mHeightmap->mHeightmapDimensions.y * mHeightmap->mHeightmapDimensions.y; j+=mHeightmap->mHeightmapDimensions.y){
 
             if(firstIteration)
-                    rainAmount[y][x] = 1.f - (mHeightmap->mDisplacement.at(CURRPOS_WE)/80);
+                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/10000.f);
 
             else if(rainAmount[y-1][x] > 0)
-                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_WE)/80));
+                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/10000.f);
 
             rainAmount[y][x] = rainAmount[y][x] < 0.0 ? 0.0 : rainAmount[y][x];
 

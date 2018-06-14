@@ -730,12 +730,10 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(std::vector<Gener
 
 void MultiLayeredHeightmap::LoadSplatmap(){
 
-    //mSplatmap.resize(mNumberOfVertices);
-
-    const float fRange1 = 0.01f;
-    const float fRange2 = 0.01667f;
-    const float fRange3 = 0.02333f;
-    const float fRange4 = 0.03f;
+    const float fRange1 = 0.01f * 30;
+    const float fRange2 = 0.01667f * 30;
+    const float fRange3 = 0.02333f * 30;
+    const float fRange4 = 0.03f * 30;
 
     float fScale;
 
