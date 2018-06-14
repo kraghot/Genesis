@@ -626,6 +626,9 @@ void MultiLayeredHeightmap::IterateDroplet(int num)
         DropletErodeTerrain(coords);
     }
     MakeVertexArray();
+    mSplatmapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RGBA);
+    mSplatmapTexture->bind().setData(GL_RGBA, mHeightmapDimensions.x, mHeightmapDimensions.y, mSplatmap);
+    mSplatmapTexture->bind().generateMipmaps();
 }
 
 glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filename, unsigned char bitsPerPixel){
@@ -791,8 +794,8 @@ void MultiLayeredHeightmap::LoadSplatmap(){
         mSplatmap.at(i) = {r,g,b,0.0f};
     }
 
-    mSplatmapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RGB);
-    mSplatmapTexture->bind().setData(GL_RGB, mHeightmapDimensions.x, mHeightmapDimensions.y, mSplatmap);
+    mSplatmapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RGBA);
+    mSplatmapTexture->bind().setData(GL_RGBA, mHeightmapDimensions.x, mHeightmapDimensions.y, mSplatmap);
     mSplatmapTexture->bind().generateMipmaps();
 }
 

@@ -71,8 +71,8 @@ void GlowApp::init()
     TwType BrushTwType = TwDefineEnum("BrushType", BrushChoices, 2);
     TwAddVarRW(tweakbar(), "Brush Type", BrushTwType, &m_selectedBrush, NULL);
 
-    TwEnumVal MapChoices[] = { {MAP_SPLAT, "Splatmap"}, {MAP_RAIN, "Rain map"}};
-    TwType MapTwType = TwDefineEnum("MapType", MapChoices, 2);
+    TwEnumVal MapChoices[] = { {MAP_SPLAT, "Splatmap"}, {MAP_RAIN, "Rain map"}, {MAP_DROPLET, "Droplet Erode debug"} };
+    TwType MapTwType = TwDefineEnum("MapType", MapChoices, 3);
     TwAddVarRW(tweakbar(), "Map Type", MapTwType, &m_selectedMap, NULL);
 
     TwEnumVal WindChoices[] = { {NS, "North -> South"}, {SN, "South -> North"}, {WE, "West -> East"}, {EW, "East -> West"}};
@@ -248,7 +248,6 @@ void GlowApp::render(float elapsedSeconds)
 
             mBrush.intersect(testRay);
 
-
             if(isKeyPressed(71)) // GLFW_KEY_G
             {
                 std::vector<glm::vec3> linePositions = {glm::vec3(0, 0, 0), glm::vec3(0, 100, 0)};
@@ -281,7 +280,7 @@ void GlowApp::render(float elapsedSeconds)
             if(GlfwApp::isMouseButtonPressed(mRightClick))
                 m_selectedBrush == 0? mBrush.SetTextureBrush(m_selectedTexture) : mBrush.SetHeightBrush(mHeightBrushFactor);
 
-            std::vector<glow::SharedTexture2D> selectedMap = {mHeightmap.getSplatmapTexture(), mBiomes.getRainTexture()};
+            std::vector<glow::SharedTexture2D> selectedMap = {mHeightmap.getSplatmapTexture(), mBiomes.getRainTexture(), mHeightmap.getSplatmapTexture()};
 
             auto model = glm::mat4(1.f); // glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
             auto shader = mShaderObj->use();
@@ -296,6 +295,7 @@ void GlowApp::render(float elapsedSeconds)
             shader.setTexture("uTexNormal", mTextureNormal);
 
             shader.setTexture("uSplatmapTex", selectedMap[m_selectedMap]);
+            shader.setUniform("uDrawDebugRain", (m_selectedMap == MAP_DROPLET));
 
             //terrain 2d texture array
             shader.setTexture("uTerrainTex", mTexture);
