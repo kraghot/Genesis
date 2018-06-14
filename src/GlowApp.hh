@@ -38,7 +38,7 @@ private:
     glm::vec4 mMouseNDC;
 
     float mHeightBrushFactor = 10.f;
-    float mCircleRadius = 30.f;
+    float mCircleRadius = 10.f;
 
 private:
     glow::SharedProgram mShaderOutput;
