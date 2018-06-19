@@ -1,17 +1,17 @@
 #ifndef ISLANDMASKGENERATOR_H
 #define ISLANDMASKGENERATOR_H
 
-#include "NoiseGenerator.hh"
+#include "FilterGenerator.hh"
 #include "PerlinNoiseGenerator.hh"
 #include <glm/common.hpp>
 
-class IslandMaskGenerator : public NoiseGenerator
+class IslandMaskGenerator : public FilterGenerator
 {
 public:
     IslandMaskGenerator(glm::vec2 innerSquare, glm::vec2 outerSquare, unsigned seed);
     IslandMaskGenerator(glm::vec2 innerSquare, glm::vec2 outerSquare, PerlinNoiseGenerator& perlin);
 
-    double noise(double x, double y, double z);
+    double filter(double x, double y, double input);
 
 private:
     inline double GetRandomFactor(double x, double y, double z)
@@ -25,16 +25,16 @@ private:
     inline double Get1DLerp(double currPos, double noise)
     {
         if(currPos > noise)
-            return 0.0;
+            return 1.0;
 
         double scaled = currPos / noise;
-        return scaled - 1.0;
+        return scaled;
     }
 
     inline double Get2DLerp(double currPosX, double xNoise, double currPosY, double yNoise)
     {
         if(currPosX > xNoise && currPosY > yNoise)
-            return 0.0;
+            return 1.0;
 
         double scaledX = currPosX / xNoise;
         double scaledY = currPosY / yNoise;
@@ -48,7 +48,7 @@ private:
 //        average = 1.0 - average;
 //        return average - 1.0;
 //        return ((scaledX + scaledY) / 2.0f) - 1.0;
-        return scaledX * scaledY - 1.0;
+        return scaledX * scaledY;
     }
 
     PerlinNoiseGenerator mPerlin;

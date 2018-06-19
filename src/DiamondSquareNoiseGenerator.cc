@@ -120,7 +120,7 @@ unsigned DiamondSquareNoiseGenerator::TerrainWrap(unsigned value)
 float DiamondSquareNoiseGenerator::fRand()
 {
     // Return uniform between -1 and 1
-    return (double) rand() / (RAND_MAX / 2.0) - 1.0 ;
+    return (double) rand() / RAND_MAX ;
 }
 
 #undef LOC

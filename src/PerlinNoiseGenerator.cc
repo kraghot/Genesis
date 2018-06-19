@@ -64,6 +64,8 @@ double PerlinNoiseGenerator::noise(double x, double y, double z)
                       lerp(u, grad(permutations[AB], x, y-1, z), grad(permutations[BB], x-1, y-1, z))),
                       lerp(v, lerp(u, grad(permutations[AA+1], x, y, z-1), grad(permutations[BA+1], x-1, y, z-1)),
                       lerp(u, grad(permutations[AB+1], x, y-1, z-1), grad(permutations[BB+1], x-1, y-1, z-1))));
+    res /= 2.0;
+    res += 0.5;
     return res;
 }
 

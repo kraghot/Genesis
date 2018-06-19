@@ -321,32 +321,26 @@ void GlowApp::initTerrain(){
 
     std::vector<MultiLayeredHeightmap::GeneratorProperties> properties;
 
-    properties.emplace_back(islandFilter,
-                            1,
-                            1.0f,
-                            0.0f, // unused
-                            100.0f,
-                            0.0f // unused
-                            );
-
-
     properties.emplace_back(diamondNoise,
                             1,
                             1.0f,
                             0.0f, // unused
-                            60.0f,
+                            30.0f,
                             0.0f // unused
                             );
 
     properties.emplace_back(perlinNoise,
-                            4,
+                            3,
                             1.0f,
                             0.5f,
-                            20.0f,
+                            15.0f,
                             0.5f
                             );
 
-    mPerlinTest = mHeightmap.GenerateTerrain(properties, heightMapDim, heightMapDim);
+    std::vector<FilterGenerator*> filters;
+    filters.push_back(&islandFilter);
+
+    mPerlinTest = mHeightmap.GenerateTerrain(properties, filters, heightMapDim, heightMapDim);
 
     //define textures for terrain
     std::vector<std::string> mTerrainTextures = {"texture/snow009.jpg", "texture/grass007.jpg", "texture/rock007.jpg"};

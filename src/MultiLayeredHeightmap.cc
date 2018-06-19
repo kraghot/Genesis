@@ -680,7 +680,8 @@ glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filenam
 
 }
 
-glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(std::vector<GeneratorProperties>& properties, unsigned int dimX, unsigned int dimY)
+glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(std::vector<GeneratorProperties>& properties, std::vector<FilterGenerator*> filters,
+                                                               unsigned int dimX, unsigned int dimY)
 {
     mHeightmapDimensions = glm::uvec2(dimX, dimY);
     mNumberOfVertices = dimX * dimY;
@@ -719,6 +720,21 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(std::vector<Gener
             freq *= prop.freqScale;
             amplitude *= prop.amplitudeScale;
         }
+    }
+
+    for(auto filter: filters)
+    {
+#pragma omp for
+            for(auto i = 0u; i < dimY; i++)
+            {
+                for(auto j = 0u; j < dimX; j++)
+                {
+                    glm::vec2 normalizedCoord((float)j / dimX, (float)i/dimY);
+                    auto loc = LOC(i, j);
+
+                    heights[loc] = filter->filter(normalizedCoord.x, normalizedCoord.y, heights[loc]);
+                }
+            }
     }
 
     FillData(heights);

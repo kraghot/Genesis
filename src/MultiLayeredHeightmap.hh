@@ -32,6 +32,7 @@
 #include <AntTweakBar.h>
 
 #include "NoiseGenerator.hh"
+#include "FilterGenerator.hh"
 
 
 inline long getFileSize(FILE *file)
@@ -97,7 +98,8 @@ public:
     MultiLayeredHeightmap(float heightScale, float blockScale);
     virtual ~MultiLayeredHeightmap();
     glow::SharedVertexArray LoadHeightmap(const char *filename, unsigned char bitsPerPixel);
-    glow::SharedVertexArray GenerateTerrain(std::vector<GeneratorProperties>& properties, unsigned int dimX, unsigned int dimY);
+    glow::SharedVertexArray GenerateTerrain(std::vector<GeneratorProperties>& properties, std::vector<FilterGenerator*> filters,
+                                            unsigned int dimX, unsigned int dimY);
 
     // Get the height of the terrain at a position in world space, position = world space position
     float GetHeightAt(const glm::vec3& position);

@@ -20,9 +20,11 @@ IslandMaskGenerator::IslandMaskGenerator(glm::vec2 innerSquare, glm::vec2 outerS
     mRelRanges /= 2.0;
 }
 
-double IslandMaskGenerator::noise(double x, double y, double z)
+double IslandMaskGenerator::filter(double x, double y, double input)
 {
-    double val = 0.0;
+    double val = 1.0;
+    double z = 0.75;
+
     if(x < mRelRanges.x && y < mRelRanges.y)
     {
         double xNoise = GetRandomFactor(0, y * 10.0, z);
@@ -92,5 +94,5 @@ double IslandMaskGenerator::noise(double x, double y, double z)
         val = Get1DLerp(currentRelPos, noise);
     }
 
-    return val;
+    return val * input;
 }
