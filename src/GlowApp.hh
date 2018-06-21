@@ -67,6 +67,8 @@ private:
     glow::SharedTextureCubeMap mBackgroundTexture;
     glow::SharedProgram mShaderBg;
 
+    bool mDebugFlow = false;
+
     Brush mBrush;
     Biomes mBiomes;
 

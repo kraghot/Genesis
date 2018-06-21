@@ -43,7 +43,7 @@ GlowApp::GlowApp():
      mHeightmap(20.0f,1.0f),
      mBrush(&mHeightmap),
      mBiomes(&mHeightmap),
-     mFlowMap(heightMapDim * 1.5, heightMapDim * 1.5, &mHeightmap)
+     mFlowMap(heightMapDim, heightMapDim, &mHeightmap)
 {
 
 }
@@ -92,6 +92,7 @@ void GlowApp::init()
     TwAddButton(tweakbar(), "Erode Terrain", GlowApp::dropletErode, this, "label='Erode Terrain'");
     TwAddVarRW(tweakbar(), "Height Brush", TW_TYPE_FLOAT, &mHeightBrushFactor, "group=scene step=0.5");
     TwAddVarRW(tweakbar(), "Circle radius", TW_TYPE_FLOAT, &mCircleRadius, "group=scene step=0.5");
+    TwAddVarRW(tweakbar(), "DebugFlow", TW_TYPE_BOOLCPP, &mDebugFlow, "group=scene key=l label='DebugFlow'");
     TwAddButton(tweakbar(), "splatmap", GlowApp::TweakSetSplatmap, NULL, " label='Recalculate textures '");
     TwAddButton(tweakbar(), "wind", GlowApp::TweakRandomWind, NULL, " label='Random wind direction '");
 
@@ -319,6 +320,9 @@ void GlowApp::render(float elapsedSeconds)
         }
 
         {
+
+            GLOW_SCOPED(enable, GL_BLEND);
+            glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             auto shaderWater = mShaderWater->use();
             shaderWater.setUniform("uView", view);
             shaderWater.setUniform("uProj", proj);
@@ -329,6 +333,7 @@ void GlowApp::render(float elapsedSeconds)
             shaderWater.setTexture("uNormalMap1", mWaterNormal1);
             shaderWater.setTexture("uNormalMap2", mWaterNormal2);
             shaderWater.setTexture("uFlowMap", mFlowMap.GetFlowTexture());
+            shaderWater.setUniform("uDrawFlowMap", mDebugFlow);
 
             const float periodLength = 2.0f;
             const float  halfPeriod = periodLength / 2.0f;
@@ -385,7 +390,7 @@ void GlowApp::initTerrain(){
                             1,
                             1.0f,
                             0.0f, // unused
-                            100.0f,
+                            20.0f,
                             0.0f // unused
                             );
 

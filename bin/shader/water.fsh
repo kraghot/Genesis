@@ -43,4 +43,5 @@ void main(){
         fragCol = texture(uFlowMap, vTexCoords) * 10;
     else
         fragCol = sampledCube /** lambertian*/;
+    fragCol.a = 0.7f;
 }
