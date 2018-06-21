@@ -137,6 +137,7 @@ void GlowApp::init()
                                                       glow::ColorSpace::sRGB));
     mShaderBg = glow::Program::createFromFile("shader/bg");
     mShaderLine = glow::Program::createFromFile("shader/line");
+    mBrush.GenerateArc(mCircleRadius);
 
     std::vector<glm::vec3> linePositions = {{0, 50, 0}, {0, 0, 0}};
     auto ab = glow::ArrayBuffer::create();
@@ -174,8 +175,6 @@ void GlowApp::render(float elapsedSeconds)
         mBiomes.randomWindDirection();
         buttonTerrain = false;
     }
-
-    mBrush.GenerateArc(mCircleRadius);
 
     GlfwApp::render(elapsedSeconds); // call to base!
 
@@ -246,10 +245,10 @@ void GlowApp::render(float elapsedSeconds)
             testRay.origin = camPos;
             testRay.direction = glm::normalize(mMousePosFinal - camPos);
 
-            mBrush.intersect(testRay);
 
             if(isKeyPressed(71)) // GLFW_KEY_G
             {
+                mBrush.intersect(testRay);
                 std::vector<glm::vec3> linePositions = {glm::vec3(0, 0, 0), glm::vec3(0, 100, 0)};
                 auto ab = glow::ArrayBuffer::create();
                 ab->defineAttribute<glm::vec3>("aPosition");
@@ -325,17 +324,17 @@ void GlowApp::initTerrain(){
                             1,
                             1.0f,
                             0.0f, // unused
-                            30.0f,
+                            100.0f,
                             0.0f // unused
                             );
 
-    properties.emplace_back(perlinNoise,
-                            3,
-                            1.0f,
-                            0.5f,
-                            15.0f,
-                            0.5f
-                            );
+//    properties.emplace_back(perlinNoise,
+//                            3,
+//                            1.0f,
+//                            0.5f,
+//                            30.0f,
+//                            0.5f
+//                            );
 
     std::vector<FilterGenerator*> filters;
     filters.push_back(&islandFilter);
