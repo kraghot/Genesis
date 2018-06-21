@@ -41,7 +41,7 @@ DiamondSquareNoiseGenerator::DiamondSquareNoiseGenerator(const unsigned dimX, co
         DiamondSquare(sampleSize, scale);
 
         sampleSize /= 2;
-        scale /= 2.0f;
+        scale /= 3.0f;
     }
 }
 
