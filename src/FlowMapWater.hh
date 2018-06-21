@@ -19,6 +19,14 @@ private:
     bool IsInBounds(glm::vec2& particle);
     glm::vec2 GetNextPosition(glm::vec2 currPos, glm::vec2 direction);
 
+    /**
+     * @brief ApplyFlow applies flow in a brush like pattern
+     * @param coords is the location of the center of change
+     * @param flow is the direction of the flow which should be applied
+     * @param radius is the radius of the brush
+     */
+    void ApplyFlow(glm::uvec2& coords, glm::vec2 flow, float radius);
+
     unsigned mWidth, mHeight;
     glow::SharedTexture2D mFlowTexture;
     std::vector<glm::vec2> mFlowData;

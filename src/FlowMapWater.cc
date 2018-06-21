@@ -72,18 +72,16 @@ void FlowMapWater::GenerateFlowTexture()
 
 void FlowMapWater::FlowParticle(glm::vec2 &particle, const glm::vec2 &direction)
 {
-
-//    if(direction.x == 0)
     glm::vec2 lastPos = particle - direction;
     glm::vec2 nextPos = particle;
     while(IsInBounds(nextPos))
     {
         glm::vec2 flowToAdd = nextPos - lastPos;
-        flowToAdd = flowToAdd / 2.0F + 0.5f;
+        flowToAdd = flowToAdd;
         glm::uvec2 arrayCoords = {round(nextPos.x), round(nextPos.y)};
-        size_t arrayIndex = arrayCoords.y * mWidth + arrayCoords.x;
 
-        mFlowData[arrayIndex] =/* 0.9f * mFlowData[arrayIndex]  + 0.1f **/ flowToAdd;
+        if(flowToAdd != direction)
+            ApplyFlow(arrayCoords, flowToAdd / 2.0F + 0.5f, 2);
 
         lastPos = nextPos;
         nextPos = GetNextPosition(nextPos, direction);
@@ -140,4 +138,30 @@ glm::vec2 FlowMapWater::GetNextPosition(glm::vec2 currPos, glm::vec2 direction)
     }
 
     return forwardPos;
+}
+
+void FlowMapWater::ApplyFlow(glm::uvec2 &coords, glm::vec2 flow, float radius)
+{
+    glm::vec2 floatCoords = glm::vec2(coords);
+    for(int y = coords.y - radius; y < coords.y + radius; y++)
+    {
+        for(int x = coords.x - radius; x < coords.x + radius; x++)
+        {
+            float length = distance(glm::vec2(x, y), floatCoords);
+            length = fabs(length);
+
+            if(length > radius)
+                continue;
+
+            // Closer to center should be stronger
+            float lerpFactor = (radius - length) / radius;
+
+            // Get Field to write to
+            size_t arrayIndex = coords.y * mWidth + coords.x;
+
+            auto dataToAdd = (1 - lerpFactor) * mFlowData[arrayIndex] + lerpFactor * flow;
+            mFlowData[arrayIndex] = 0.5f * mFlowData[arrayIndex] + 0.5f * dataToAdd;
+        }
+    }
+
 }
