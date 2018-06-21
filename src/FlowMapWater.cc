@@ -18,6 +18,10 @@ void FlowMapWater::SetWindDirection(glm::vec2 windDirection)
     glm::vec2 rescaledWindDirection = mWindDirection / 2.0F + 0.5f;
     mFlowData = std::vector<glm::vec2>(mWidth * mHeight, rescaledWindDirection);
 
+    // Bypass because no effect
+    GenerateFlowTexture();
+    return;
+
     int frontArrayBegin, frontArrayEnd, particleBegin, particleEnd, variableCoordinate;
 
     if(mWindDirection == glm::vec2(0, -1))
@@ -77,23 +81,14 @@ void FlowMapWater::FlowParticle(glm::vec2 &particle, const glm::vec2 &direction)
     while(IsInBounds(nextPos))
     {
         glm::vec2 flowToAdd = nextPos - lastPos;
-        flowToAdd = flowToAdd;
         glm::uvec2 arrayCoords = {round(nextPos.x), round(nextPos.y)};
 
         if(flowToAdd != direction)
-            ApplyFlow(arrayCoords, flowToAdd / 2.0F + 0.5f, 2);
+            ApplyFlow(arrayCoords, flowToAdd / 2.0F + 0.5f, 10);
 
         lastPos = nextPos;
         nextPos = GetNextPosition(nextPos, direction);
     }
-}
-
-int FlowMapWater::incDec(int value, bool increment)
-{
-    if(increment)
-        return value++;
-    else
-        return value--;
 }
 
 bool FlowMapWater::IsInBounds(glm::vec2 &particle)
@@ -154,7 +149,8 @@ void FlowMapWater::ApplyFlow(glm::uvec2 &coords, glm::vec2 flow, float radius)
                 continue;
 
             // Closer to center should be stronger
-            float lerpFactor = (radius - length) / radius;
+//            float lerpFactor = (radius - length) / radius;
+            float lerpFactor = 1.0f;
 
             // Get Field to write to
             size_t arrayIndex = coords.y * mWidth + coords.x;

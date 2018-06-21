@@ -157,7 +157,7 @@ void GlowApp::init()
     mFlowMap.SetWindDirection(mBiomes.GetWindDirection());
 
     mWaterTimeLoop[0] = 0.0f;
-    mWaterTimeLoop[1] = 1.0f;
+    mWaterTimeLoop[1] = 2.0f;
 }
 
 void GlowApp::onResize(int w, int h)
@@ -265,6 +265,9 @@ void GlowApp::render(float elapsedSeconds)
                 ab->bind().setData(linePositions);
                 ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Line");
 
+                auto intersectionPoint = mBrush.getIntersectionPoint();
+                std::cout << intersectionPoint.x << " " << intersectionPoint.y << " " << intersectionPoint.z << std::endl;
+
                 mLineVao = glow::VertexArray::create(ab, GL_LINES);
             }
 
@@ -335,7 +338,7 @@ void GlowApp::render(float elapsedSeconds)
             shaderWater.setTexture("uFlowMap", mFlowMap.GetFlowTexture());
             shaderWater.setUniform("uDrawFlowMap", mDebugFlow);
 
-            const float periodLength = 2.0f;
+            const float periodLength = 4.0f;
             const float  halfPeriod = periodLength / 2.0f;
 
             for(int i = 0; i < 2; i++)
@@ -390,7 +393,7 @@ void GlowApp::initTerrain(){
                             1,
                             1.0f,
                             0.0f, // unused
-                            20.0f,
+                            50.0f,
                             0.0f // unused
                             );
 

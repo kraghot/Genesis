@@ -125,6 +125,9 @@ public:
     void AddClampedDisplacementAt(glm::uvec2 pos, float addition, float min);
     void AddSoftDisplacement(glm::uvec2 pos, float addition);
     void IterateDroplet(int num);
+    std::vector<glm::uvec2> GetNeighborhood(unsigned int i, unsigned int j);
+    std::vector<glm::uvec2> GetNeighborhood(glm::uvec2 coord);
+    glm::uvec2 GetLowestNeigh(std::vector<glm::uvec2>& neigh);
 
     glow::SharedTexture2D GetDisplacementTexture() const;
 
@@ -137,27 +140,21 @@ public:
     void MakeVertexArray();
 
     glow::SharedTexture2D mSplatmapTexture;
+    // The dimensions of the heightmap texture
     glm::uvec2 mHeightmapDimensions;
     std::vector<glm::vec4> mSplatmap;
 
     float mfBlockScale;
     float halfTerrainWidth;
 
+    float GetMfBlockScale() const;
+
 protected:
 
     void FillData(std::vector<float>& heights);
 
-
-    std::vector<glm::uvec2> GetNeighborhood(unsigned int i, unsigned int j);
-    std::vector<glm::uvec2> GetNeighborhood(glm::uvec2 coord);
-    glm::uvec2 GetLowestNeigh(std::vector<glm::uvec2>& neigh);
-
-
-
     float mfHeightScale;
     float mHeightValue;
-
-
 
     std::vector<glm::vec3> mNormals;
     std::vector<glm::vec4> mColors;
@@ -188,9 +185,6 @@ protected:
     glow::SharedTexture2D mDisplacementTexture;
 
     glm::mat4x4 mLocalToWorldMatrix;
-    // The dimensions of the heightmap texture
-
-
 
 };
 

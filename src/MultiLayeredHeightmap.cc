@@ -21,11 +21,12 @@ MultiLayeredHeightmap::MultiLayeredHeightmap(float heightScale, float blockScale
     mHeightmapDimensions(0,0),
     mfBlockScale(blockScale),
     mfHeightScale(heightScale)
-    {
+{
 
 }
 
-MultiLayeredHeightmap::~MultiLayeredHeightmap(){
+MultiLayeredHeightmap::~MultiLayeredHeightmap()
+{
 
 }
 
@@ -153,6 +154,11 @@ void MultiLayeredHeightmap::MakeVertexArray()
     mDisplacementTexture->bind().setData(GL_R32F, mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RED, GL_FLOAT, mDisplacement.data());
     mDisplacementTexture->bind().generateMipmaps();
 
+}
+
+float MultiLayeredHeightmap::GetMfBlockScale() const
+{
+    return mfBlockScale;
 }
 
 void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
