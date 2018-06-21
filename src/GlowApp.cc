@@ -40,9 +40,10 @@ void TW_CALL GlowApp::TweakRandomWind(void *clientData){
 }
 
 GlowApp::GlowApp():
-     mHeightmap(20.0f,3.0f),
+     mHeightmap(20.0f,1.0f),
      mBrush(&mHeightmap),
-     mBiomes(&mHeightmap)
+     mBiomes(&mHeightmap),
+     mFlowMap(heightMapDim * 1.5, heightMapDim * 1.5, &mHeightmap)
 {
 
 }
@@ -137,7 +138,11 @@ void GlowApp::init()
                                                       glow::ColorSpace::sRGB));
     mShaderBg = glow::Program::createFromFile("shader/bg");
     mShaderLine = glow::Program::createFromFile("shader/line");
+    mShaderWater = glow::Program::createFromFile("shader/water");
     mBrush.GenerateArc(mCircleRadius);
+
+    mWaterNormal1 = glow::Texture2D::createFromFile("texture/waternormal1.jpg", ColorSpace::Linear);
+    mWaterNormal2 = glow::Texture2D::createFromFile("texture/waternormal2.jpg", ColorSpace::Linear);
 
     std::vector<glm::vec3> linePositions = {{0, 50, 0}, {0, 0, 0}};
     auto ab = glow::ArrayBuffer::create();
@@ -148,7 +153,10 @@ void GlowApp::init()
     mLineVao = glow::VertexArray::create(ab, GL_LINES);
 
     mBiomes.randomWindDirection();
+    mFlowMap.SetWindDirection(mBiomes.GetWindDirection());
 
+    mWaterTimeLoop[0] = 0.0f;
+    mWaterTimeLoop[1] = 1.0f;
 }
 
 void GlowApp::onResize(int w, int h)
@@ -173,6 +181,7 @@ void GlowApp::render(float elapsedSeconds)
     if(buttonTerrain){
         GlowApp::initTerrain();
         mBiomes.randomWindDirection();
+        mFlowMap.SetWindDirection(mBiomes.GetWindDirection());
         buttonTerrain = false;
     }
 
@@ -259,8 +268,10 @@ void GlowApp::render(float elapsedSeconds)
             }
 
             if(isKeyPressed(66)) //GLFW_KEY_B
+            {
                 mBiomes.generateRainMap(m_selectedWind);
-
+                mFlowMap.SetWindDirection(mBiomes.GetWindDirection());
+            }
             mLineVao->bind().draw();
 
             lineShader.setUniform("uModel", mBrush.GetCircleRotation());
@@ -273,6 +284,7 @@ void GlowApp::render(float elapsedSeconds)
 
             if(randomWind){
                 mBiomes.randomWindDirection();
+                mFlowMap.SetWindDirection(mBiomes.GetWindDirection());
                 randomWind = false;
             }
 
@@ -304,6 +316,55 @@ void GlowApp::render(float elapsedSeconds)
             shader.setUniform("fRenderHeight", mHeightmap.getMfHeightScale());
 
             mHeightmap.getVao()->bind().draw();
+        }
+
+        {
+            auto shaderWater = mShaderWater->use();
+            shaderWater.setUniform("uView", view);
+            shaderWater.setUniform("uProj", proj);
+            shaderWater.setUniform("uLightPos", lightPos);
+            shaderWater.setUniform("uCameraPos", camPos);
+            shaderWater.setUniform("uHeightmapDim", heightMapDim);
+            shaderWater.setTexture("uCubeMap", mBackgroundTexture);
+            shaderWater.setTexture("uNormalMap1", mWaterNormal1);
+            shaderWater.setTexture("uNormalMap2", mWaterNormal2);
+            shaderWater.setTexture("uFlowMap", mFlowMap.GetFlowTexture());
+
+            const float periodLength = 2.0f;
+            const float  halfPeriod = periodLength / 2.0f;
+
+            for(int i = 0; i < 2; i++)
+            {
+                mWaterTimeLoop[i] += elapsedSeconds;
+                // Full period length is 2 seconds
+                if(mWaterTimeLoop[i] >= periodLength)
+                    mWaterTimeLoop[i] -= periodLength;
+
+                // One normal map rises and the other falls the first half and then reverse
+            }
+
+            float elapsedPeriod = mWaterTimeLoop[0];
+            bool isSecondPhase = false;
+            if(elapsedPeriod >= halfPeriod)
+            {
+                elapsedPeriod -= halfPeriod;
+                isSecondPhase = true;
+            }
+
+            float waterLerpFactor = elapsedPeriod / halfPeriod;
+            if(isSecondPhase)
+                waterLerpFactor = 1.0f - waterLerpFactor;
+
+            shaderWater.setUniform("uElapsedTime1", mWaterTimeLoop[0]);
+            shaderWater.setUniform("uElapsedTime2", mWaterTimeLoop[1]);
+            shaderWater.setUniform("uLerpFactor", waterLerpFactor);
+
+            mMeshQuad->bind().draw();
+        }
+
+        // @todo draw vector field
+        {
+
         }
     }
 

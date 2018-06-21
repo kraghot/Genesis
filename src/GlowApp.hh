@@ -3,13 +3,13 @@
 #include "PerlinNoiseGenerator.hh"
 #include "Brush.hh"
 #include "Biomes.hh"
+#include "FlowMapWater.hh"
 
 #include <AntTweakBar.h>
 
 #include <glow-extras/glfw/GlfwApp.hh>
 #include <glow/fwd.hh>
 #include <glm/glm.hpp>
-
 
 #include <glow/objects/Texture2DArray.hh>
 #include<glow/objects/TextureCubeMap.hh>
@@ -49,6 +49,7 @@ private:
 
     glow::SharedProgram mShaderObj;
     glow::SharedProgram mShaderLine;
+    glow::SharedProgram mShaderWater;
     glow::SharedVertexArray mMeshCube;
     glow::SharedVertexArray mPerlinTest;
     glow::SharedVertexArray mLineVao;
@@ -60,12 +61,18 @@ private:
 
     MultiLayeredHeightmap mHeightmap;
     glow::SharedTexture2D mSplatmapTexture;
+    glow::SharedTexture2D mWaterNormal1;
+    glow::SharedTexture2D mWaterNormal2;
 
     glow::SharedTextureCubeMap mBackgroundTexture;
     glow::SharedProgram mShaderBg;
 
     Brush mBrush;
     Biomes mBiomes;
+
+    FlowMapWater mFlowMap;
+    float mWaterTimeLoop[2];
+
 
     typedef enum { TEXTURE_SNOW, TEXTURE_GRASS, TEXTURE_ROCK} SelectedTexture;
     SelectedTexture m_selectedTexture = TEXTURE_GRASS;
