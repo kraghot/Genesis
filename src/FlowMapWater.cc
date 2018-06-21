@@ -79,10 +79,11 @@ void FlowMapWater::FlowParticle(glm::vec2 &particle, const glm::vec2 &direction)
     while(IsInBounds(nextPos))
     {
         glm::vec2 flowToAdd = nextPos - lastPos;
+        flowToAdd = flowToAdd / 2.0F + 0.5f;
         glm::uvec2 arrayCoords = {round(nextPos.x), round(nextPos.y)};
         size_t arrayIndex = arrayCoords.y * mWidth + arrayCoords.x;
 
-        mFlowData[arrayIndex] =/* 0.9f * mFlowData[arrayIndex]  + 0.1f **/ (normalize(flowToAdd));
+        mFlowData[arrayIndex] =/* 0.9f * mFlowData[arrayIndex]  + 0.1f **/ flowToAdd;
 
         lastPos = nextPos;
         nextPos = GetNextPosition(nextPos, direction);

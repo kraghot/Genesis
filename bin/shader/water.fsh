@@ -40,7 +40,7 @@ void main(){
     float lambertian = dot(normal, lightVec);
 
     if(uDrawFlowMap)
-        fragCol = texture(uFlowMap, vTexCoords) * 10;
+        fragCol = texture(uFlowMap, vTexCoords);
     else
         fragCol = sampledCube /** lambertian*/;
     fragCol.a = 0.7f;
