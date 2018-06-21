@@ -51,7 +51,11 @@ double DiamondSquareNoiseGenerator::noise(double x, double y, double z)
     locX = std::floor(x * mDimX);
     locY = std::floor(y * mDimY);
 
-    return mData.at(LOC(locX, locY));
+    // Rescale to [0, 1]
+    double height = mData.at(LOC(locX, locY));
+    height = height / 2.0 + 0.5;
+
+    return height;
 }
 
 void DiamondSquareNoiseGenerator::DiamondSquare(int stepsize, double scale)
@@ -120,7 +124,7 @@ unsigned DiamondSquareNoiseGenerator::TerrainWrap(unsigned value)
 float DiamondSquareNoiseGenerator::fRand()
 {
     // Return uniform between -1 and 1
-    return (double) rand() / RAND_MAX ;
+    return (double) rand() / (RAND_MAX /2.0) - 1.0;
 }
 
 #undef LOC
