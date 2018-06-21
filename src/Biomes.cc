@@ -17,6 +17,8 @@ void Biomes::generateRainMap(unsigned int randomWindDir){
 
     mRainMap.resize(mHeightmap->mNumberOfVertices);
 
+    mLastWindDir = randomWindDir;
+
     switch(randomWindDir){ //0 = N->S, 1 = S->N, 2 = W->E, 3 = E->W
         case 0: goto NS;
         case 1: goto SN;
@@ -135,4 +137,15 @@ glow::SharedTexture2D Biomes::getRainTexture() const
 void Biomes::randomWindDirection(){
     unsigned int randomWindDir = rand() % 4;
     generateRainMap(randomWindDir);
+}
+
+glm::vec2 Biomes::GetWindDirection()
+{
+    switch(mLastWindDir){ //0 = N->S, 1 = S->N, 2 = W->E, 3 = E->W
+        case 0: return glm::vec2( 0, -1);
+        case 1: return glm::vec2( 0,  1);
+        case 2: return glm::vec2(-1,  0);
+        case 3: return glm::vec2( 1,  0);
+    }
+    return glm::vec2(0, 0);
 }
