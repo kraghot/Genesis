@@ -242,8 +242,6 @@ void GlowApp::render(float elapsedSeconds)
 
         }
 
-
-
         // draw object
         {
             auto lineShader = mShaderLine->use();
