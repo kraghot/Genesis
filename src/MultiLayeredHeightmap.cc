@@ -254,12 +254,28 @@ std::vector<glm::uvec2> MultiLayeredHeightmap::GetNeighborhood(glm::uvec2 coord)
     return GetNeighborhood(coord.x, coord.y);
 }
 
+std::vector<glm::uvec2> MultiLayeredHeightmap::GetMooreNeighborhood(glm::uvec2 coord)
+{
+    // Get Von-Neumann
+    auto ret = GetNeighborhood(coord);
+    auto i = coord.x;
+    auto j = coord.y;
+
+    // Add corners
+    ret.push_back(glm::uvec2((i - 1) % mHeightmapDimensions.x, (j - 1) % mHeightmapDimensions.y));
+    ret.push_back(glm::uvec2((i - 1) % mHeightmapDimensions.x, (j + 1) % mHeightmapDimensions.y));
+    ret.push_back(glm::uvec2((i + 1) % mHeightmapDimensions.x, (j - 1) % mHeightmapDimensions.y));
+    ret.push_back(glm::uvec2((i + 1) % mHeightmapDimensions.x, (j + 1) % mHeightmapDimensions.y));
+
+    return ret;
+}
+
 glm::uvec2 MultiLayeredHeightmap::GetLowestNeigh(std::vector<glm::uvec2> &neigh)
 {
     unsigned int lowestIndex = -1;
     float lowestDepth = std::numeric_limits<float>::max();
 
-    for(auto i = 0u; i < 4; i++)
+    for(auto i = 0u; i < neigh.size(); i++)
     {
         auto currDepth = GetDisplacementAt(neigh.at(i));
         if (currDepth < lowestDepth)
@@ -270,6 +286,13 @@ glm::uvec2 MultiLayeredHeightmap::GetLowestNeigh(std::vector<glm::uvec2> &neigh)
     }
 
     return neigh.at(lowestIndex);
+}
+
+glm::uvec2 MultiLayeredHeightmap::WorldToLocalCoordinates(glm::vec2 position)
+{
+    position /= mfBlockScale;
+    position += glm::vec2(mHeightmapDimensions.x / 2.0, mHeightmapDimensions.y / 2.0);
+    return round(position);
 }
 
 glow::SharedVertexArray MultiLayeredHeightmap::getVao() const

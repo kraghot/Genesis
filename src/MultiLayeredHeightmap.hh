@@ -126,8 +126,34 @@ public:
     void AddSoftDisplacement(glm::uvec2 pos, float addition);
     void IterateDroplet(int num);
     std::vector<glm::uvec2> GetNeighborhood(unsigned int i, unsigned int j);
+
+    /**
+     * @brief GetNeighborhood returns the Von Neumann neighborhood of a given point
+     * @param coord is the point for which to generate neighbours
+     * @return list of neighbours
+     */
     std::vector<glm::uvec2> GetNeighborhood(glm::uvec2 coord);
+
+    /**
+     * @brief GetMooreNeighborhood returns the Moore neighborhood of a given point
+     * @param coord is the point for which to generate neighbours
+     * @return list of neighbours
+     */
+    std::vector<glm::uvec2> GetMooreNeighborhood(glm::uvec2 coord);
+
+    /**
+     * @brief GetLowestNeigh returns the point with the lowest height
+     * @param neigh is a list of of points which to check
+     * @return the coordinates of the lowest point
+     */
     glm::uvec2 GetLowestNeigh(std::vector<glm::uvec2>& neigh);
+
+    /**
+     * @brief WorldToLocalCoordinates calculates the local position on the heightmap from world coords
+     * @param position are the XZ world coords
+     * @return coords on the heightmap
+     */
+    glm::uvec2 WorldToLocalCoordinates(glm::vec2 position);
 
     glow::SharedTexture2D GetDisplacementTexture() const;
 

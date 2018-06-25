@@ -28,6 +28,13 @@ public:
      */
     void SetWindDirection(glm::vec2 windDirection);
 
+    /**
+     * @brief SpawnRiver attmepts to create a river in the given coordinates
+     * @param worldCoordinates is where the river starts
+     * @param flowVolume is the magnitude of the river
+     */
+    void SpawnRiver(glm::vec3 worldCoordinates, float flowVolume);
+
 private:
     /**
      * @brief GenerateFlowTexture prepares an OpenGL texture with the flow data
@@ -62,6 +69,29 @@ private:
      * @param radius is the radius of the brush
      */
     void ApplyFlow(glm::uvec2& coords, glm::vec2 flow, float radius);
+
+    /**
+     * @brief GetTriangleArea calculates the surface area of a triangle using Heron's formula
+     * @param A, B, C are points of a triangle
+     * @return Surface area of a triangle
+     */\
+    float GetTriangleArea(glm::vec3 A, glm::vec3 B, glm::vec3 C);
+
+    /**
+     * @brief InitializeOcean initializes all locations where the terrain height is less than the water level
+     * @param value is the direction to use in initialization
+     */
+    void InitializeOcean(glm::vec2 value);
+
+    /**
+     * @brief ConvertToHeightmapCoords converts the flowmap coords to the heightmap coords
+     */
+    glm::vec2 ConvertToHeightmapCoords(glm::vec2 flowCoords);
+
+    /**
+     * @brief ClampTo1 clamps a vector to a max length of 1
+     */
+    glm::vec2 ClampTo1(glm::vec2& vector);
 
     unsigned mWidth, mHeight;
     glow::SharedTexture2D mFlowTexture;
