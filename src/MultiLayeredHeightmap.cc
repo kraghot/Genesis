@@ -312,85 +312,6 @@ glm::vec3 MultiLayeredHeightmap::LocalToWorldCoordinates(glm::vec3 pos)
     return {world.x, pos.y, world.z};
 }
 
-void MultiLayeredHeightmap::CreateWaterMass()
-{
-    std::vector<glm::vec3> vertices;
-    std::vector<glm::vec2> texCoords;
-    vertices.reserve(1000);
-
-    for(auto i = 0; i < mHeightmapDimensions.y - 1; i++)
-    {
-        bool first = true;
-        float height = 0;
-        for(auto j = 0; j < mHeightmapDimensions.x; j++)
-        {
-            if(GetDisplacementAt({j, i}) < mFlowMap->GetWaterLevel())
-            {
-                first = true;
-                continue;
-            }
-
-            if(!IsWaterMass({j, i}) && IsWaterMass({j+1, i}) && IsWaterMass({j, i+1}))
-            {
-                first = false;
-                height = GetDisplacementAt({j, i});
-                vertices.push_back({j, height, i});
-                vertices.push_back({j, GetDisplacementAt({j, i}), i + 1});
-                vertices.push_back({j - 1, GetDisplacementAt({j - 1, i + 1}), i + 1});
-            }
-
-            if(!first && IsWaterMass({j, i}) && IsWaterMass({j, i+1}))
-            {
-                vertices.push_back({j, height, i});
-                vertices.push_back({j + 1, height, i});
-                vertices.push_back({j, height, i + 1});
-            }
-
-            if(IsWaterMass({j, i}) && IsWaterMass({j, i+1}))
-            {
-                vertices.push_back({j, height, i});
-                vertices.push_back({j + 1, height, i});
-                vertices.push_back({j, height, i + 1});
-                vertices.push_back({j + 1, height, i});
-                vertices.push_back({j + 1, height, i + 1});
-                vertices.push_back({j, height, i + 1});
-            }
-
-            if(!first && IsWaterMass({j+1, i}))
-            {
-                first = true;
-            }
-
-        }
-    }
-
-    // Add texture coords
-    texCoords.reserve(vertices.size());
-    for(auto i=0u; i < vertices.size(); i++)
-        texCoords[i] = {vertices[i].x / mHeightmapDimensions.x, vertices[i].z / mHeightmapDimensions.y};
-
-    // Convert from local to world coordinates
-    for(auto i=0; i < vertices.size(); i++)
-        vertices[i] = LocalToWorldCoordinates(vertices[i]);
-
-    std::vector<glow::SharedArrayBuffer> abs;
-    auto ab = glow::ArrayBuffer::create();
-    ab->defineAttribute<glm::vec3>("aPosition");
-    ab->bind().setData(vertices);
-    abs.push_back(ab);
-
-    ab = glow::ArrayBuffer::create();
-    ab->defineAttribute<glm::vec2>("aTexCoords");
-    ab->bind().setData(texCoords);
-    abs.push_back(ab);
-
-    for (auto const& ab : abs)
-        ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "WaterMass");
-
-    mRainMesh = glow::VertexArray::create(abs, nullptr, GL_TRIANGLES);
-    mRainMesh->setObjectLabel("WaterMass");
-}
-
 bool MultiLayeredHeightmap::IsWaterMass(glm::uvec2 pos)
 {
     return mRainFlowMap[LOCV(pos)] >= 0.98;
@@ -766,9 +687,6 @@ void MultiLayeredHeightmap::IterateDroplet(int num)
     mRainFlowMapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RED);
     mRainFlowMapTexture->bind().setData(GL_RED, mHeightmapDimensions.x, mHeightmapDimensions.y, mRainFlowMap);
     mRainFlowMapTexture->bind().generateMipmaps();
-
-    CreateWaterMass();
-
 }
 
 glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filename, unsigned char bitsPerPixel){

@@ -166,11 +166,6 @@ public:
     glm::vec3 LocalToWorldCoordinates(glm::vec3 pos);
 
     /**
-     * @brief CreateWaterMass creates a mesh that covers all the rivers and lakes
-     */
-    void CreateWaterMass();
-
-    /**
      * @brief IsWaterMass checks if the coordinate is a river of a lake
      */
     bool IsWaterMass(glm::uvec2 pos);

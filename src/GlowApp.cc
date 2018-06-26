@@ -160,8 +160,6 @@ void GlowApp::init()
 
     mWaterTimeLoop[0] = 0.0f;
     mWaterTimeLoop[1] = 2.0f;
-
-    mHeightmap.CreateWaterMass();
 }
 
 void GlowApp::onResize(int w, int h)
@@ -384,8 +382,10 @@ void GlowApp::render(float elapsedSeconds)
             shaderRiver.setUniform("uElapsedTime1", mWaterTimeLoop[0]);
             shaderRiver.setUniform("uElapsedTime2", mWaterTimeLoop[1]);
             shaderRiver.setUniform("uLerpFactor", waterLerpFactor);
+            shaderRiver.setTexture("uTexDisplacement", mHeightmap.GetDisplacementTexture());
+            shaderRiver.setTexture("uTexRainFlow", mHeightmap.mRainFlowMapTexture);
 
-            mHeightmap.GetRainMesh()->bind().draw();
+            mHeightmap.getVao()->bind().draw();
 
         }
     }
