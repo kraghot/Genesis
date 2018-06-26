@@ -27,7 +27,7 @@ private:
 
     float mAngle = 0.0f;
     float mSpeed = 0.0f;
-    unsigned int mNumIterations = 1;
+    unsigned int mNumIterations = 1000;
 
     glm::vec2 mMousePosWin;
     const int mLeftClick = 0;

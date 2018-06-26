@@ -428,8 +428,8 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
         auto next = GetLowestNeigh(neigh);
 
         // Stop when in ocean
-        if(GetDisplacementAt(next) < mFlowMap->GetWaterLevel())
-            return;
+//        if(GetDisplacementAt(next) < mFlowMap->GetWaterLevel() - 2)
+//            return;
 
         float heightDifference = GetDisplacementAt(currPos) - GetDisplacementAt(next);
 

@@ -73,39 +73,6 @@ void FlowMapWater::SpawnRiver(glm::vec3 worldCoordinates, float flowVolume)
 
     // Add strong droplets to generate a better rainmap
     mHeightmap->DropletErodeTerrain(currentCoords, 10.0f);
-
-//    glm::vec2 inertia;
-//    auto neigh = mHeightmap->GetMooreNeighborhood(currentCoords);
-//    auto nextPos = mHeightmap->GetLowestNeigh(neigh);
-
-//    inertia = nextPos - currentCoords;
-//    currentCoords = nextPos;
-//    glm::vec2 realCoords = currentCoords;
-//    glm::vec2 nextRealPos;
-
-//    while(true)
-//    {
-//        auto neigh = mHeightmap->GetMooreNeighborhood(currentCoords);
-//        auto lowest = mHeightmap->GetLowestNeigh(neigh);
-
-//        // Get Next postion according to inertia
-//        nextRealPos = realCoords + normalize(inertia);
-
-//        // inertia to lower position, inertia to the real position
-//        glm::vec2 toLowest, toReal;
-//        float lowestDiff, realDiff;
-
-//        lowestDiff = mHeightmap->GetDisplacementAt(lowest) - mHeightmap->GetDisplacementAt(currentCoords);
-//        realDiff = mHeightmap->GetDisplacementAt(nextRealPos) - mHeightmap->GetDisplacementAt(currentCoords);
-//        toLowest = (glm::vec2(lowest)- realCoords) * lowestDiff;
-//        toReal = (nextRealPos - realCoords) * realDiff;
-
-//        ClampTo1(toLowest);
-//        ClampTo1(toReal);
-
-//        // mix inertia to get the nex position
-//        inertia = 0.5 * toLowest, 0.5 * toReal;
-    //    }
 }
 
 void FlowMapWater::SetFlowAt(glm::uvec2 heightmapCoordinates, glm::vec2 flow)
