@@ -399,22 +399,18 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
     // Sediment, velocity, water
     float s=0, v=0, w=strength;
 
-
-//    // Left, Right, Bottom, Top
-//    float hl = GetDisplacementAt(neight.at(NeighSide::Left));
-//    float hr = GetDisplacementAt(neight.at(NeighSide::Right));
-//    float hu = GetDisplacementAt(neight.at(NeighSide::Up));
-//    float hd = GetDisplacementAt(neight.at(NeighSide::Down));
-
     glm::uvec2 currPos = coordinates;
     for(auto i=0u; i < maxPathLength; i++)
     {
         auto neigh = GetNeighborhood(currPos);
         auto next = GetLowestNeigh(neigh);
 
+        // Stop when in ocean
+        if(GetDisplacementAt(next) < mFlowMap->GetWaterLevel())
+            return;
+
         float heightDifference = GetDisplacementAt(currPos) - GetDisplacementAt(next);
 
-        /// @todo Add handling when the differece is negligible
         /// Move in random direction
         if(heightDifference <= 0.0001)
         {
@@ -455,6 +451,11 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
         }
 
         w *= 1 - Cw;
+        if(mFlowMap)
+        {
+            mFlowMap->SetFlowAt(currPos, next - currPos);
+        }
+        mRainFlowMap[LOC(currPos.x, currPos.y)] += 0.05;
         currPos = next;
 
         if(i > maxPathLength)
@@ -658,6 +659,13 @@ void MultiLayeredHeightmap::IterateDroplet(int num)
     mSplatmapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RGBA);
     mSplatmapTexture->bind().setData(GL_RGBA, mHeightmapDimensions.x, mHeightmapDimensions.y, mSplatmap);
     mSplatmapTexture->bind().generateMipmaps();
+
+    mFlowMap->GenerateFlowTexture();
+
+    mRainFlowMapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RED);
+    mRainFlowMapTexture->bind().setData(GL_RED, mHeightmapDimensions.x, mHeightmapDimensions.y, mRainFlowMap);
+    mRainFlowMapTexture->bind().generateMipmaps();
+
 }
 
 glow::SharedVertexArray MultiLayeredHeightmap::LoadHeightmap(const char *filename, unsigned char bitsPerPixel){
@@ -767,8 +775,12 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(std::vector<Gener
     }
 
     FillData(heights);
-
     MakeVertexArray();
+
+    mRainFlowMap.resize(dimX * dimY, 0.0f);
+    mRainFlowMapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RED);
+    mRainFlowMapTexture->bind().setData(GL_RED, mHeightmapDimensions.x, mHeightmapDimensions.y, mRainFlowMap);
+    mRainFlowMapTexture->bind().generateMipmaps();
 
     return mVao;
 }

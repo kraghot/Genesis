@@ -35,11 +35,16 @@ public:
      */
     void SpawnRiver(glm::vec3 worldCoordinates, float flowVolume);
 
-private:
+    void SetFlowAt(glm::uvec2 heightmapCoordinates, glm::vec2 flow);
+
     /**
      * @brief GenerateFlowTexture prepares an OpenGL texture with the flow data
      */
     void GenerateFlowTexture();
+
+    float GetWaterLevel() {return mWaterLevel;}
+
+private:
 
     /**
      * @brief FlowParticle simulates the travel of a particle according to wind and terrain

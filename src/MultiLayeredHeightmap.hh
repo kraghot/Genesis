@@ -60,6 +60,7 @@ inline int getFileLength(std::istream& file){
     return length;
 }
 
+class FlowMapWater;
 
 class MultiLayeredHeightmap
 {
@@ -174,6 +175,8 @@ public:
     float halfTerrainWidth;
 
     float GetMfBlockScale() const;
+    FlowMapWater* mFlowMap;
+    glow::SharedTexture2D mRainFlowMapTexture;
 
 protected:
 
@@ -211,6 +214,8 @@ protected:
     glow::SharedTexture2D mDisplacementTexture;
 
     glm::mat4x4 mLocalToWorldMatrix;
+
+    std::vector<float> mRainFlowMap;
 
 };
 

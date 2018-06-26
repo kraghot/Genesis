@@ -72,8 +72,8 @@ void GlowApp::init()
     TwType BrushTwType = TwDefineEnum("BrushType", BrushChoices, 2);
     TwAddVarRW(tweakbar(), "Brush Type", BrushTwType, &m_selectedBrush, NULL);
 
-    TwEnumVal MapChoices[] = { {MAP_SPLAT, "Splatmap"}, {MAP_RAIN, "Rain map"}, {MAP_DROPLET, "Droplet Erode debug"} };
-    TwType MapTwType = TwDefineEnum("MapType", MapChoices, 3);
+    TwEnumVal MapChoices[] = { {MAP_SPLAT, "Splatmap"}, {MAP_RAIN, "Rain map"}, {MAP_DROPLET, "Droplet Erode debug"}, {MAP_RAINFLOW, "Rain Flow Map"} };
+    TwType MapTwType = TwDefineEnum("MapType", MapChoices, 4);
     TwAddVarRW(tweakbar(), "Map Type", MapTwType, &m_selectedMap, NULL);
 
     TwEnumVal WindChoices[] = { {NS, "North -> South"}, {SN, "South -> North"}, {WE, "West -> East"}, {EW, "East -> West"}};
@@ -155,6 +155,7 @@ void GlowApp::init()
 
     mBiomes.randomWindDirection();
     mFlowMap.SetWindDirection(mBiomes.GetWindDirection());
+    mHeightmap.mFlowMap = &mFlowMap;
 
     mWaterTimeLoop[0] = 0.0f;
     mWaterTimeLoop[1] = 2.0f;
@@ -293,7 +294,7 @@ void GlowApp::render(float elapsedSeconds)
             if(GlfwApp::isMouseButtonPressed(mRightClick))
                 m_selectedBrush == 0? mBrush.SetTextureBrush(m_selectedTexture) : mBrush.SetHeightBrush(mHeightBrushFactor);
 
-            std::vector<glow::SharedTexture2D> selectedMap = {mHeightmap.getSplatmapTexture(), mBiomes.getRainTexture(), mHeightmap.getSplatmapTexture()};
+            std::vector<glow::SharedTexture2D> selectedMap = {mHeightmap.getSplatmapTexture(), mBiomes.getRainTexture(), mHeightmap.getSplatmapTexture(), mHeightmap.mRainFlowMapTexture};
 
             auto model = glm::mat4(1.f); // glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
             auto shader = mShaderObj->use();
