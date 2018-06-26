@@ -140,6 +140,7 @@ void GlowApp::init()
     mShaderBg = glow::Program::createFromFile("shader/bg");
     mShaderLine = glow::Program::createFromFile("shader/line");
     mShaderWater = glow::Program::createFromFile("shader/water");
+    mShaderRiver = glow::Program::createFromFile("shader/river");
     mBrush.GenerateArc(mCircleRadius);
 
     mWaterNormal1 = glow::Texture2D::createFromFile("texture/waternormal1.jpg", ColorSpace::Linear);
@@ -159,6 +160,8 @@ void GlowApp::init()
 
     mWaterTimeLoop[0] = 0.0f;
     mWaterTimeLoop[1] = 2.0f;
+
+    mHeightmap.CreateWaterMass();
 }
 
 void GlowApp::onResize(int w, int h)
@@ -367,10 +370,22 @@ void GlowApp::render(float elapsedSeconds)
             shaderWater.setUniform("uLerpFactor", waterLerpFactor);
 
             mMeshQuad->bind().draw();
-        }
 
-        // @todo draw vector field
-        {
+            auto shaderRiver = mShaderRiver->use();
+            shaderRiver.setUniform("uView", view);
+            shaderRiver.setUniform("uProj", proj);
+            shaderRiver.setUniform("uLightPos", lightPos);
+            shaderRiver.setUniform("uCameraPos", camPos);
+            shaderRiver.setTexture("uCubeMap", mBackgroundTexture);
+            shaderRiver.setTexture("uNormalMap1", mWaterNormal1);
+            shaderRiver.setTexture("uNormalMap2", mWaterNormal2);
+            shaderRiver.setTexture("uFlowMap", mFlowMap.GetFlowTexture());
+            shaderRiver.setUniform("uDrawFlowMap", mDebugFlow);
+            shaderRiver.setUniform("uElapsedTime1", mWaterTimeLoop[0]);
+            shaderRiver.setUniform("uElapsedTime2", mWaterTimeLoop[1]);
+            shaderRiver.setUniform("uLerpFactor", waterLerpFactor);
+
+            mHeightmap.GetRainMesh()->bind().draw();
 
         }
     }

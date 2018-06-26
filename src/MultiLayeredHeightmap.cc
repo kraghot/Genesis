@@ -20,7 +20,8 @@ GlowApp GlowAppObject;
 MultiLayeredHeightmap::MultiLayeredHeightmap(float heightScale, float blockScale):
     mHeightmapDimensions(0,0),
     mfBlockScale(blockScale),
-    mfHeightScale(heightScale)
+    mfHeightScale(heightScale),
+    mRainFlowMap(0.0)
 {
 
 }
@@ -293,6 +294,106 @@ glm::uvec2 MultiLayeredHeightmap::WorldToLocalCoordinates(glm::vec2 position)
     position /= mfBlockScale;
     position += glm::vec2(mHeightmapDimensions.x / 2.0, mHeightmapDimensions.y / 2.0);
     return round(position);
+}
+
+glm::vec3 MultiLayeredHeightmap::LocalToWorldCoordinates(glm::uvec2 position)
+{
+    glm::ivec2 iPos = position;
+    iPos -= (glm::ivec2(mHeightmapDimensions)/2.0);
+    glm::vec3 ret = {iPos.x, 0, iPos.y};
+    ret *= mfBlockScale;
+    return ret;
+}
+
+glm::vec3 MultiLayeredHeightmap::LocalToWorldCoordinates(glm::vec3 pos)
+{
+    glm::uvec2 lPos = {pos.x, pos.z};
+    auto world = LocalToWorldCoordinates(lPos);
+    return {world.x, pos.y, world.z};
+}
+
+void MultiLayeredHeightmap::CreateWaterMass()
+{
+    std::vector<glm::vec3> vertices;
+    std::vector<glm::vec2> texCoords;
+    vertices.reserve(1000);
+
+    for(auto i = 0; i < mHeightmapDimensions.y - 1; i++)
+    {
+        bool first = true;
+        float height = 0;
+        for(auto j = 0; j < mHeightmapDimensions.x; j++)
+        {
+            if(GetDisplacementAt({j, i}) < mFlowMap->GetWaterLevel())
+            {
+                first = true;
+                continue;
+            }
+
+            if(!IsWaterMass({j, i}) && IsWaterMass({j+1, i}) && IsWaterMass({j, i+1}))
+            {
+                first = false;
+                height = GetDisplacementAt({j, i});
+                vertices.push_back({j, height, i});
+                vertices.push_back({j, GetDisplacementAt({j, i}), i + 1});
+                vertices.push_back({j - 1, GetDisplacementAt({j - 1, i + 1}), i + 1});
+            }
+
+            if(!first && IsWaterMass({j, i}) && IsWaterMass({j, i+1}))
+            {
+                vertices.push_back({j, height, i});
+                vertices.push_back({j + 1, height, i});
+                vertices.push_back({j, height, i + 1});
+            }
+
+            if(IsWaterMass({j, i}) && IsWaterMass({j, i+1}))
+            {
+                vertices.push_back({j, height, i});
+                vertices.push_back({j + 1, height, i});
+                vertices.push_back({j, height, i + 1});
+                vertices.push_back({j + 1, height, i});
+                vertices.push_back({j + 1, height, i + 1});
+                vertices.push_back({j, height, i + 1});
+            }
+
+            if(!first && IsWaterMass({j+1, i}))
+            {
+                first = true;
+            }
+
+        }
+    }
+
+    // Add texture coords
+    texCoords.reserve(vertices.size());
+    for(auto i=0u; i < vertices.size(); i++)
+        texCoords[i] = {vertices[i].x / mHeightmapDimensions.x, vertices[i].z / mHeightmapDimensions.y};
+
+    // Convert from local to world coordinates
+    for(auto i=0; i < vertices.size(); i++)
+        vertices[i] = LocalToWorldCoordinates(vertices[i]);
+
+    std::vector<glow::SharedArrayBuffer> abs;
+    auto ab = glow::ArrayBuffer::create();
+    ab->defineAttribute<glm::vec3>("aPosition");
+    ab->bind().setData(vertices);
+    abs.push_back(ab);
+
+    ab = glow::ArrayBuffer::create();
+    ab->defineAttribute<glm::vec2>("aTexCoords");
+    ab->bind().setData(texCoords);
+    abs.push_back(ab);
+
+    for (auto const& ab : abs)
+        ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "WaterMass");
+
+    mRainMesh = glow::VertexArray::create(abs, nullptr, GL_TRIANGLES);
+    mRainMesh->setObjectLabel("WaterMass");
+}
+
+bool MultiLayeredHeightmap::IsWaterMass(glm::uvec2 pos)
+{
+    return mRainFlowMap[LOCV(pos)] >= 0.98;
 }
 
 glow::SharedVertexArray MultiLayeredHeightmap::getVao() const
@@ -665,6 +766,8 @@ void MultiLayeredHeightmap::IterateDroplet(int num)
     mRainFlowMapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RED);
     mRainFlowMapTexture->bind().setData(GL_RED, mHeightmapDimensions.x, mHeightmapDimensions.y, mRainFlowMap);
     mRainFlowMapTexture->bind().generateMipmaps();
+
+    CreateWaterMass();
 
 }
 

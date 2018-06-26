@@ -156,6 +156,27 @@ public:
      */
     glm::uvec2 WorldToLocalCoordinates(glm::vec2 position);
 
+    /**
+     * @brief LocalToWorldCoordinates calculates the world coordinates from local coordinates
+     * @param position is the XZ local coord
+     * @return XZ world coords
+     */
+    glm::vec3 LocalToWorldCoordinates(glm::uvec2 position);
+
+    glm::vec3 LocalToWorldCoordinates(glm::vec3 pos);
+
+    /**
+     * @brief CreateWaterMass creates a mesh that covers all the rivers and lakes
+     */
+    void CreateWaterMass();
+
+    /**
+     * @brief IsWaterMass checks if the coordinate is a river of a lake
+     */
+    bool IsWaterMass(glm::uvec2 pos);
+
+    glow::SharedVertexArray GetRainMesh() {return mRainMesh;}
+
     glow::SharedTexture2D GetDisplacementTexture() const;
 
     glow::SharedTexture2D getSplatmapTexture() const;
@@ -216,6 +237,7 @@ protected:
     glm::mat4x4 mLocalToWorldMatrix;
 
     std::vector<float> mRainFlowMap;
+    glow::SharedVertexArray mRainMesh;
 
 };
 
