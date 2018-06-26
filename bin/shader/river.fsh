@@ -13,6 +13,7 @@ uniform float uLerpFactor;
 in vec4 vLightViewPos;
 in vec4 vPosition;
 in vec2 vTexCoords;
+in float vAlpha;
 
 out vec4 fragCol;
 
@@ -43,5 +44,5 @@ void main(){
         fragCol = texture(uFlowMap, vTexCoords);
     else
         fragCol = sampledCube /** lambertian*/;
-    fragCol.a = 0.7f;
+    fragCol.a = vAlpha;
 }
