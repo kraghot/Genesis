@@ -1,5 +1,6 @@
 #include "FlowMapWater.hh"
 #include <MultiLayeredHeightmap.hh>
+#include <LinearBlur.hh>
 #include <math.h>
 
 FlowMapWater::FlowMapWater(unsigned width, unsigned height, MultiLayeredHeightmap* heightmap):
@@ -83,19 +84,13 @@ void FlowMapWater::SetFlowAt(glm::uvec2 heightmapCoordinates, glm::vec2 flow)
     size_t arrayIndex = flowCoords.x + flowCoords.y * mWidth;
     auto existingFlow = mFlowData[arrayIndex];
 
-    // If no flow set to new flow
-    if(existingFlow == glm::vec2(0))
-    {
-        mFlowData[arrayIndex] = flow;
-    }
-    else
-    {
-        mFlowData[arrayIndex] = 0.8 * existingFlow + 0.2 * flow;
-    }
+    mFlowData[arrayIndex] = 0.8 * existingFlow + 0.2 * flow;
 }
 
 void FlowMapWater::GenerateFlowTexture()
 {
+    LinearBlur(mFlowData, mWidth, 3);
+
     mFlowTexture = glow::Texture2D::create(mWidth, mHeight, GL_RG);
     mFlowTexture->bind().setData(GL_RG, mWidth, mHeight, mFlowData);
     mFlowTexture->bind().generateMipmaps();

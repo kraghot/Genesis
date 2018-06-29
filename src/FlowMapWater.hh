@@ -45,6 +45,7 @@ public:
     float GetWaterLevel() {return mWaterLevel;}
 
 private:
+    friend class MultiLayeredHeightmap;
 
     /**
      * @brief FlowParticle simulates the travel of a particle according to wind and terrain

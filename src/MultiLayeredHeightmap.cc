@@ -1,5 +1,6 @@
 #include "MultiLayeredHeightmap.hh"
 #include "GlowApp.hh"
+#include "LinearBlur.hh"
 
 #include <stdio.h>
 #include <experimental/random>
@@ -683,6 +684,8 @@ void MultiLayeredHeightmap::IterateDroplet(int num)
     mSplatmapTexture->bind().generateMipmaps();
 
     mFlowMap->GenerateFlowTexture();
+
+    LinearBlur(mRainFlowMap, mHeightmapDimensions.x, 3);
 
     mRainFlowMapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RED);
     mRainFlowMapTexture->bind().setData(GL_RED, mHeightmapDimensions.x, mHeightmapDimensions.y, mRainFlowMap);
