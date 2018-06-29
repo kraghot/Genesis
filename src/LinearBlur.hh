@@ -3,29 +3,31 @@
 
 #include <vector>
 
-#define LOCV(i, j) (j % height) * width + (i % width)
+#define LOCV(i, j) j * width + i
 
 template<typename T>
-void LinearBlur(std::vector<T>& data, unsigned width, int r)
+void LinearBlur(std::vector<T>& data, int width, int r)
 {
     std::vector<T> blurred(data.size());
-    unsigned height = data.size() / width;
-    for(auto j = 0u; j < height; j++)
+    int height = data.size() / width;
+    for(auto j = r; j < height - r; j++)
     {
-        for(auto i = 0u; i < width; i++)
+        for(auto i = r; i < width - r; i++)
         {
-            T sum = {};
+            T sum = T(0);
             unsigned samples = 0;
             for(int offsetX = -r; offsetX <= r; offsetX++)
             {
                 for(int offsetY = -r; offsetY <= r; offsetY++)
                 {
-                    sum += data[LOCV(i + offsetX, j + offsetY)];
+                    auto index = LOCV(i + offsetX, j + offsetY);
+                    sum += data[index];
                     samples++;
                 }
             }
             sum /= samples;
-            blurred[LOCV(i, j)] = sum;
+            auto index = LOCV(i, j);
+            blurred[index] = sum;
         }
     }
 
