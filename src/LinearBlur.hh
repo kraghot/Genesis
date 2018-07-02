@@ -15,14 +15,14 @@ void LinearBlur(std::vector<T>& data, int width, int r)
         for(auto i = r; i < width - r; i++)
         {
             T sum = T(0);
-            unsigned samples = 0;
+            float samples = 0;
             for(int offsetX = -r; offsetX <= r; offsetX++)
             {
                 for(int offsetY = -r; offsetY <= r; offsetY++)
                 {
                     auto index = LOCV((i + offsetX), (j + offsetY));
                     sum += data[index];
-                    samples++;
+                    samples += 1.0;
                 }
             }
             sum /= samples;
