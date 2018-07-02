@@ -478,7 +478,7 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
         {
             mFlowMap->SetFlowAt(currPos, next - currPos);
         }
-        mRainFlowMap[LOC(currPos.x, currPos.y)] += 0.05;
+        mRainFlowMap[LOC(currPos.x, currPos.y)] += 0.1;
         currPos = next;
 
         if(i > maxPathLength)
@@ -685,7 +685,7 @@ void MultiLayeredHeightmap::IterateDroplet(int num)
 
     mFlowMap->GenerateFlowTexture();
 
-    LinearBlur(mRainFlowMap, mHeightmapDimensions.x, 3);
+    LinearBlur(mRainFlowMap, mHeightmapDimensions.x, 1);
 
     mRainFlowMapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RED);
     mRainFlowMapTexture->bind().setData(GL_RED, mHeightmapDimensions.x, mHeightmapDimensions.y, mRainFlowMap);

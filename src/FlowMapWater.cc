@@ -89,7 +89,7 @@ void FlowMapWater::SetFlowAt(glm::uvec2 heightmapCoordinates, glm::vec2 flow)
 
 void FlowMapWater::GenerateFlowTexture()
 {
-    LinearBlur(mFlowData, mWidth, 3);
+    LinearBlur(mFlowData, mWidth, 1);
 
     mFlowTexture = glow::Texture2D::create(mWidth, mHeight, GL_RG);
     mFlowTexture->bind().setData(GL_RG, mWidth, mHeight, mFlowData);
