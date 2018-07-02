@@ -20,7 +20,7 @@ void LinearBlur(std::vector<T>& data, int width, int r)
             {
                 for(int offsetY = -r; offsetY <= r; offsetY++)
                 {
-                    auto index = LOCV(i + offsetX, j + offsetY);
+                    auto index = LOCV((i + offsetX), (j + offsetY));
                     sum += data[index];
                     samples++;
                 }
