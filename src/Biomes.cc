@@ -15,8 +15,7 @@ void Biomes::generateRainMap(unsigned int randomWindDir){
     unsigned int x = 0, y = 0, i, j;
     bool firstIteration = true;
     float initRainValue = 0.f;
-    std::vector<std::vector<double>> test(mHeightmap->mHeightmapDimensions.x,std::vector<double>(mHeightmap->mHeightmapDimensions.y,0));
-    bool loss = false;
+    std::vector<std::vector<double>> biomesMerge(mHeightmap->mHeightmapDimensions.x,std::vector<double>(mHeightmap->mHeightmapDimensions.y,0));
 
     mRainMap.resize(mHeightmap->mNumberOfVertices);
 
@@ -37,7 +36,7 @@ NS:
             if(firstIteration){
                     rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/15000.f); // default: /100
                     initRainValue = rainAmount[y][x];
-                    test[x][y] = 1.f;
+                    biomesMerge[x][y] = 1.f;
             }
 
             else if(rainAmount[y-1][x] > 0)
@@ -47,12 +46,12 @@ NS:
 
             if(rainAmount[y][x] > initRainValue * 0.5f){
                 mRainMap.at(CURRPOS_NS) ={1.f, 0.f, 0.f};
-                test[x][y] = 1.f;
+                biomesMerge[x][y] = 1.f;
             }
             else{
-                test[x][y] = test[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/5000.f);
-                test[x][y] = test[x][y] < 0.0 ? 0.0 : test[x][y];
-                mRainMap.at(CURRPOS_NS) ={test[x][y], 1.f - test[x][y], 0.f};
+                biomesMerge[x][y] = biomesMerge[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/5000.f);
+                biomesMerge[x][y] = biomesMerge[x][y] < 0.0 ? 0.0 : biomesMerge[x][y];
+                mRainMap.at(CURRPOS_NS) ={biomesMerge[x][y], 1.f - biomesMerge[x][y], 0.f};
             }
 
             x++;
@@ -72,6 +71,7 @@ SN:
             if(firstIteration){
                     rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/15000.f); // default: /100
                     initRainValue = rainAmount[y][x];
+                    biomesMerge[x][y] = 1.f;
             }
 
             else if(rainAmount[y-1][x] > 0)
@@ -81,12 +81,12 @@ SN:
 
             if(rainAmount[y][x] > initRainValue * 0.5f){
                 mRainMap.at(CURRPOS_NS) ={1.f, 0.f, 0.f};
-                test[x][y] = 1.f;
+                biomesMerge[x][y] = 1.f;
             }
             else{
-                test[x][y] = test[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/5000.f);
-                test[x][y] = test[x][y] < 0.0 ? 0.0 : test[x][y];
-                mRainMap.at(CURRPOS_NS) ={test[x][y], 1.f - test[x][y], 0.f};
+                biomesMerge[x][y] = biomesMerge[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/5000.f);
+                biomesMerge[x][y] = biomesMerge[x][y] < 0.0 ? 0.0 : biomesMerge[x][y];
+                mRainMap.at(CURRPOS_NS) ={biomesMerge[x][y], 1.f - biomesMerge[x][y], 0.f};
             }
 
             x++;
@@ -107,6 +107,7 @@ WE:
             if(firstIteration){
                     rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/15000.f); // default: /100
                     initRainValue = rainAmount[y][x];
+                    biomesMerge[x][y] = 1.f;
             }
 
             else if(rainAmount[y-1][x] > 0)
@@ -116,12 +117,12 @@ WE:
 
             if(rainAmount[y][x] > initRainValue * 0.5f){
                 mRainMap.at(CURRPOS_WE) ={1.f, 0.f, 0.f};
-                test[x][y] = 1.f;
+                biomesMerge[x][y] = 1.f;
             }
             else{
-                test[x][y] = test[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/5000.f);
-                test[x][y] = test[x][y] < 0.0 ? 0.0 : test[x][y];
-                mRainMap.at(CURRPOS_WE) ={test[x][y], 1.f - test[x][y], 0.f};
+                biomesMerge[x][y] = biomesMerge[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/5000.f);
+                biomesMerge[x][y] = biomesMerge[x][y] < 0.0 ? 0.0 : biomesMerge[x][y];
+                mRainMap.at(CURRPOS_WE) ={biomesMerge[x][y], 1.f - biomesMerge[x][y], 0.f};
             }
 
             x++;
@@ -141,6 +142,7 @@ EW:
             if(firstIteration){
                     rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/15000.f); // default: /100
                     initRainValue = rainAmount[y][x];
+                    biomesMerge[x][y] = 1.f;
             }
 
             else if(rainAmount[y-1][x] > 0)
@@ -150,12 +152,12 @@ EW:
 
             if(rainAmount[y][x] > initRainValue * 0.5f){
                 mRainMap.at(CURRPOS_WE) ={1.f, 0.f, 0.f};
-                test[x][y] = 1.f;
+                biomesMerge[x][y] = 1.f;
             }
             else{
-                test[x][y] = test[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/5000.f);
-                test[x][y] = test[x][y] < 0.0 ? 0.0 : test[x][y];
-                mRainMap.at(CURRPOS_WE) ={test[x][y], 1.f - test[x][y], 0.f};
+                biomesMerge[x][y] = biomesMerge[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/5000.f);
+                biomesMerge[x][y] = biomesMerge[x][y] < 0.0 ? 0.0 : biomesMerge[x][y];
+                mRainMap.at(CURRPOS_WE) ={biomesMerge[x][y], 1.f - biomesMerge[x][y], 0.f};
             }
 
             x++;
