@@ -869,6 +869,7 @@ void MultiLayeredHeightmap::LoadSplatmap(){
         else{
             b = 1.f;
            }
+        
 
         mSplatmap.at(i) = {r,g,b,0.0f};
     }

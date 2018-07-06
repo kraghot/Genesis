@@ -258,7 +258,8 @@ void GlowApp::render(float elapsedSeconds)
 
             if(isKeyPressed(71)) // GLFW_KEY_G
             {
-                mBrush.intersect(testRay);
+                mBrush.intersect_quadtree(testRay);
+//                mBrush.intersect(testRay);
                 std::vector<glm::vec3> linePositions = {glm::vec3(0, 0, 0), glm::vec3(0, 100, 0)};
                 auto ab = glow::ArrayBuffer::create();
                 ab->defineAttribute<glm::vec3>("aPosition");

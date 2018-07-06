@@ -96,6 +96,7 @@ SN:
         firstIteration = false;
         x = 0;
         y++;
+        
     }
 
     goto bindRainMap;

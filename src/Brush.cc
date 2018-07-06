@@ -1,4 +1,5 @@
 #include "Brush.hh"
+#include <list>
 
 Brush::Brush(MultiLayeredHeightmap *h){
 
@@ -96,6 +97,45 @@ void Brush::SetHeightBrush(float factor){
     mHeightmap->CalculateNormalsTangents(mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y);
     //mHeightmap->LoadSplatmap();
     mHeightmap->MakeVertexArray();
+}
+
+bool Brush::IntersectAabb(const Ray &ray, const quadtree_node &node, float& tmin, float& tmax)
+{
+
+    tmin = (node.area.min.x - ray.origin.x) / ray.direction.x;
+    tmax = (node.area.max.x - ray.origin.x) / ray.direction.x;
+
+    if (tmin > tmax) std::swap(tmin, tmax);
+
+    float tymin = (node.area.min.y - ray.origin.y) / ray.direction.y;
+    float tymax = (node.area.max.y - ray.origin.y) / ray.direction.y;
+
+    if (tymin > tymax) std::swap(tymin, tymax);
+
+    if ((tmin > tymax) || (tymin > tmax))
+    return false;
+
+    if (tymin > tmin)
+    tmin = tymin;
+
+    if (tymax < tmax)
+    tmax = tymax;
+
+    float tzmin = (node.height_min - ray.origin.z) / ray.direction.z;
+    float tzmax = (node.height_max - ray.origin.z) / ray.direction.z;
+
+    if (tzmin > tzmax) std::swap(tzmin, tzmax);
+
+    if ((tmin > tzmax) || (tzmin > tmax))
+    return false;
+
+    if (tzmin > tmin)
+    tmin = tzmin;
+
+    if (tzmax < tmax)
+    tmax = tzmax;
+
+    return true;
 }
 
 glm::dvec3 Brush::getIntersectionPoint() const
@@ -261,6 +301,55 @@ void Brush::intersect(const Ray& _ray )
 
 }
 
+bool Brush::IntersectNode(const Ray &ray, const quadtree_node &node)
+{
+    int dimX = mHeightmap->mHeightmapDimensions.x;
+    Face Triangle1, Triangle2;
+    glm::vec3 Normal1, Normal2;
+    float temp_t = std::numeric_limits<float>::max();
+
+    for (int j = node.area.min.x; j <= node.area.max.x; j++ )
+    {
+        for (int i = node.area.min.y; i <= node.area.max.y; i++ )
+        {
+
+            Triangle1.p0 = mHeightmap->mPositions.at((j * dimX ) + i);
+            Triangle1.p1 = mHeightmap->mPositions.at((j+1) * dimX  + i);
+            Triangle1.p2 = mHeightmap->mPositions.at((j+1) * dimX + i+1);
+
+            Triangle2.p0 = mHeightmap->mPositions.at((j+1) * dimX + i+1);
+            Triangle2.p1 = mHeightmap->mPositions.at((j* dimX) + i+1);
+            Triangle2.p2 = mHeightmap->mPositions.at((j * dimX ) + i);
+
+            Normal1 = glm::normalize(glm::cross(Triangle1.p0-Triangle1.p1, Triangle1.p1-Triangle1.p2));
+            Normal2 = glm::normalize(glm::cross(Triangle2.p0-Triangle2.p1, Triangle2.p1-Triangle2.p2));
+
+            if(intersectTriangle(Triangle1, Normal1, ray) && _t < temp_t){
+                temp_t = _t;
+                Triangle1.normal = Normal1;
+                mIntersectionTriangle = Triangle1;
+                mIntersectionHeight = j;
+                mIntersectionWidth = i;
+                intersectionPoint = ray.origin + temp_t * ray.direction * 0.9;
+            }
+
+            else if(intersectTriangle(Triangle2, Normal2, ray) && _t < temp_t){
+                temp_t = _t;
+                Triangle2.normal = Normal2;
+                mIntersectionTriangle = Triangle2;
+                mIntersectionHeight = j;
+                mIntersectionWidth = i;
+                intersectionPoint = ray.origin + temp_t * ray.direction* 0.9;
+            }
+
+        }
+
+    }
+
+    // Check if anything intersected
+    return temp_t != std::numeric_limits<float>::max();
+}
+
 
 
 void Brush::GenerateArc(float r)
@@ -279,6 +368,56 @@ void Brush::GenerateArc(float r)
     ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Circle");
     mCircleVao = glow::VertexArray::create(ab, GL_LINES);
 
+}
+
+glm::vec3 Brush::intersect_quadtree(const Ray& _ray ){
+    QuadTree quadtree(mHeightmap);
+
+    std::vector<quadtree_node> nodes;
+
+    std::vector<quadtree_node> queue;
+    std::list<quadtree_intersection> intersected;
+
+    nodes = quadtree.construct_quadtree();
+
+    queue.push_back(nodes.at(0));
+
+    while(!queue.empty()){
+        quadtree_node node = queue.back();
+        queue.pop_back();
+        float tmin, tmax;
+        bool isIntersecting = IntersectAabb(_ray, node, tmin, tmax);
+
+        if(isIntersecting){
+            if(node.isLeaf)
+            {
+                intersected.push_back({node, tmin, tmax});
+            }
+            else
+            {
+                for(auto it: node.children)
+                    queue.push_back(*it);
+            }
+        }
+
+    }
+
+//    std::sort(intersected.begin(), intersected.end(), CompareQuadtreeIntersections);
+    intersected.sort(CompareQuadtreeIntersections);
+
+    while(intersected.size() > 0)
+    {
+        auto& closestIntersection = intersected.front();
+        if(IntersectNode(_ray, closestIntersection.node))
+            return intersectionPoint;
+        else
+        {
+            intersected.pop_front();
+        }
+    }
+
+    // No intersection found. Figure out what to do
+    return {-10, -10, -10};
 }
 
 
