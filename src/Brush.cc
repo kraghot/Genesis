@@ -366,9 +366,9 @@ bool Brush::IntersectNode(const Ray &ray, const quadtree_node *node)
     glm::vec3 Normal1, Normal2;
     float temp_t = std::numeric_limits<float>::max();
 
-    for (int j = node->area.min.x; j < (node->area.max.x - 1); j++ )
+    for (int j = node->area.min.y; j < (node->area.max.y - 1); j++ )
     {
-        for (int i = node->area.min.y; i < (node->area.max.y - 1); i++ )
+        for (int i = node->area.min.x; i < (node->area.max.x - 1); i++ )
         {
 
             Triangle1.p0 = mHeightmap->mPositions.at((j * dimX ) + i);
