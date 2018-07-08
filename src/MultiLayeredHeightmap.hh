@@ -108,6 +108,8 @@ public:
     glow::SharedTexture2DArray LoadTexture(std::vector<std::string> textureName);
     glow::SharedTexture2DArray LoadNormal(std::vector<std::string> normalName);
 
+    glm::vec4 CalculateRGBA(float fRange1, float fRange2, float fRange3, float fRange4, float fScale);
+
     void LoadSplatmap();
 
     /**
@@ -186,6 +188,9 @@ public:
     // The dimensions of the heightmap texture
     glm::uvec2 mHeightmapDimensions;
     std::vector<glm::vec4> mSplatmap;
+
+    std::vector<glm::vec4> mTemperatureMap;
+    std::vector<glm::vec4> mSlopeMap;
 
     float mfBlockScale;
     float halfTerrainWidth;

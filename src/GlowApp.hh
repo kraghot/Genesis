@@ -83,7 +83,8 @@ private:
     typedef enum { BRUSH_TEXTURE, BRUSH_HEIGHT} SelectedBrush;
     SelectedBrush m_selectedBrush = BRUSH_TEXTURE;
 
-    typedef enum { MAP_SPLAT, MAP_RAIN, MAP_DROPLET, MAP_RAINFLOW} SelectedMap;
+    //typedef enum { MAP_SPLAT, MAP_RAIN, MAP_DROPLET, MAP_RAINFLOW} SelectedMap;
+    typedef enum { MAP_SPLAT, MAP_RAIN, MAP_DROPLET, MAP_BIOMES} SelectedMap;
     SelectedMap m_selectedMap = MAP_SPLAT;
 
     typedef enum { NS, SN, WE, EW} SelectedWind;

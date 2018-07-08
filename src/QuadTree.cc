@@ -44,7 +44,7 @@ std::vector<quadtree_node> QuadTree::construct_quadtree(){
         nodes.at(i+2).area.max = half_length;
 
         //NorthEastQuadrant
-        nodes.at(i+1).area.min =  nodes.at(i+2).area.max;
+        nodes.at(i+1).area.min =  half_length;
         nodes.at(i+1).area.max = parent.area.max;
 
         //SouthEastQuadrant
