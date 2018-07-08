@@ -90,8 +90,7 @@ void GlfwApp::init()
     {
         // create camera with some sensible defaults
         mCamera = std::make_shared<camera::GenericCamera>();
-        mCamera->setPosition({2, 2, 2});
-        mCamera->setTarget({0, 0, 0});
+        mCamera->setLookAtMatrix({0, 200, 0}, {0, 198, 0}, {0, 0, 1});
     }
 
     if (mUseRenderingPipeline)
