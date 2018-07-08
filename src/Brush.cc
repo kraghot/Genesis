@@ -101,14 +101,24 @@ void Brush::SetHeightBrush(float factor){
 
 bool Brush::IntersectAabb(const Ray &ray, const quadtree_node &node, float& tmin, float& tmax)
 {
+    glm::vec3 node_position_min;
+    glm::vec3 node_position_max;
 
-    tmin = (node.area.min.x - ray.origin.x) / ray.direction.x;
-    tmax = (node.area.max.x - ray.origin.x) / ray.direction.x;
+    node_position_min.x = node.area.min.x;
+    node_position_min.y = node.height_min;
+    node_position_min.z = node.area.min.y;
+
+    node_position_max.x = node.area.max.x;
+    node_position_max.y = node.height_max;
+    node_position_max.z = node.area.max.y;
+
+    tmin = (mHeightmap->LocalToWorldCoordinates(node_position_min).x - ray.origin.x) / ray.direction.x;
+    tmax = (mHeightmap->LocalToWorldCoordinates(node_position_max).x - ray.origin.x) / ray.direction.x;
 
     if (tmin > tmax) std::swap(tmin, tmax);
 
-    float tymin = (node.area.min.y - ray.origin.y) / ray.direction.y;
-    float tymax = (node.area.max.y - ray.origin.y) / ray.direction.y;
+    float tymin = (mHeightmap->LocalToWorldCoordinates(node_position_min).y - ray.origin.y) / ray.direction.y;
+    float tymax = (mHeightmap->LocalToWorldCoordinates(node_position_max).y - ray.origin.y) / ray.direction.y;
 
     if (tymin > tymax) std::swap(tymin, tymax);
 
@@ -121,8 +131,8 @@ bool Brush::IntersectAabb(const Ray &ray, const quadtree_node &node, float& tmin
     if (tymax < tmax)
     tmax = tymax;
 
-    float tzmin = (node.height_min - ray.origin.z) / ray.direction.z;
-    float tzmax = (node.height_max - ray.origin.z) / ray.direction.z;
+    float tzmin = (mHeightmap->LocalToWorldCoordinates(node_position_min).z - ray.origin.z) / ray.direction.z;
+    float tzmax = (mHeightmap->LocalToWorldCoordinates(node_position_max).z - ray.origin.z) / ray.direction.z;
 
     if (tzmin > tzmax) std::swap(tzmin, tzmax);
 
@@ -135,6 +145,48 @@ bool Brush::IntersectAabb(const Ray &ray, const quadtree_node &node, float& tmin
     if (tzmax < tmax)
     tmax = tzmax;
 
+    return true;
+}
+
+bool Brush::IntersectAabb2(const Ray &ray, const quadtree_node &node, float &tmin, float &tmax, float& t)
+{
+    glm::vec3 lb = mHeightmap->LocalToWorldCoordinates({node.area.min.x, node.height_min, node.area.min.y});
+    glm::vec3 rt = mHeightmap->LocalToWorldCoordinates({node.area.max.x, node.height_max, node.area.max.y});
+
+//    float t; // Length of ray intersection
+
+    glm::vec3 dirfrac;
+    // r.dir is unit direction vector of ray
+    dirfrac.x = 1.0f / ray.direction.x;
+    dirfrac.y = 1.0f / ray.direction.y;
+    dirfrac.z = 1.0f / ray.direction.z;
+    // lb is the corner of AABB with minimal coordinates - left bottom, rt is maximal corner
+    // r.org is origin of ray
+    float t1 = (lb.x - ray.origin.x)*dirfrac.x;
+    float t2 = (rt.x - ray.origin.x)*dirfrac.x;
+    float t3 = (lb.y - ray.origin.y)*dirfrac.y;
+    float t4 = (rt.y - ray.origin.y)*dirfrac.y;
+    float t5 = (lb.z - ray.origin.z)*dirfrac.z;
+    float t6 = (rt.z - ray.origin.z)*dirfrac.z;
+
+    tmin = std::max(std::max(std::min(t1, t2), std::min(t3, t4)), std::min(t5, t6));
+    tmax = std::min(std::min(std::max(t1, t2), std::max(t3, t4)), std::max(t5, t6));
+
+    // if tmax < 0, ray (line) is intersecting AABB, but the whole AABB is behind us
+    if (tmax < 0)
+    {
+        t = tmax;
+        return false;
+    }
+
+    // if tmin > tmax, ray doesn't intersect AABB
+    if (tmin > tmax)
+    {
+        t = tmax;
+        return false;
+    }
+
+    t = tmin;
     return true;
 }
 
@@ -330,7 +382,7 @@ bool Brush::IntersectNode(const Ray &ray, const quadtree_node &node)
                 mIntersectionTriangle = Triangle1;
                 mIntersectionHeight = j;
                 mIntersectionWidth = i;
-                intersectionPoint = ray.origin + temp_t * ray.direction * 0.9;
+                intersectionPoint = ray.origin + temp_t * ray.direction * 0.8;
             }
 
             else if(intersectTriangle(Triangle2, Normal2, ray) && _t < temp_t){
@@ -339,7 +391,7 @@ bool Brush::IntersectNode(const Ray &ray, const quadtree_node &node)
                 mIntersectionTriangle = Triangle2;
                 mIntersectionHeight = j;
                 mIntersectionWidth = i;
-                intersectionPoint = ray.origin + temp_t * ray.direction* 0.9;
+                intersectionPoint = ray.origin + temp_t * ray.direction* 0.8;
             }
 
         }
@@ -385,13 +437,13 @@ glm::vec3 Brush::intersect_quadtree(const Ray& _ray ){
     while(!queue.empty()){
         quadtree_node node = queue.back();
         queue.pop_back();
-        float tmin, tmax;
-        bool isIntersecting = IntersectAabb(_ray, node, tmin, tmax);
+        float tmin, tmax, t;
+        bool isIntersecting = IntersectAabb2(_ray, node, tmin, tmax, t);
 
         if(isIntersecting){
             if(node.isLeaf)
             {
-                intersected.push_back({node, tmin, tmax});
+                intersected.push_back({node, t, tmax});
             }
             else
             {

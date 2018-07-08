@@ -29,7 +29,7 @@ std::vector<quadtree_node> QuadTree::construct_quadtree(){
     for(int i = 1; i < nodes_count; i += 4){
         quadtree_node parent = nodes.at((i-1)/4);
 
-        glm::vec2 half_length = parent.area.min + ((parent.area.max - parent.area.min)/2);
+        glm::vec2 half_length = parent.area.min + ((parent.area.max - parent.area.min)/2.0);
 
         //NorthWestQuadrant
         nodes.at(i).area.min.y = half_length.y;

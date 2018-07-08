@@ -38,6 +38,7 @@ public:
     void SetTextureBrush(int seletedTexture);
     void SetHeightBrush(float factor);
     bool IntersectAabb(const Ray& ray, const quadtree_node& node, float& tmin, float& tmax);
+    bool IntersectAabb2(const Ray& ray, const quadtree_node& node, float& tmin, float& tmax, float &t);
 
 private:
 
