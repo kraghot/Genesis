@@ -234,7 +234,7 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
 
         mIndices.push_back(restart);
     }
-    CalculateNormalsTangents(dimX, dimY);
+    CalculateNormalsTangents(glm::vec2(0,0), glm::vec2(dimX, dimY));
     LoadSplatmap();
 }
 
@@ -493,11 +493,14 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
 
 }
 
-void MultiLayeredHeightmap::CalculateNormalsTangents(int dimX, int dimY){
+void MultiLayeredHeightmap::CalculateNormalsTangents(glm::vec2 start_pos, glm::vec2 end_pos){
 
-    for (int j = 0; j < dimY-1; j++ )
+    int dimX = mHeightmapDimensions.x;
+    int dimY = mHeightmapDimensions.y;
+
+    for (int j = start_pos.y; j < end_pos.y-1; j++ )
     {
-        for (int i = 0; i < dimX-1; i++ )
+        for (int i = start_pos.x; i < end_pos.x-1; i++ )
         {
             unsigned int index = ( j * dimX ) + i;
 
@@ -572,9 +575,9 @@ void MultiLayeredHeightmap::CalculateNormalsTangents(int dimX, int dimY){
     }
 
 
-    for (int i = 0; i < dimY; ++i )
+    for (int j = start_pos.y; j < end_pos.y-1; j++ )
     {
-        for (int j = 0; j < dimX; ++j )
+        for (int i = start_pos.x; i < end_pos.x-1; i++ )
         {
             glm::vec3 tempNormals = glm::vec3(0.0f, 0.0f, 0.0f);
             glm::vec3 tempTangents = glm::vec3(0.0f, 0.0f, 0.0f);

@@ -177,7 +177,7 @@ public:
     glow::SharedTexture2D GetDisplacementTexture() const;
 
     glow::SharedTexture2D getSplatmapTexture() const;
-    void CalculateNormalsTangents(int dimX, int dimY);
+    void CalculateNormalsTangents(glm::vec2 start_pos, glm::vec2 end_pos);
     glow::SharedVertexArray getVao() const;
     std::vector<glm::vec3> mPositions;
     std::vector<float> mDisplacement;
