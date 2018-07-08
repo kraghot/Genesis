@@ -35,7 +35,7 @@ public:
     glm::mat4 GetCircleRotation();
     void GenerateArc(float r);
 
-    void SetTextureBrush(int seletedTexture);
+    void SetTextureBrush(int seletedTexture, std::vector<glm::vec4> &biomesMap, glow::SharedTexture2D mBiomesTexture);
     void SetHeightBrush(float factor);
     bool IntersectAabb(const Ray& ray, const quadtree_node& node, float& tmin, float& tmax);
     bool IntersectAabb2(const Ray& ray, const quadtree_node& node, float &t);

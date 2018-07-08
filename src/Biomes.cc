@@ -1,5 +1,6 @@
 #include "Biomes.hh"
 #include <random>
+#include <list>
 
 #define CURRPOS_NS i*mHeightmap->mHeightmapDimensions.x + j // S->N, N->S
 #define CURRPOS_WE i-j // E->W, W->E
@@ -245,3 +246,105 @@ glm::vec2 Biomes::GetWindDirection()
     }
     return glm::vec2(0, 0);
 }
+
+std::vector<glm::vec2> Biomes::poissonDiskSampling(float radius, int k){
+    int N = 2;
+    std::vector<glm::vec2> points;
+    std::list<glm::vec2> active;
+
+
+    glm::vec2 p0 = {rand() % mHeightmap->mHeightmapDimensions.x, rand() % mHeightmap->mHeightmapDimensions.y};
+
+    float cellSize = std::floor(radius/sqrt(N));
+
+    int ncells_width = ceil(mHeightmap->mHeightmapDimensions.x/cellSize) + 1;
+    int ncells_height = ceil(mHeightmap->mHeightmapDimensions.y/cellSize) + 1;
+
+    std::vector<std::vector<glm::vec2>> grid(ncells_width,std::vector<glm::vec2>(ncells_height,glm::vec2(-1, -1)));
+
+    insertPoint(grid, cellSize, p0);
+
+    points.push_back(p0);
+    active.push_back(p0);
+
+    while(active.size() > 0){
+        size_t random_index = rand() % (active.size());
+        auto it2 = active.begin();
+        std::advance(it2, random_index);
+        glm::vec2 p = *it2;
+
+
+        bool found = false;
+
+        for(int tries = 0; tries < k; tries++){
+            float theta = rand() % (360);
+
+            int rad_2rad = (2*radius) - radius;
+
+            float new_radius = rand() % rad_2rad;
+            new_radius += radius;
+
+            float pnewx = p.x + new_radius * cos(glm::radians(theta));
+            float pnewy = p.y + new_radius * sin(glm::radians(theta));
+            glm::vec2 pnew = {pnewx, pnewy};
+
+            if (!isValidPoint(grid, cellSize, ncells_width, ncells_height, pnew, radius))
+                continue;
+
+            points.push_back(pnew);
+            insertPoint(grid, cellSize, pnew);
+            active.push_back(pnew);
+            found = true;
+            break;
+
+        }
+
+        if(!found)
+            active.erase(it2);
+    }
+
+    return points;
+}
+
+void Biomes::insertPoint(std::vector<std::vector<glm::vec2>>& grid, float cellsize, glm::vec2 point) {
+    int xindex = floor((float) point.x / cellsize);
+    int yindex = floor((float) point.y / cellsize);
+    grid[xindex][yindex] = point;
+}
+
+bool Biomes::isValidPoint(std::vector<std::vector<glm::vec2>>& grid, float cellsize, int gwidth, int gheight, glm::vec2 p, float radius) {
+    /* Make sure the point is on the screen */
+    if (p.x < 0 || p.x >= mHeightmap->mHeightmapDimensions.x || p.y < 0 || p.y >= mHeightmap->mHeightmapDimensions.y)
+        return false;
+
+    /* Check neighboring eight cells */
+    int xindex = floor(p.x / cellsize);
+    int yindex = floor(p.y / cellsize);
+    int i0 = std::max(xindex - 1, 0);
+    int i1 = std::min(xindex + 1, gwidth - 1);
+    int j0 = std::max(yindex - 1, 0);
+    int j1 = std::min(yindex + 1, gheight - 1);
+
+    for (int i = i0; i <= i1; i++){
+        for (int j = j0; j <= j1; j++){
+          if (grid[i][j].x != (-1)){
+
+              //float distance = (grid[i][j] - p).length();
+
+              float xdiff = grid[i][j].x - p.x;
+              float zdiff = grid[i][j].y - p.y;
+
+              float distance2 = (xdiff * xdiff) - (zdiff * zdiff);
+              float radius2 = radius * radius;
+
+              if (distance2 < radius2)
+                return false;
+          }
+        }
+    }
+
+    /* If we get here, return true */
+    return true;
+}
+
+

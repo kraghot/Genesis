@@ -24,8 +24,9 @@ glm::mat4 Brush::GetCircleRotation()
 
 }
 
-void Brush::SetTextureBrush(int seletedTexture){
+void Brush::SetTextureBrush(int seletedTexture, std::vector<glm::vec4> &biomesMap, glow::SharedTexture2D mBiomesTexture){
 
+    
     float sum;
 
     float Radius2 = mIntersectionRadius * mIntersectionRadius;
@@ -45,28 +46,27 @@ void Brush::SetTextureBrush(int seletedTexture){
                 float distance = pointPositionx + pointPositiony + pointPositionz;
 
                     if(distance < Radius2 && distance > (0.7 * Radius2)){
-                        mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i)[seletedTexture] += 0.2;
+                        biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i)[seletedTexture] += 0.2;
                     }
 
                     else if(distance < (0.7 * Radius2) && distance > (0.5 * Radius2)){
-                        mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i)[seletedTexture] += 0.4;
+                        biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i)[seletedTexture] += 0.4;
                     }
                     else if(distance < (0.5 * Radius2)){
-                        mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i)[seletedTexture] += 0.8;
+                        biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i)[seletedTexture] += 0.8;
                     }
 
-                    sum = mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i).x + mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i).y + mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i).z + mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i).w;
-                    mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i).y /= sum;
-                    mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i).x /= sum;
-                    mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i).z /= sum;
-                    mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i).w /= sum;
+                    sum = biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).x + biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).y + biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).z + biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).w;
+                    biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).y /= sum;
+                    biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).x /= sum;
+                    biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).z /= sum;
+                    biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).w /= sum;
 
                 }
             }
 
-
-       mHeightmap->mSplatmapTexture->bind().setData(GL_RGBA, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mHeightmap->mSplatmap);
-       mHeightmap->mSplatmapTexture->bind().generateMipmaps();
+        mBiomesTexture->bind().setData(GL_RGBA, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, biomesMap);
+        mBiomesTexture->bind().generateMipmaps();
 }
 
 void Brush::SetHeightBrush(float factor){

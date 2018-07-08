@@ -112,25 +112,30 @@ void GlowApp::init()
     mTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
     mTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
 
-    addMesh("palm1");
 
-//    //define textures for terrain
-//    std::vector<std::string> mTerrainTextures = {"texture/snow009.jpg", "texture/grass007.jpg", "texture/rock007.jpg"};
 
-//    //define normals of textures for terrain (in the same order as the textures)
-//    std::vector<std::string> mTerrainNormals = {"texture/snow009_normal.png", "texture/grass007_normal9.png", "texture/rock007_normal9.png"};
-
-//    //load textures for terrain
-//    mTexture = mHeightmap.LoadTexture(mTerrainTextures);
-
-//    //load normals of textures for terrain
-//    mTexNormal = mHeightmap.LoadNormal(mTerrainNormals);
+    //addMesh("palm0");
 
     //generate first random seed for terrain
     std::srand(std::time(0));
     seed = std::rand();
     GlowApp::initTerrain();
     std::cout << "seed: " << seed << std::endl;
+
+
+    int a = 0;
+    int RADIUS = 60;
+    std::vector<glm::vec2> plist;
+
+    plist = mBiomes.poissonDiskSampling(RADIUS, 5);
+
+    addMesh("palm0");
+    while(a < plist.size()){
+        auto worldCoordinates = mHeightmap.LocalToWorldCoordinates(plist[a]);
+        worldCoordinates.y = mHeightmap.GetDisplacementAt(plist[a]); //mHeightmap.mPositions.at(plist[a].x * mHeightmap.mHeightmapDimensions.x + plist[a].y).y;
+        mesh_positions.push_back(worldCoordinates);
+        a++;
+    }
 
     //set up mesh shaders
     meshShader = Program::createFromFile("shader/mesh");
@@ -314,7 +319,7 @@ void GlowApp::render(float elapsedSeconds)
             }
 
             if(GlfwApp::isMouseButtonPressed(mRightClick))
-                m_selectedBrush == 0? mBrush.SetTextureBrush(m_selectedTexture) : mBrush.SetHeightBrush(mHeightBrushFactor);
+                m_selectedBrush == 0? mBrush.SetTextureBrush(m_selectedTexture, mBiomes.mBiomeMap, mBiomes.getBiomesTexture()) : mBrush.SetHeightBrush(mHeightBrushFactor);
 
             //std::vector<glow::SharedTexture2D> selectedMap = {mHeightmap.getSplatmapTexture(), mBiomes.getRainTexture(), mHeightmap.getSplatmapTexture(), mHeightmap.mRainFlowMapTexture};
 
@@ -347,6 +352,21 @@ void GlowApp::render(float elapsedSeconds)
         }
 
         {
+            int a = 0;
+            while(a < mesh_positions.size()){
+                auto mesh_model =  glm::translate(glm::mat4(1.f), mesh_positions.at(a)) * glm::scale(glm::mat4(1.f), glm::vec3(10.f, 10.f, 10.f));  //glm::vec3(0, mHeightmap.mPositions.at(mHeightmap.WorldToLocalCoordinates(glm::vec3(0.f,0.f,0.f)).x * mHeightmap.mHeightmapDimensions.x + mHeightmap.WorldToLocalCoordinates(glm::vec3(0.f,0.f,0.f)).y).y, 0));
+
+                auto mesh_shader = meshShader->use();
+                mesh_shader.setUniform("uView", view);
+                mesh_shader.setUniform("uProj", proj);
+                mesh_shader.setUniform("uLightPos", lightPos);
+                mesh_shader.setUniform("uCameraPos", camPos);
+                mesh_shader.setUniform("uModel", mesh_model);
+
+                mMeshes[0]->bind().draw();
+                a++;
+            }
+
 
             GLOW_SCOPED(enable, GL_BLEND);
             glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -413,14 +433,6 @@ void GlowApp::render(float elapsedSeconds)
             mHeightmap.getVao()->bind().draw();
 
 
-            auto mesh_shader = meshShader->use();
-            mesh_shader.setUniform("uView", view);
-            mesh_shader.setUniform("uProj", proj);
-            mesh_shader.setUniform("uLightPos", lightPos);
-            mesh_shader.setUniform("uCameraPos", camPos);
-            mesh_shader.setUniform("uModel", glm::mat4());
-
-            mMeshes.at(0)->bind().draw();
 
 
 
@@ -463,10 +475,10 @@ void GlowApp::initTerrain(){
     mPerlinTest = mHeightmap.GenerateTerrain(properties, filters, heightMapDim, heightMapDim);
 
     //define textures for terrain
-    std::vector<std::string> mTerrainTextures = {"texture/jungle.png", "texture/snow009.jpg", "texture/rock007.jpg", "texture/beach.jpg"};
+    std::vector<std::string> mTerrainTextures = {"texture/01grass.jpg", "texture/04grass.jpg", "texture/rock007.jpg", "texture/beach.jpg"};
 
     //define normals of textures for terrain (in the same order as the textures)
-    std::vector<std::string> mTerrainNormals = {"texture/jungle_normal.png", "texture/snow009_normal.png", "texture/rock007_normal9.png", "texture/beach_normal.png"};
+    std::vector<std::string> mTerrainNormals = {"texture/01grass.png", "texture/04grass.png", "texture/rock007_normal9.png", "texture/beach_normal.png"};
 
     //load textures for terrain
     mTexture = mHeightmap.LoadTexture(mTerrainTextures);
