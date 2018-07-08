@@ -190,8 +190,8 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
 
     int dimX = mHeightmapDimensions.x, dimY = mHeightmapDimensions.y;
 
-    float terrainWidth = ( dimX - 1 ) * mfBlockScale;
-    float terrainHeight = ( dimY - 1 ) * mfBlockScale;
+    float terrainWidth = dimX * mfBlockScale;
+    float terrainHeight = dimY * mfBlockScale;
 
     halfTerrainWidth = terrainWidth * 0.5f;
     float halfTerrainHeight = terrainHeight * 0.5f;
@@ -200,7 +200,7 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
     float fTextureV = float(dimY)*0.1f;
 
 
-#define CURRPOS i*dimY + j
+#define CURRPOS i*dimX + j
 
     for(int i = 0; i < dimY; ++i)
     {
@@ -212,8 +212,8 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
 
             //float x = 10 * ((float)i / dimY), y = 10 * ((float)j/dimX);
 
-            float S = ( j / (float)(dimX - 1) );
-            float T = ( i / (float)(dimY - 1) );
+            float S = ( j / (float) dimX );
+            float T = ( i / (float) dimY );
 
             float X = ( S * terrainWidth ) - halfTerrainWidth;
             float Y = heights.at(CURRPOS);
