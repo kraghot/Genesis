@@ -40,6 +40,11 @@ public:
     bool IntersectAabb(const Ray& ray, const quadtree_node& node, float& tmin, float& tmax);
     bool IntersectAabb2(const Ray& ray, const quadtree_node& node, float &t);
 
+    template <typename T>
+    inline T clamp(const T& n, const T& lower, const T& upper) {
+      return std::max(lower, std::min(n, upper));
+    }
+
 private:
 
     bool bary_coord(const glm::vec3& _p, const glm::vec3& _u, const glm::vec3& _v, const glm::vec3& _w, glm::vec3& _result) const;

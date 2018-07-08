@@ -1,5 +1,6 @@
 #include "Brush.hh"
 #include <list>
+#include <algorithm>
 
 Brush::Brush(MultiLayeredHeightmap *h){
 
@@ -29,9 +30,12 @@ void Brush::SetTextureBrush(int seletedTexture){
 
     float Radius2 = mIntersectionRadius * mIntersectionRadius;
 
-        for (unsigned int j = 0; j < mHeightmap->mHeightmapDimensions.x; j++){ // NEEDS OPTIMIZATION; old: for (unsigned int j = mIntersectionHeight - mIntersectionRadius; j < mIntersectionHeight + mIntersectionRadius; j++)
+        for (unsigned int j = mIntersectionHeight - mIntersectionRadius; j < mIntersectionHeight + mIntersectionRadius; j++){
 
-            for (unsigned int i = 0; i < mHeightmap->mHeightmapDimensions.x; i++){
+            for (unsigned int i = mIntersectionWidth - mIntersectionRadius; i < mIntersectionWidth + mIntersectionRadius; i++){
+
+                if(j < 0 || j >= mHeightmap->mHeightmapDimensions.x || i < 0 || i >= mHeightmap->mHeightmapDimensions.x)
+                    continue;
 
 
                 float pointPositionx = glm::pow(mHeightmap->mPositions.at((j * mHeightmap->mHeightmapDimensions.x) + i).x - mHeightmap->mPositions.at((mIntersectionHeight * mHeightmap->mHeightmapDimensions.x) + mIntersectionWidth).x,2);
@@ -51,16 +55,17 @@ void Brush::SetTextureBrush(int seletedTexture){
                         mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i)[seletedTexture] += 0.8;
                     }
 
-                    sum = mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i).x + mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i).y + mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i).z;
+                    sum = mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i).x + mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i).y + mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i).z + mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i).w;
                     mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i).y /= sum;
                     mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i).x /= sum;
                     mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i).z /= sum;
+                    mHeightmap->mSplatmap.at(j*mHeightmap->mHeightmapDimensions.x + i).w /= sum;
 
                 }
             }
 
 
-       mHeightmap->mSplatmapTexture->bind().setData(GL_RGB, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mHeightmap->mSplatmap);
+       mHeightmap->mSplatmapTexture->bind().setData(GL_RGBA, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mHeightmap->mSplatmap);
        mHeightmap->mSplatmapTexture->bind().generateMipmaps();
 }
 
@@ -68,8 +73,17 @@ void Brush::SetHeightBrush(float factor){
     float Radius2 = mIntersectionRadius * mIntersectionRadius;
     factor /= 10;
 
-    for (unsigned int j = 0; j < mHeightmap->mHeightmapDimensions.x; j++){ // 2m world = 2 u heightmapu
-        for (unsigned int i = 0; i < mHeightmap->mHeightmapDimensions.x; i++){
+    int jstart = clamp(mIntersectionHeight - mIntersectionRadius, 0.0f, static_cast<float>(mHeightmap->mHeightmapDimensions.y));
+    int jend   = clamp(mIntersectionHeight + mIntersectionRadius, 0.0f, static_cast<float>(mHeightmap->mHeightmapDimensions.y));
+    int istart = clamp(mIntersectionWidth  - mIntersectionRadius, 0.0f, static_cast<float>(mHeightmap->mHeightmapDimensions.x));
+    int iend   = clamp(mIntersectionWidth  + mIntersectionRadius, 0.0f, static_cast<float>(mHeightmap->mHeightmapDimensions.x));
+
+    for (unsigned int j = jstart; j < jend; j++){
+
+        for (unsigned int i = istart; i < iend; i++){
+
+            if(j < 0 || j >= mHeightmap->mHeightmapDimensions.x || i < 0 || i >= mHeightmap->mHeightmapDimensions.x)
+                continue;
 
 
             float pointPositionx = glm::pow(mHeightmap->mPositions.at((j * mHeightmap->mHeightmapDimensions.x) + i).x - mHeightmap->mPositions.at((mIntersectionHeight * mHeightmap->mHeightmapDimensions.x) + mIntersectionWidth).x,2);
@@ -94,7 +108,11 @@ void Brush::SetHeightBrush(float factor){
             }
         }
 
-    mHeightmap->CalculateNormalsTangents(mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y);
+//    if(j < 0 || j >= mHeightmap->mHeightmapDimensions.x || i < 0 || i >= mHeightmap->mHeightmapDimensions.x)
+//        return;
+
+   mHeightmap->CalculateNormalsTangents({istart, iend},
+                                        {jstart, jend});
     //mHeightmap->LoadSplatmap();
     mHeightmap->MakeVertexArray();
 }
