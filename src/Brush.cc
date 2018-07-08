@@ -171,10 +171,8 @@ bool Brush::IntersectAabb2(const Ray &ray, const quadtree_node &node, float& t)
     glm::vec3 lb = mHeightmap->LocalToWorldCoordinates({node.area.min.x, node.height_min, node.area.min.y});
     glm::vec3 rt = mHeightmap->LocalToWorldCoordinates({node.area.max.x, node.height_max, node.area.max.y});
 
-    printf("lb: %f %f %f rb: %f %f %f\n", lb.x, lb.y, lb.z, rt.x, rt.y, rt.z);
-    std::cout << std::flush;
-
-//    float t; // Length of ray intersection
+//    printf("lb: %f %f %f rb: %f %f %f\n", lb.x, lb.y, lb.z, rt.x, rt.y, rt.z);
+//    std::cout << std::flush;
 
     glm::vec3 dirfrac;
     // ray.direction is unit direction vector of ray
@@ -193,8 +191,8 @@ bool Brush::IntersectAabb2(const Ray &ray, const quadtree_node &node, float& t)
     float tmin = std::max(std::max(std::min(t1, t2), std::min(t3, t4)), std::min(t5, t6));
     float tmax = std::min(std::min(std::max(t1, t2), std::max(t3, t4)), std::max(t5, t6));
 
-    printf("tmin %f, tmax %f", tmin, tmax);
-    std::cout << std::flush;
+//    printf("tmin %f, tmax %f", tmin, tmax);
+//    std::cout << std::flush;
 
     // if tmax < 0, ray (line) is intersecting AABB, but the whole AABB is behind us
     if (tmax < 0)
@@ -384,10 +382,14 @@ bool Brush::IntersectNode(const Ray &ray, const quadtree_node *node)
     glm::vec3 Normal1, Normal2;
     float temp_t = std::numeric_limits<float>::max();
 
-    for (int j = node->area.min.y; j < (node->area.max.y - 1); j++ )
+    for (int j = node->area.min.y; j < (node->area.max.y); j++ )
     {
-        for (int i = node->area.min.x; i < (node->area.max.x - 1); i++ )
+        if(j >= mHeightmap->mHeightmapDimensions.y)
+            continue;
+        for (int i = node->area.min.x; i < (node->area.max.x); i++ )
         {
+            if(i >= dimX)
+                continue;
 
             Triangle1.p0 = mHeightmap->mPositions.at((j * dimX ) + i);
             Triangle1.p1 = mHeightmap->mPositions.at((j+1) * dimX  + i);
@@ -460,8 +462,8 @@ glm::vec3 Brush::intersect_quadtree(const Ray& _ray, std::vector<quadtree_node> 
         float t;
         bool isIntersecting = IntersectAabb2(_ray, *node, t);
 
-        printf("Is Intersecting %d\n", isIntersecting);
-        std::cout << std::flush;
+//        printf("Is Intersecting %d\n", isIntersecting);
+//        std::cout << std::flush;
 
         if(isIntersecting){
             if(node->isLeaf)
