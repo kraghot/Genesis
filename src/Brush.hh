@@ -26,7 +26,7 @@ public:
     Brush(MultiLayeredHeightmap *h);
 
     void intersect(const Ray& _ray );
-    bool IntersectNode(const Ray& ray, const quadtree_node *node);
+    bool IntersectNode(const Ray& ray, const quadtree_node *node, glm::vec3 &mIntersection);
     glm::vec3 intersect_quadtree(const Ray& _ray, std::vector<quadtree_node> nodes);
 
     glm::dvec3 getIntersectionPoint() const;
@@ -53,7 +53,7 @@ private:
     {
         return a.t_min < b.t_min;
     }
-    glm::vec3 intersectionPoint = {0.f, 0.f, 0.f};
+    glm::vec3 mIntersection = {0.f, 0.f, 0.f};
     float _t = 0.f;
     float epsilon = 0.001f;
 

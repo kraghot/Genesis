@@ -16,8 +16,8 @@ glm::mat4 Brush::GetCircleRotation()
 {
     glm::vec3 upVector(0, 1, 0);
     glm::vec3 xVector = glm::cross(upVector, mIntersectionTriangle.normal);
-    glm::mat4 rot = glm::lookAt(intersectionPoint,
-                                intersectionPoint + xVector,
+    glm::mat4 rot = glm::lookAt(mIntersection,
+                                mIntersection + xVector,
                                 mIntersectionTriangle.normal);
 
     return inverse(rot);
@@ -214,7 +214,7 @@ bool Brush::IntersectAabb2(const Ray &ray, const quadtree_node &node, float& t)
 
 glm::dvec3 Brush::getIntersectionPoint() const
 {
-    return intersectionPoint;
+    return mIntersection;
 }
 
 bool Brush::intersectTriangle(const Face& _face, const glm::vec3& _normal, const Ray& _ray)
@@ -222,7 +222,7 @@ bool Brush::intersectTriangle(const Face& _face, const glm::vec3& _normal, const
 
     glm::vec3 bary;
     auto temp_t = _t;
-    auto temp_intersection = intersectionPoint;
+    auto temp_intersection = mIntersection;
 
     float dotRN = glm::dot(_ray.direction, _normal);
 
@@ -231,9 +231,9 @@ bool Brush::intersectTriangle(const Face& _face, const glm::vec3& _normal, const
     _t = planeDist / dotRN;
 
 
-    intersectionPoint = _ray.origin + _t * _ray.direction;
+    mIntersection = _ray.origin + _t * _ray.direction;
 
-    bary_coord(intersectionPoint, _face.p0, _face.p1, _face.p2, bary);
+    bary_coord(mIntersection, _face.p0, _face.p1, _face.p2, bary);
 
 
     if(bary[0] >= 0 && bary[1] >= 0 && bary[2] >= 0 && bary[0] <= 1 && bary[1] <= 1 && bary[2] <= 1 && _t > epsilon){
@@ -242,7 +242,7 @@ bool Brush::intersectTriangle(const Face& _face, const glm::vec3& _normal, const
     }
 
     _t = temp_t;
-    intersectionPoint = temp_intersection;
+    mIntersection = temp_intersection;
 
     return false;
 }
@@ -354,7 +354,7 @@ void Brush::intersect(const Ray& _ray )
                 mIntersectionTriangle = Triangle1;
                 mIntersectionHeight = j;
                 mIntersectionWidth = i;
-                intersectionPoint = _ray.origin + temp_t * _ray.direction * 0.9;
+                mIntersection = _ray.origin + temp_t * _ray.direction * 0.9;
             }
 
             else if(intersectTriangle(Triangle2, Normal2, _ray) && _t < temp_t){
@@ -363,7 +363,7 @@ void Brush::intersect(const Ray& _ray )
                 mIntersectionTriangle = Triangle2;
                 mIntersectionHeight = j;
                 mIntersectionWidth = i;
-                intersectionPoint = _ray.origin + temp_t * _ray.direction* 0.9;
+                mIntersection = _ray.origin + temp_t * _ray.direction* 0.9;
             }
 
         }
@@ -375,7 +375,7 @@ void Brush::intersect(const Ray& _ray )
 
 }
 
-bool Brush::IntersectNode(const Ray &ray, const quadtree_node *node)
+bool Brush::IntersectNode(const Ray &ray, const quadtree_node *node, glm::vec3& intersectionPoint)
 {
     int dimX = mHeightmap->mHeightmapDimensions.x;
     Face Triangle1, Triangle2;
@@ -462,9 +462,6 @@ glm::vec3 Brush::intersect_quadtree(const Ray& _ray, std::vector<quadtree_node> 
         float t;
         bool isIntersecting = IntersectAabb2(_ray, *node, t);
 
-//        printf("Is Intersecting %d\n", isIntersecting);
-//        std::cout << std::flush;
-
         if(isIntersecting){
             if(node->isLeaf)
             {
@@ -479,14 +476,17 @@ glm::vec3 Brush::intersect_quadtree(const Ray& _ray, std::vector<quadtree_node> 
 
     }
 
-//    std::sort(intersected.begin(), intersected.end(), CompareQuadtreeIntersections);
+    glm::vec3 closestIntersection;
     intersected.sort(CompareQuadtreeIntersections);
 
     while(intersected.size() > 0)
     {
-        auto& closestIntersection = intersected.front();
-        if(IntersectNode(_ray, closestIntersection.node))
-            return intersectionPoint;
+        auto& closestNode = intersected.front();
+        if(IntersectNode(_ray, closestNode.node, closestIntersection))
+        {
+            mIntersection = closestIntersection;
+            return mIntersection;
+        }
         else
         {
             intersected.pop_front();
