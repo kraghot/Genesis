@@ -285,7 +285,9 @@ void GlowApp::render(float elapsedSeconds)
                 ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Line");
 
                 auto intersectionPoint = mBrush.getIntersectionPoint();
-                std::cout << intersectionPoint.x << " " << intersectionPoint.y << " " << intersectionPoint.z << std::endl;
+                auto localInterection = mHeightmap.WorldToLocalCoordinates({intersectionPoint.x, intersectionPoint.z});
+                printf("World: %f %f %f\nLocal: %u %u\n", intersectionPoint.x, intersectionPoint.y, intersectionPoint.z, localInterection.x, localInterection.y);
+                std::cout << std::flush;
 
                 mLineVao = glow::VertexArray::create(ab, GL_LINES);
             }
