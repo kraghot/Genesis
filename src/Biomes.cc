@@ -37,13 +37,13 @@ NS:
         for(j = 0; j < mHeightmap->mHeightmapDimensions.y; j++){
 
             if(firstIteration){
-                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/15000.f); // default: /100
+                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0171f)); // default: /100
                     initRainValue = rainAmount[y][x];
                     biomesMerge[x][y] = 1.f;
             }
 
             else if(rainAmount[y-1][x] > 0)
-                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/15000.f);
+                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0171f));
 
             rainAmount[y][x] = rainAmount[y][x] < 0.0 ? 0.0 : rainAmount[y][x];
 
@@ -52,13 +52,13 @@ NS:
                 biomesMerge[x][y] = 1.f;
             }
             else{
-                biomesMerge[x][y] = biomesMerge[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/5000.f);
+                biomesMerge[x][y] = biomesMerge[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0512f));
                 biomesMerge[x][y] = biomesMerge[x][y] < 0.0 ? 0.0 : biomesMerge[x][y];
                 mRainMap.at(CURRPOS_NS) ={biomesMerge[x][y], 1.f - biomesMerge[x][y], 0.f, 0.f};
             }
 
 
-            mBiomeMap.at(CURRPOS_NS) = {mRainMap.at(CURRPOS_NS).r, mRainMap.at(CURRPOS_NS).g, mHeightmap->mSplatmap.at(CURRPOS_NS).b, mHeightmap->mSplatmap.at(CURRPOS_NS).a};
+            mBiomeMap.at(CURRPOS_NS) = {mRainMap.at(CURRPOS_NS).r, mRainMap.at(CURRPOS_NS).g , mHeightmap->mSplatmap.at(CURRPOS_NS).b * 5, mHeightmap->mSplatmap.at(CURRPOS_NS).a * 8};
             sum = mBiomeMap.at(CURRPOS_NS).x + mBiomeMap.at(CURRPOS_NS).y + mBiomeMap.at(CURRPOS_NS).z + mBiomeMap.at(CURRPOS_NS).w;
 
             mBiomeMap.at(CURRPOS_NS).x /= sum;
@@ -81,13 +81,13 @@ SN:
         for(j = 0; j < mHeightmap->mHeightmapDimensions.y; j++){
 
             if(firstIteration){
-                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/15000.f); // default: /100
+                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0171f)); // default: /100
                     initRainValue = rainAmount[y][x];
                     biomesMerge[x][y] = 1.f;
             }
 
             else if(rainAmount[y-1][x] > 0)
-                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/15000.f);
+                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0171f));
 
             rainAmount[y][x] = rainAmount[y][x] < 0.0 ? 0.0 : rainAmount[y][x];
 
@@ -96,12 +96,12 @@ SN:
                 biomesMerge[x][y] = 1.f;
             }
             else{
-                biomesMerge[x][y] = biomesMerge[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/5000.f);
+                biomesMerge[x][y] = biomesMerge[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0512f));
                 biomesMerge[x][y] = biomesMerge[x][y] < 0.0 ? 0.0 : biomesMerge[x][y];
                 mRainMap.at(CURRPOS_NS) ={biomesMerge[x][y], 1.f - biomesMerge[x][y], 0.f, 0.f};
             }
 
-            mBiomeMap.at(CURRPOS_NS) = {mRainMap.at(CURRPOS_NS).r, mRainMap.at(CURRPOS_NS).g, mHeightmap->mSplatmap.at(CURRPOS_NS).b, mHeightmap->mSplatmap.at(CURRPOS_NS).a};
+            mBiomeMap.at(CURRPOS_NS) = {mRainMap.at(CURRPOS_NS).r, mRainMap.at(CURRPOS_NS).g , mHeightmap->mSplatmap.at(CURRPOS_NS).b * 5, mHeightmap->mSplatmap.at(CURRPOS_NS).a* 8};
             sum = mBiomeMap.at(CURRPOS_NS).x + mBiomeMap.at(CURRPOS_NS).y + mBiomeMap.at(CURRPOS_NS).z + mBiomeMap.at(CURRPOS_NS).w;
 
             mBiomeMap.at(CURRPOS_NS).x /= sum;
@@ -126,13 +126,13 @@ WE:
         for(j = 0; j < mHeightmap->mHeightmapDimensions.y * mHeightmap->mHeightmapDimensions.y; j+= mHeightmap->mHeightmapDimensions.y){
 
             if(firstIteration){
-                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/15000.f); // default: /100
+                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0171f)); // default: /100
                     initRainValue = rainAmount[y][x];
                     biomesMerge[x][y] = 1.f;
             }
 
             else if(rainAmount[y-1][x] > 0)
-                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/15000.f);
+                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0171f));
 
             rainAmount[y][x] = rainAmount[y][x] < 0.0 ? 0.0 : rainAmount[y][x];
 
@@ -141,12 +141,12 @@ WE:
                 biomesMerge[x][y] = 1.f;
             }
             else{
-                biomesMerge[x][y] = biomesMerge[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/5000.f);
+                biomesMerge[x][y] = biomesMerge[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0512f));
                 biomesMerge[x][y] = biomesMerge[x][y] < 0.0 ? 0.0 : biomesMerge[x][y];
                 mRainMap.at(CURRPOS_WE) ={biomesMerge[x][y], 1.f - biomesMerge[x][y], 0.f, 0.f};
             }
 
-            mBiomeMap.at(CURRPOS_WE) = {mRainMap.at(CURRPOS_WE).r, mRainMap.at(CURRPOS_WE).g, mHeightmap->mSplatmap.at(CURRPOS_WE).b, mHeightmap->mSplatmap.at(CURRPOS_WE).a};
+            mBiomeMap.at(CURRPOS_WE) = {mRainMap.at(CURRPOS_WE).r, mRainMap.at(CURRPOS_WE).g , mHeightmap->mSplatmap.at(CURRPOS_WE).b * 5, mHeightmap->mSplatmap.at(CURRPOS_WE).a* 8};
             sum = mBiomeMap.at(CURRPOS_WE).x + mBiomeMap.at(CURRPOS_WE).y + mBiomeMap.at(CURRPOS_WE).z + mBiomeMap.at(CURRPOS_WE).w;
 
             mBiomeMap.at(CURRPOS_WE).x /= sum;
@@ -169,13 +169,13 @@ EW:
         for(j = 0; j < mHeightmap->mHeightmapDimensions.y * mHeightmap->mHeightmapDimensions.y; j+=mHeightmap->mHeightmapDimensions.y){
 
             if(firstIteration){
-                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/15000.f); // default: /100
+                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0171f)); // default: /100
                     initRainValue = rainAmount[y][x];
                     biomesMerge[x][y] = 1.f;
             }
 
             else if(rainAmount[y-1][x] > 0)
-                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/15000.f);
+                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0171f));
 
             rainAmount[y][x] = rainAmount[y][x] < 0.0 ? 0.0 : rainAmount[y][x];
 
@@ -184,13 +184,15 @@ EW:
                 biomesMerge[x][y] = 1.f;
             }
             else{
-                biomesMerge[x][y] = biomesMerge[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/5000.f);
+                biomesMerge[x][y] = biomesMerge[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0512f));
                 biomesMerge[x][y] = biomesMerge[x][y] < 0.0 ? 0.0 : biomesMerge[x][y];
                 mRainMap.at(CURRPOS_WE) ={biomesMerge[x][y], 1.f - biomesMerge[x][y], 0.f, 0.f};
             }
 
 
-            mBiomeMap.at(CURRPOS_WE) = {mRainMap.at(CURRPOS_WE).r, mRainMap.at(CURRPOS_WE).g, mHeightmap->mSplatmap.at(CURRPOS_WE).b, mHeightmap->mSplatmap.at(CURRPOS_WE).a};
+
+            mBiomeMap.at(CURRPOS_WE) = {mRainMap.at(CURRPOS_WE).r, mRainMap.at(CURRPOS_WE).g , mHeightmap->mSplatmap.at(CURRPOS_WE).b * 5, mHeightmap->mSplatmap.at(CURRPOS_WE).a* 8};
+
             sum = mBiomeMap.at(CURRPOS_WE).x + mBiomeMap.at(CURRPOS_WE).y + mBiomeMap.at(CURRPOS_WE).z + mBiomeMap.at(CURRPOS_WE).w;
 
             mBiomeMap.at(CURRPOS_WE).x /= sum;

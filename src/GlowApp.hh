@@ -4,6 +4,7 @@
 #include "Brush.hh"
 #include "Biomes.hh"
 #include "FlowMapWater.hh"
+#include "QuadTree.hh"
 
 #include <AntTweakBar.h>
 
@@ -76,6 +77,8 @@ private:
     FlowMapWater mFlowMap;
     float mWaterTimeLoop[2];
 
+    std::vector<quadtree_node> RayIntersectionQuadtree_nodes;
+
 
     typedef enum { TEXTURE_SNOW, TEXTURE_GRASS, TEXTURE_ROCK} SelectedTexture;
     SelectedTexture m_selectedTexture = TEXTURE_GRASS;
@@ -100,6 +103,14 @@ public:
     void render(float elapsedSeconds) override;
     // called after window is resized
     void onResize(int w, int h) override;
+
+    void addMesh(const std::string &name);
+
+    std::vector<glow::SharedVertexArray> mMeshes;
+    int mMeshIdx = 0;
+    glow::SharedProgram meshShader;
+    glow::SharedTexture2D meshTextureColor;
+    glow::SharedTexture2D meshTextureNormal;
 
     void randomTerrain();
     void initTerrain();

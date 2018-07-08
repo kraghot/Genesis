@@ -29,7 +29,7 @@ bool recalculateSplatmap;
 bool randomWind;
 
 using namespace glow;
-const int heightMapDim = 256;
+const int heightMapDim = 512;
 
 void TW_CALL GlowApp::TweakSetSplatmap(void *clientData){
     static_cast<GlowApp *>(clientData)->SetSplatmap();
@@ -47,6 +47,16 @@ GlowApp::GlowApp():
 {
 
 }
+
+void GlowApp::addMesh(const std::string &name)
+{
+   // auto path = util::pathOf(__FILE__) + "/" + name + ".obj";
+    auto mesh = assimp::Importer().load("mesh/" + name + "/" + name + ".obj");
+//    mesh->setPrimitiveMode(GL_PATCHES);
+//    mesh->setVerticesPerPatch(3);
+    mMeshes.push_back(mesh);
+}
+
 
 void GlowApp::init()
 {
@@ -102,6 +112,8 @@ void GlowApp::init()
     mTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
     mTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
 
+    addMesh("palm1");
+
 //    //define textures for terrain
 //    std::vector<std::string> mTerrainTextures = {"texture/snow009.jpg", "texture/grass007.jpg", "texture/rock007.jpg"};
 
@@ -119,6 +131,12 @@ void GlowApp::init()
     seed = std::rand();
     GlowApp::initTerrain();
     std::cout << "seed: " << seed << std::endl;
+
+    //set up mesh shaders
+    meshShader = Program::createFromFile("shader/mesh");
+    meshTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
+    meshTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
+
 
     // set up framebuffer and output
     mShaderOutput = Program::createFromFile("shader/output");
@@ -258,7 +276,7 @@ void GlowApp::render(float elapsedSeconds)
 
             if(isKeyPressed(71)) // GLFW_KEY_G
             {
-                mBrush.intersect_quadtree(testRay);
+                mBrush.intersect_quadtree(testRay, RayIntersectionQuadtree_nodes);
 //                mBrush.intersect(testRay);
                 std::vector<glm::vec3> linePositions = {glm::vec3(0, 0, 0), glm::vec3(0, 100, 0)};
                 auto ab = glow::ArrayBuffer::create();
@@ -389,7 +407,20 @@ void GlowApp::render(float elapsedSeconds)
             shaderRiver.setTexture("uTexDisplacement", mHeightmap.GetDisplacementTexture());
             shaderRiver.setTexture("uTexRainFlow", mHeightmap.mRainFlowMapTexture);
 
+
             mHeightmap.getVao()->bind().draw();
+
+
+            auto mesh_shader = meshShader->use();
+            mesh_shader.setUniform("uView", view);
+            mesh_shader.setUniform("uProj", proj);
+            mesh_shader.setUniform("uLightPos", lightPos);
+            mesh_shader.setUniform("uCameraPos", camPos);
+            mesh_shader.setUniform("uModel", glm::mat4());
+
+            mMeshes.at(0)->bind().draw();
+
+
 
         }
     }
@@ -400,6 +431,7 @@ void GlowApp::render(float elapsedSeconds)
 }
 
 void GlowApp::initTerrain(){
+    QuadTree quadtree(&mHeightmap);
 
     PerlinNoiseGenerator perlinNoise(seed);
     DiamondSquareNoiseGenerator diamondNoise(heightMapDim, heightMapDim, 64);
@@ -429,16 +461,18 @@ void GlowApp::initTerrain(){
     mPerlinTest = mHeightmap.GenerateTerrain(properties, filters, heightMapDim, heightMapDim);
 
     //define textures for terrain
-    std::vector<std::string> mTerrainTextures = {"texture/jungle.png", "texture/grass_sand.jpg", "texture/rock007.jpg", "texture/beach.jpg"};
+    std::vector<std::string> mTerrainTextures = {"texture/jungle.png", "texture/snow009.jpg", "texture/rock007.jpg", "texture/beach.jpg"};
 
     //define normals of textures for terrain (in the same order as the textures)
-    std::vector<std::string> mTerrainNormals = {"texture/jungle_normal.png", "texture/grass_sand_normal.png", "texture/rock007_normal9.png", "texture/beach_normal.png"};
+    std::vector<std::string> mTerrainNormals = {"texture/jungle_normal.png", "texture/snow009_normal.png", "texture/rock007_normal9.png", "texture/beach_normal.png"};
 
     //load textures for terrain
     mTexture = mHeightmap.LoadTexture(mTerrainTextures);
 
     //load normals of textures for terrain
     mTexNormal = mHeightmap.LoadNormal(mTerrainNormals);
+
+    RayIntersectionQuadtree_nodes = quadtree.construct_quadtree();
 }
 
 void GlowApp::setSeed(unsigned int var){

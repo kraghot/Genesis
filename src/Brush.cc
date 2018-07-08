@@ -422,15 +422,15 @@ void Brush::GenerateArc(float r)
 
 }
 
-glm::vec3 Brush::intersect_quadtree(const Ray& _ray ){
+glm::vec3 Brush::intersect_quadtree(const Ray& _ray, std::vector<quadtree_node> nodes){
     QuadTree quadtree(mHeightmap);
 
-    std::vector<quadtree_node> nodes;
+    //std::vector<quadtree_node> nodes;
 
     std::vector<quadtree_node> queue;
     std::list<quadtree_intersection> intersected;
 
-    nodes = quadtree.construct_quadtree();
+    //nodes = quadtree.construct_quadtree();
 
     queue.push_back(nodes.at(0));
 

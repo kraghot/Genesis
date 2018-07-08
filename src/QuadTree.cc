@@ -7,7 +7,7 @@ QuadTree::QuadTree(MultiLayeredHeightmap *h){
 
 std::vector<quadtree_node> QuadTree::construct_quadtree(){
     //MultiLayeredHeightmap heightmap(20.0f,1.0f);
-    int d = std::log2(mHeightmap->mNumberOfVertices/2048);
+    int d = std::log2(mHeightmap->mNumberOfVertices/8500);
 
     int nodes_count = 0;
     int leaf_first_index = 0;

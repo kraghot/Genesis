@@ -865,15 +865,15 @@ glm::vec4 MultiLayeredHeightmap::CalculateRGBA(float fRange1, float fRange2, flo
 void MultiLayeredHeightmap::LoadSplatmap(){
 
 
-    const float fRange1_height = 0.01667f * 80;
-    const float fRange2_height = 0.02f * 80;
-    const float fRange3_height = 0.027f * 80;
-    const float fRange4_height = 0.035f * 80;
+    const float fRange1_height = 0.01667f * 40;
+    const float fRange2_height = 0.02f * 50;
+    const float fRange3_height = 0.027f * 60;
+    const float fRange4_height = 0.035f * 70;
 
     const float fRange1_slope = 0.01f * 30;
-    const float fRange2_slope = 0.01667f * 30;
-    const float fRange3_slope = 0.02333f * 30;
-    const float fRange4_slope = 0.03f * 30;
+    const float fRange2_slope = 0.01667f * 35;
+    const float fRange3_slope = 0.02333f * 40;
+    const float fRange4_slope = 0.03f * 50;
 
     float fScale_height;
     float fScale_slope;
@@ -906,7 +906,7 @@ void MultiLayeredHeightmap::LoadSplatmap(){
 //    }
 
     //beach
-    if (mPositions.at(i).y >= 10 && mPositions.at(i).y < 15 && fScale_slope <= fRange4_slope){
+    if (mPositions.at(i).y >= 10 && mPositions.at(i).y < 14 && fScale_slope <= fRange4_slope){
         a = 1.f;
         r = 0.f;
         g = 0.f;
@@ -915,6 +915,26 @@ void MultiLayeredHeightmap::LoadSplatmap(){
         mTemperatureMap.at(i) = {r, g, b, a};
         mSlopeMap.at(i) = {r, g, b, a};
     }
+
+//    else if (mPositions.at(i).y >= 11 && mPositions.at(i).y < 14 && fScale_slope <= fRange4_slope){
+//        a = 0.002;
+//        r *= 0.888f;
+//        g *= 0.888f;
+//        b *= 0.888f;
+
+//        mTemperatureMap.at(i) = {r, g, b, a};
+//        mSlopeMap.at(i) = {r, g, b, a};
+//    }
+
+//    else if (mPositions.at(i).y >= 14 && mPositions.at(i).y < 16 && fScale_slope <= fRange4_slope){
+//        a = 0.0001f;
+//        r *= 0.9999f;
+//        g *= 0.9999f;
+//        b *= 0.9999f;
+
+//        mTemperatureMap.at(i) = {r, g, b, a};
+//        mSlopeMap.at(i) = {r, g, b, a};
+//    }
 
     mSplatmap.at(i) = {mTemperatureMap.at(i).x, mTemperatureMap.at(i).y, mSlopeMap.at(i).z + mTemperatureMap.at(i).z, mTemperatureMap.at(i).w};
 
@@ -926,7 +946,7 @@ void MultiLayeredHeightmap::LoadSplatmap(){
     mSplatmap.at(i).w /= sum;
 
 
-    std::cout << "RGBA: {" << mSplatmap.at(i).x << "," << mSplatmap.at(i).y << "," << mSplatmap.at(i).z << "," << mSplatmap.at(i).w << "}" << std::endl;
+    //std::cout << "RGBA: {" << mSplatmap.at(i).x << "," << mSplatmap.at(i).y << "," << mSplatmap.at(i).z << "," << mSplatmap.at(i).w << "}" << std::endl;
 }
 
     mSplatmapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RGBA);
