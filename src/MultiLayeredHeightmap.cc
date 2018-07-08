@@ -906,7 +906,7 @@ void MultiLayeredHeightmap::LoadSplatmap(){
 //    }
 
     //beach
-    if (mPositions.at(i).y >= 10 && mPositions.at(i).y < 14 && fScale_slope <= fRange4_slope){
+    if (mPositions.at(i).y >= 9 && mPositions.at(i).y < 14 && fScale_slope <= fRange4_slope){
         a = 1.f;
         r = 0.f;
         g = 0.f;

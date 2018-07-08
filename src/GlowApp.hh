@@ -88,7 +88,7 @@ private:
 
     //typedef enum { MAP_SPLAT, MAP_RAIN, MAP_DROPLET, MAP_RAINFLOW} SelectedMap;
     typedef enum { MAP_SPLAT, MAP_RAIN, MAP_DROPLET, MAP_BIOMES} SelectedMap;
-    SelectedMap m_selectedMap = MAP_SPLAT;
+    SelectedMap m_selectedMap = MAP_BIOMES;
 
     typedef enum { NS, SN, WE, EW} SelectedWind;
     SelectedWind m_selectedWind = NS;
@@ -137,6 +137,8 @@ public:
 
     static void TW_CALL TweakRandomWind(void *clientData);
     void SetRandomWind();
+
+    std::vector<glm::vec3> mesh_positions;
 
 };
 
