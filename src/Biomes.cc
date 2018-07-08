@@ -15,7 +15,10 @@ void Biomes::generateRainMap(unsigned int randomWindDir){
     unsigned int x = 0, y = 0, i, j;
     bool firstIteration = true;
 
+    float sum;
+
     mRainMap.resize(mHeightmap->mNumberOfVertices);
+    mBiomeMap.resize(mHeightmap->mNumberOfVertices);
 
     mLastWindDir = randomWindDir;
 
@@ -32,14 +35,22 @@ NS:
         for(j = 0; j < mHeightmap->mHeightmapDimensions.y; j++){
 
             if(firstIteration)
-                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/10000.f); // default: /100
+                    rainAmount[y][x] = 1.f;// - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/30000.f); // default: /100
 
             else if(rainAmount[y-1][x] > 0)
-                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/10000.f);
+                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_NS))/(double)10000.0);
 
             rainAmount[y][x] = rainAmount[y][x] < 0.0 ? 0.0 : rainAmount[y][x];
 
-            mRainMap.at(CURRPOS_NS) ={rainAmount[y][x], 1 - rainAmount[y][x], 0.f};
+            mRainMap.at(CURRPOS_NS) ={rainAmount[y][x], (double)1.0 - rainAmount[y][x], 0.f, 0.f};
+
+            mBiomeMap.at(CURRPOS_NS) = {mRainMap.at(CURRPOS_NS).r, mRainMap.at(CURRPOS_NS).g, mHeightmap->mSplatmap.at(CURRPOS_NS).b, mHeightmap->mSplatmap.at(CURRPOS_NS).a};
+            sum = mBiomeMap.at(CURRPOS_NS).x + mBiomeMap.at(CURRPOS_NS).y + mBiomeMap.at(CURRPOS_NS).z + mBiomeMap.at(CURRPOS_NS).w;
+
+            mBiomeMap.at(CURRPOS_NS).x /= sum;
+            mBiomeMap.at(CURRPOS_NS).y /= sum;
+            mBiomeMap.at(CURRPOS_NS).z /= sum;
+            mBiomeMap.at(CURRPOS_NS).w /= sum;
 
             x++;
         }
@@ -56,14 +67,22 @@ SN:
         for(j = 0; j < mHeightmap->mHeightmapDimensions.y; j++){
 
             if(firstIteration)
-                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/10000.f);
+                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/30000.f);
 
             else if(rainAmount[y-1][x] > 0)
-                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/10000.f);
+                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/30000.f);
 
             rainAmount[y][x] = rainAmount[y][x] < 0.0 ? 0.0 : rainAmount[y][x];
 
-            mRainMap.at(CURRPOS_NS) ={rainAmount[y][x], 1 - rainAmount[y][x], 0.f};
+            mRainMap.at(CURRPOS_NS) ={rainAmount[y][x], 1.f - rainAmount[y][x], 0.f, 0.f};
+
+            mBiomeMap.at(CURRPOS_NS) = {mHeightmap->mSplatmap.at(CURRPOS_NS).r + mRainMap.at(CURRPOS_NS).r, mHeightmap->mSplatmap.at(CURRPOS_NS).g + mRainMap.at(CURRPOS_NS).g, mHeightmap->mSplatmap.at(CURRPOS_NS).b + mRainMap.at(CURRPOS_NS).b, mHeightmap->mSplatmap.at(CURRPOS_NS).a + mRainMap.at(CURRPOS_NS).a};
+            sum = mBiomeMap.at(CURRPOS_NS).r + mBiomeMap.at(CURRPOS_NS).g + mBiomeMap.at(CURRPOS_NS).b + mBiomeMap.at(CURRPOS_NS).a;
+
+            mBiomeMap.at(CURRPOS_NS).r /= sum;
+            mBiomeMap.at(CURRPOS_NS).g /= sum;
+            mBiomeMap.at(CURRPOS_NS).b /= sum;
+            mBiomeMap.at(CURRPOS_NS).a /= sum;
 
             x++;
         }
@@ -80,14 +99,22 @@ WE:
         for(j = 0; j < mHeightmap->mHeightmapDimensions.y * mHeightmap->mHeightmapDimensions.y; j+= mHeightmap->mHeightmapDimensions.y){
 
             if(firstIteration)
-                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/10000.f);
+                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/30000.f);
 
             else if(rainAmount[y-1][x] > 0)
-                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/10000.f);
+                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/30000.f);
 
             rainAmount[y][x] = rainAmount[y][x] < 0.0 ? 0.0 : rainAmount[y][x];
 
-            mRainMap.at(CURRPOS_WE) ={rainAmount[y][x], 1 - rainAmount[y][x], 0.f};
+            mRainMap.at(CURRPOS_WE) ={rainAmount[y][x], 1.f - rainAmount[y][x], 0.f, 0.f};
+
+            mBiomeMap.at(CURRPOS_WE) = {mHeightmap->mSplatmap.at(CURRPOS_WE).r + mRainMap.at(CURRPOS_WE).r, mHeightmap->mSplatmap.at(CURRPOS_WE).g + mRainMap.at(CURRPOS_WE).g, mHeightmap->mSplatmap.at(CURRPOS_WE).b + mRainMap.at(CURRPOS_WE).b, mHeightmap->mSplatmap.at(CURRPOS_WE).a + mRainMap.at(CURRPOS_WE).a};
+            sum = mBiomeMap.at(CURRPOS_WE).r + mBiomeMap.at(CURRPOS_WE).g + mBiomeMap.at(CURRPOS_WE).b + mBiomeMap.at(CURRPOS_WE).a;
+
+            mBiomeMap.at(CURRPOS_WE).r /= sum;
+            mBiomeMap.at(CURRPOS_WE).g /= sum;
+            mBiomeMap.at(CURRPOS_WE).b /= sum;
+            mBiomeMap.at(CURRPOS_WE).a /= sum;
 
             x++;
         }
@@ -104,14 +131,27 @@ EW:
         for(j = 0; j < mHeightmap->mHeightmapDimensions.y * mHeightmap->mHeightmapDimensions.y; j+=mHeightmap->mHeightmapDimensions.y){
 
             if(firstIteration)
-                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/10000.f);
+                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/30000.f);
 
             else if(rainAmount[y-1][x] > 0)
-                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/10000.f);
+                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/30000.f);
 
             rainAmount[y][x] = rainAmount[y][x] < 0.0 ? 0.0 : rainAmount[y][x];
 
-            mRainMap.at(CURRPOS_WE) ={rainAmount[y][x], 1 - rainAmount[y][x], 0.f};
+            mRainMap.at(CURRPOS_WE) ={rainAmount[y][x], 1.f - rainAmount[y][x], 0.f, 0.f};
+
+
+            mBiomeMap.at(CURRPOS_WE) = {mHeightmap->mSplatmap.at(CURRPOS_WE).r + mRainMap.at(CURRPOS_WE).r, mHeightmap->mSplatmap.at(CURRPOS_WE).g + mRainMap.at(CURRPOS_WE).g, mHeightmap->mSplatmap.at(CURRPOS_WE).b + mRainMap.at(CURRPOS_WE).b, mHeightmap->mSplatmap.at(CURRPOS_WE).a + mRainMap.at(CURRPOS_WE).a};
+
+
+            sum = mBiomeMap.at(CURRPOS_WE).r + mBiomeMap.at(CURRPOS_WE).g + mBiomeMap.at(CURRPOS_WE).b + mBiomeMap.at(CURRPOS_WE).a;
+
+
+
+            mBiomeMap.at(CURRPOS_WE).r /= sum;
+            mBiomeMap.at(CURRPOS_WE).g /= sum;
+            mBiomeMap.at(CURRPOS_WE).b /= sum;
+            mBiomeMap.at(CURRPOS_WE).a /= sum;
 
             x++;
         }
@@ -123,15 +163,24 @@ EW:
 
 bindRainMap:
 
-    mRainTexture = glow::Texture2D::create(mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, GL_RGB);
-    mRainTexture->bind().setData(GL_RGB, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mRainMap);
+    mRainTexture = glow::Texture2D::create(mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, GL_RGBA);
+    mRainTexture->bind().setData(GL_RGBA, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mRainMap);
     mRainTexture->bind().generateMipmaps();
+
+    mBiomesTexture = glow::Texture2D::create(mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, GL_RGBA);
+    mBiomesTexture->bind().setData(GL_RGBA, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mBiomeMap);
+    mBiomesTexture->bind().generateMipmaps();
 
 }
 
 glow::SharedTexture2D Biomes::getRainTexture() const
 {
     return mRainTexture;
+}
+
+glow::SharedTexture2D Biomes::getBiomesTexture() const
+{
+    return mBiomesTexture;
 }
 
 void Biomes::randomWindDirection(){
@@ -142,10 +191,16 @@ void Biomes::randomWindDirection(){
 glm::vec2 Biomes::GetWindDirection()
 {
     switch(mLastWindDir){ //0 = N->S, 1 = S->N, 2 = W->E, 3 = E->W
-        case 0: return glm::vec2( 0, -1);
-        case 1: return glm::vec2( 0,  1);
-        case 2: return glm::vec2(-1,  0);
-        case 3: return glm::vec2( 1,  0);
+        case 0: return glm::vec2( 0, 1);
+        case 1: return glm::vec2( 0, -1);
+        case 2: return glm::vec2( 1,  0);
+        case 3: return glm::vec2(-1,  0);
     }
     return glm::vec2(0, 0);
+}
+
+void Biomes::generateBiomes(){
+
+
+
 }

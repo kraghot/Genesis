@@ -7,7 +7,7 @@
 #include<glm/gtx/quaternion.hpp>
 
 #ifndef ENABLE_SLOPE_BASED_BLEND
-#define ENABLE_SLOPE_BASED_BLEND 1
+#define ENABLE_SLOPE_BASED_BLEND 0
 #endif
 
 #define LOC(a, b) b * mHeightmapDimensions.y + a
@@ -183,6 +183,8 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
     mSlopeY.resize(mNumberOfVertices);
     //mHeightCoords.resize(mNumberOfVertices);
     mSplatmap.resize(mNumberOfVertices);
+    mTemperatureMap.resize(mNumberOfVertices);
+    mSlopeMap.resize(mNumberOfVertices);
 
     int dimX = mHeightmapDimensions.x, dimY = mHeightmapDimensions.y;
 
@@ -750,73 +752,128 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(std::vector<Gener
     return mVao;
 }
 
+glm::vec4 MultiLayeredHeightmap::CalculateRGBA(float fRange1, float fRange2, float fRange3, float fRange4, float fScale){
+    glm::vec4 RGBA;
+
+    float r = 0.0f;
+    float g = 0.0f;
+    float b = 0.0f;
+    float a = 0.0f;
+
+
+    if(fScale >= 0.0 && fScale <= fRange1){
+        r = 1.f;
+    }
+
+    if(fScale >= 0.0 && fScale <= fRange2){
+        fScale -= fRange1;
+        fScale /= (fRange2-fRange1);
+
+       float fScale2 = fScale;
+       fScale = 1.0-fScale;
+
+       r = fScale;
+       g = fScale2;
+
+    }
+
+    else if(fScale >= 0.0 && fScale <= fRange3){
+        g = 1.f;
+    }
+
+    else if(fScale >= 0.0 && fScale <= fRange4)
+    {
+            fScale -= fRange3;
+            fScale /= (fRange4-fRange3);
+
+            float fScale2 = fScale;
+            fScale = 1.0-fScale;
+
+            g = fScale;
+            b = fScale2;
+    }
+
+    else if (fScale >= 0.0 && fScale > fRange4){
+        b = 1.f;
+       }
+
+    RGBA = {r, g, b, a};
+
+    return RGBA;
+
+}
+
 void MultiLayeredHeightmap::LoadSplatmap(){
 
-    const float fRange1 = 0.01f * 30;
-    const float fRange2 = 0.01667f * 30;
-    const float fRange3 = 0.02333f * 30;
-    const float fRange4 = 0.03f * 30;
 
-    float fScale;
+    const float fRange1_height = 0.01667f * 80;
+    const float fRange2_height = 0.02f * 80;
+    const float fRange3_height = 0.027f * 80;
+    const float fRange4_height = 0.035f * 80;
+
+    const float fRange1_slope = 0.01f * 30;
+    const float fRange2_slope = 0.01667f * 30;
+    const float fRange3_slope = 0.02333f * 30;
+    const float fRange4_slope = 0.03f * 30;
+
+    float fScale_height;
+    float fScale_slope;
 
     float r;
     float g;
     float b;
+    float a;
+
+    float sum;
+
 
     for(unsigned int i = 0; i<mNumberOfVertices; i++){
-        r = 0.0f;
-        g = 0.0f;
-        b = 0.0f;
 
-#if ENABLE_SLOPE_BASED_BLEND
-    fScale = mSlopeY.at(i);
-#else
-    fScale = mPositions.at(i).y/mfHeightScale;
-#endif
-#undef ENABLE_SLOPE_BASED_BLEND
+    fScale_slope = mSlopeY.at(i);
+    fScale_height = mPositions.at(i).y/mfHeightScale;
 
-        if(fScale >= 0.0 && fScale <= fRange1){
-            r = 1.f;
-        }
+    mTemperatureMap.at(i) = CalculateRGBA(fRange1_height, fRange2_height, fRange3_height, fRange4_height, fScale_height);
+    mSlopeMap.at(i) = CalculateRGBA(fRange1_slope, fRange2_slope, fRange3_slope, fRange4_slope, fScale_slope);
 
-        else if(fScale <= fRange2){
-            fScale -= fRange1;
-            fScale /= (fRange2-fRange1);
+    //underwater
+//    if(mPositions.at(i).y <= 9.5f){
+//        a = 1.f;
+//        r = 0.f;
+//        g = 0.f;
+//        b = 0.f;
 
-           float fScale2 = fScale;
-           fScale = 1.0-fScale;
+//        mTemperatureMap.at(i) = {r, g, b, a};
+//        mSlopeMap.at(i) = {r, g, b, a};
+//    }
 
-           r = fScale;
-           g = fScale2;
+    //beach
+    if (mPositions.at(i).y >= 10 && mPositions.at(i).y < 15 && fScale_slope <= fRange4_slope){
+        a = 1.f;
+        r = 0.f;
+        g = 0.f;
+        b = 0.f;
 
-        }
-
-        else if(fScale <= fRange3){
-            g = 1.f;
-        }
-
-        else if(fScale <= fRange4)
-        {
-                fScale -= fRange3;
-                fScale /= (fRange4-fRange3);
-
-                float fScale2 = fScale;
-                fScale = 1.0-fScale;
-
-                g = fScale;
-                b = fScale2;
-        }
-
-        else{
-            b = 1.f;
-           }
-
-        mSplatmap.at(i) = {r,g,b,0.0f};
+        mTemperatureMap.at(i) = {r, g, b, a};
+        mSlopeMap.at(i) = {r, g, b, a};
     }
+
+    mSplatmap.at(i) = {mTemperatureMap.at(i).x, mTemperatureMap.at(i).y, mSlopeMap.at(i).z + mTemperatureMap.at(i).z, mTemperatureMap.at(i).w};
+
+    sum = mSplatmap.at(i).x + mSplatmap.at(i).y + mSplatmap.at(i).z + mSplatmap.at(i).w;
+
+    mSplatmap.at(i).x /= sum;
+    mSplatmap.at(i).y /= sum;
+    mSplatmap.at(i).z /= sum;
+    mSplatmap.at(i).w /= sum;
+
+
+    std::cout << "RGBA: {" << mSplatmap.at(i).x << "," << mSplatmap.at(i).y << "," << mSplatmap.at(i).z << "," << mSplatmap.at(i).w << "}" << std::endl;
+}
 
     mSplatmapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RGBA);
     mSplatmapTexture->bind().setData(GL_RGBA, mHeightmapDimensions.x, mHeightmapDimensions.y, mSplatmap);
     mSplatmapTexture->bind().generateMipmaps();
+
 }
 
 #undef LOC

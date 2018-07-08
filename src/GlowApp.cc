@@ -72,8 +72,8 @@ void GlowApp::init()
     TwType BrushTwType = TwDefineEnum("BrushType", BrushChoices, 2);
     TwAddVarRW(tweakbar(), "Brush Type", BrushTwType, &m_selectedBrush, NULL);
 
-    TwEnumVal MapChoices[] = { {MAP_SPLAT, "Splatmap"}, {MAP_RAIN, "Rain map"}, {MAP_DROPLET, "Droplet Erode debug"} };
-    TwType MapTwType = TwDefineEnum("MapType", MapChoices, 3);
+    TwEnumVal MapChoices[] = { {MAP_SPLAT, "Splatmap"}, {MAP_RAIN, "Rain map"}, {MAP_DROPLET, "Droplet Erode debug"}, {MAP_BIOMES, "Biomes Map"} };
+    TwType MapTwType = TwDefineEnum("MapType", MapChoices, 4);
     TwAddVarRW(tweakbar(), "Map Type", MapTwType, &m_selectedMap, NULL);
 
     TwEnumVal WindChoices[] = { {NS, "North -> South"}, {SN, "South -> North"}, {WE, "West -> East"}, {EW, "East -> West"}};
@@ -102,17 +102,17 @@ void GlowApp::init()
     mTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
     mTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
 
-    //define textures for terrain
-    std::vector<std::string> mTerrainTextures = {"texture/snow009.jpg", "texture/grass007.jpg", "texture/rock007.jpg"};
+//    //define textures for terrain
+//    std::vector<std::string> mTerrainTextures = {"texture/sand007.jpg", "texture/grass007.jpg", "texture/rock007.jpg"};
 
-    //define normals of textures for terrain (in the same order as the textures)
-    std::vector<std::string> mTerrainNormals = {"texture/snow009_normal.png", "texture/grass007_normal9.png", "texture/rock007_normal9.png"};
+//    //define normals of textures for terrain (in the same order as the textures)
+//    std::vector<std::string> mTerrainNormals = {"texture/sand007_normal9.png", "texture/grass007_normal9.png", "texture/rock007_normal9.png"};
 
-    //load textures for terrain
-    mTexture = mHeightmap.LoadTexture(mTerrainTextures);
+//    //load textures for terrain
+//    mTexture = mHeightmap.LoadTexture(mTerrainTextures);
 
-    //load normals of textures for terrain
-    mTexNormal = mHeightmap.LoadNormal(mTerrainNormals);
+//    //load normals of textures for terrain
+//    mTexNormal = mHeightmap.LoadNormal(mTerrainNormals);
 
     //generate first random seed for terrain
     std::srand(std::time(0));
@@ -295,7 +295,7 @@ void GlowApp::render(float elapsedSeconds)
             if(GlfwApp::isMouseButtonPressed(mRightClick))
                 m_selectedBrush == 0? mBrush.SetTextureBrush(m_selectedTexture) : mBrush.SetHeightBrush(mHeightBrushFactor);
 
-            std::vector<glow::SharedTexture2D> selectedMap = {mHeightmap.getSplatmapTexture(), mBiomes.getRainTexture(), mHeightmap.getSplatmapTexture()};
+            std::vector<glow::SharedTexture2D> selectedMap = {mHeightmap.getSplatmapTexture(), mBiomes.getRainTexture(), mHeightmap.getSplatmapTexture(), mBiomes.getBiomesTexture()};
 
             auto model = glm::mat4(1.f); // glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
             auto shader = mShaderObj->use();
@@ -411,10 +411,10 @@ void GlowApp::initTerrain(){
     mPerlinTest = mHeightmap.GenerateTerrain(properties, filters, heightMapDim, heightMapDim);
 
     //define textures for terrain
-    std::vector<std::string> mTerrainTextures = {"texture/snow009.jpg", "texture/grass007.jpg", "texture/rock007.jpg"};
+    std::vector<std::string> mTerrainTextures = {"texture/jungle.png", "texture/grass_sand.jpg", "texture/rock007.jpg", "texture/beach.jpg"};
 
     //define normals of textures for terrain (in the same order as the textures)
-    std::vector<std::string> mTerrainNormals = {"texture/snow009_normal.png", "texture/grass007_normal9.png", "texture/rock007_normal9.png"};
+    std::vector<std::string> mTerrainNormals = {"texture/jungle_normal.png", "texture/grass_sand_normal.png", "texture/rock007_normal9.png", "texture/beach_normal.png"};
 
     //load textures for terrain
     mTexture = mHeightmap.LoadTexture(mTerrainTextures);
