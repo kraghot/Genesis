@@ -26,7 +26,7 @@ public:
     Brush(MultiLayeredHeightmap *h);
 
     void intersect(const Ray& _ray );
-    bool IntersectNode(const Ray& ray, const quadtree_node& node);
+    bool IntersectNode(const Ray& ray, const quadtree_node *node);
     glm::vec3 intersect_quadtree(const Ray& _ray, std::vector<quadtree_node> nodes);
 
     glm::dvec3 getIntersectionPoint() const;
@@ -38,7 +38,7 @@ public:
     void SetTextureBrush(int seletedTexture);
     void SetHeightBrush(float factor);
     bool IntersectAabb(const Ray& ray, const quadtree_node& node, float& tmin, float& tmax);
-    bool IntersectAabb2(const Ray& ray, const quadtree_node& node, float& tmin, float& tmax, float &t);
+    bool IntersectAabb2(const Ray& ray, const quadtree_node& node, float &t);
 
 private:
 

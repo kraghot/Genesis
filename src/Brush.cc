@@ -148,15 +148,18 @@ bool Brush::IntersectAabb(const Ray &ray, const quadtree_node &node, float& tmin
     return true;
 }
 
-bool Brush::IntersectAabb2(const Ray &ray, const quadtree_node &node, float &tmin, float &tmax, float& t)
+bool Brush::IntersectAabb2(const Ray &ray, const quadtree_node &node, float& t)
 {
     glm::vec3 lb = mHeightmap->LocalToWorldCoordinates({node.area.min.x, node.height_min, node.area.min.y});
     glm::vec3 rt = mHeightmap->LocalToWorldCoordinates({node.area.max.x, node.height_max, node.area.max.y});
 
+    printf("lb: %f %f %f rb: %f %f %f\n", lb.x, lb.y, lb.z, rt.x, rt.y, rt.z);
+    std::cout << std::flush;
+
 //    float t; // Length of ray intersection
 
     glm::vec3 dirfrac;
-    // r.dir is unit direction vector of ray
+    // ray.direction is unit direction vector of ray
     dirfrac.x = 1.0f / ray.direction.x;
     dirfrac.y = 1.0f / ray.direction.y;
     dirfrac.z = 1.0f / ray.direction.z;
@@ -169,8 +172,11 @@ bool Brush::IntersectAabb2(const Ray &ray, const quadtree_node &node, float &tmi
     float t5 = (lb.z - ray.origin.z)*dirfrac.z;
     float t6 = (rt.z - ray.origin.z)*dirfrac.z;
 
-    tmin = std::max(std::max(std::min(t1, t2), std::min(t3, t4)), std::min(t5, t6));
-    tmax = std::min(std::min(std::max(t1, t2), std::max(t3, t4)), std::max(t5, t6));
+    float tmin = std::max(std::max(std::min(t1, t2), std::min(t3, t4)), std::min(t5, t6));
+    float tmax = std::min(std::min(std::max(t1, t2), std::max(t3, t4)), std::max(t5, t6));
+
+    printf("tmin %f, tmax %f", tmin, tmax);
+    std::cout << std::flush;
 
     // if tmax < 0, ray (line) is intersecting AABB, but the whole AABB is behind us
     if (tmax < 0)
@@ -353,16 +359,16 @@ void Brush::intersect(const Ray& _ray )
 
 }
 
-bool Brush::IntersectNode(const Ray &ray, const quadtree_node &node)
+bool Brush::IntersectNode(const Ray &ray, const quadtree_node *node)
 {
     int dimX = mHeightmap->mHeightmapDimensions.x;
     Face Triangle1, Triangle2;
     glm::vec3 Normal1, Normal2;
     float temp_t = std::numeric_limits<float>::max();
 
-    for (int j = node.area.min.x; j <= node.area.max.x; j++ )
+    for (int j = node->area.min.x; j < (node->area.max.x - 1); j++ )
     {
-        for (int i = node.area.min.y; i <= node.area.max.y; i++ )
+        for (int i = node->area.min.y; i < (node->area.max.y - 1); i++ )
         {
 
             Triangle1.p0 = mHeightmap->mPositions.at((j * dimX ) + i);
@@ -425,30 +431,29 @@ void Brush::GenerateArc(float r)
 glm::vec3 Brush::intersect_quadtree(const Ray& _ray, std::vector<quadtree_node> nodes){
     QuadTree quadtree(mHeightmap);
 
-    //std::vector<quadtree_node> nodes;
-
-    std::vector<quadtree_node> queue;
+    std::vector<quadtree_node*> queue;
     std::list<quadtree_intersection> intersected;
 
-    //nodes = quadtree.construct_quadtree();
-
-    queue.push_back(nodes.at(0));
+    queue.push_back(&nodes.at(0));
 
     while(!queue.empty()){
-        quadtree_node node = queue.back();
+        quadtree_node* node = queue.back();
         queue.pop_back();
-        float tmin, tmax, t;
-        bool isIntersecting = IntersectAabb2(_ray, node, tmin, tmax, t);
+        float t;
+        bool isIntersecting = IntersectAabb2(_ray, *node, t);
+
+        printf("Is Intersecting %d\n", isIntersecting);
+        std::cout << std::flush;
 
         if(isIntersecting){
-            if(node.isLeaf)
+            if(node->isLeaf)
             {
-                intersected.push_back({node, t, tmax});
+                intersected.push_back({node, t});
             }
             else
             {
-                for(auto it: node.children)
-                    queue.push_back(*it);
+                for(auto it: node->children)
+                    queue.push_back(it);
             }
         }
 

@@ -84,6 +84,7 @@ std::vector<quadtree_node> QuadTree::construct_quadtree(){
                 nodes.at(i).height_max = std::max(child.height_max, nodes.at(i).height_max);
                 nodes.at(i).height_min = std::min(child.height_min, nodes.at(i).height_min);
             }
+            nodes.at(i).isLeaf = false;
         }
     }
 

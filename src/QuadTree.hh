@@ -22,9 +22,8 @@ struct quadtree_node{
 };
 
 struct quadtree_intersection{
-    struct quadtree_node& node;
+    struct quadtree_node* node;
     float t_min;
-    float t_max;
 };
 
 
