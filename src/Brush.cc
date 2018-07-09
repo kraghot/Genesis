@@ -386,7 +386,7 @@ bool Brush::IntersectNode(const Ray &ray, const quadtree_node *node, glm::vec3& 
             continue;
         for (int i = node->area.min.x; i < (node->area.max.x); i++ )
         {
-            if(i >= dimX)
+            if(i >= (dimX - 1))
                 continue;
 
             Triangle1.p0 = mHeightmap->mPositions.at((j * dimX ) + i);
@@ -446,9 +446,8 @@ void Brush::GenerateArc(float r)
 
 }
 
-glm::vec3 Brush::intersect_quadtree(const Ray& _ray, std::vector<quadtree_node>& nodes){
-    QuadTree quadtree(mHeightmap);
-
+glm::vec3 Brush::intersect_quadtree(const Ray& _ray, std::vector<quadtree_node>& nodes)
+{
     std::vector<quadtree_node*> queue;
     std::list<quadtree_intersection> intersected;
 
