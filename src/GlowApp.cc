@@ -377,7 +377,15 @@ void GlowApp::render(float elapsedSeconds)
             std::vector<glow::SharedArrayBuffer> mAbs;
             while(a < mesh_positions.size()){
 
-                auto mesh_model =  glm::translate(glm::mat4(1.f), mesh_positions.at(a)) * glm::scale(glm::mat4(1.f), glm::vec3(0.1f, 0.1f, 0.1f)) * mBrush.GetCircleRotation(mHeightmap.mNormalsFinal.at(mHeightmap.WorldToLocalCoordinates({mesh_positions.at(a).x, mesh_positions.at(a).z}).y * mHeightmap.mHeightmapDimensions.x + mHeightmap.WorldToLocalCoordinates({mesh_positions.at(a).x, mesh_positions.at(a).z}).x), mesh_positions.at(a));  //glm::vec3(0, mHeightmap.mPositions.at(mHeightmap.WorldToLocalCoordinates(glm::vec3(0.f,0.f,0.f)).x * mHeightmap.mHeightmapDimensions.x + mHeightmap.WorldToLocalCoordinates(glm::vec3(0.f,0.f,0.f)).y).y, 0));
+                auto localCoords = mHeightmap.WorldToLocalCoordinates({mesh_positions.at(a).x, mesh_positions.at(a).z});
+                glm::mat4 mesh_model(1.0f);
+                auto rotMat = mBrush.GetCircleRotation(mHeightmap.mNormalsFinal.at(localCoords.y * mHeightmap.mHeightmapDimensions.x + localCoords.x), {0, 0, 0});
+                auto scalingMat = glm::scale(glm::vec3(0.1f, 0.1f, 0.1f));
+                auto translMat = glm::translate(mesh_positions.at(a));
+
+                mesh_model = translMat * scalingMat * rotMat * mesh_model;
+
+                //glm::vec3(0, mHeightmap.mPositions.at(mHeightmap.WorldToLocalCoordinates(glm::vec3(0.f,0.f,0.f)).x * mHeightmap.mHeightmapDimensions.x + mHeightmap.WorldToLocalCoordinates(glm::vec3(0.f,0.f,0.f)).y).y, 0));
                 m1.resize(mMeshes[0]->getVertexCount());
                 m2.resize(mMeshes[0]->getVertexCount());
                 m3.resize(mMeshes[0]->getVertexCount());
