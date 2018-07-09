@@ -185,7 +185,7 @@ public:
         int halfrad = radius / 2;
         float sum = 0;
 
-        std::vector<std::vector<float> > kernel(5, std::vector<float>(5, 0));
+        std::vector<std::vector<float> > kernel(radius, std::vector<float>(radius, 0));
 //        glm::uvec2 start = {loc.x - halfrad, loc.y - halfrad};
 //        glm::uvec2 end = {loc.x + halfrad, loc.y + halfrad};
 

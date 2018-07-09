@@ -5,6 +5,7 @@ uniform sampler2D uTexColor;
 uniform sampler2D uTexNormal;
 
 uniform sampler2D uSplatmapTex;
+uniform sampler2D uAmbientOcclusionMap;
 
 uniform sampler2DArray uTerrainTex;
 uniform sampler2DArray uTerrainNormal;
@@ -66,6 +67,9 @@ void main()
     float albedo = ka;
     float diffuse = kd * max(0, dot(N, L));
     float specular = ks * pow(max(0, dot(N, H)), shininess);
+
+    float ambient = 0.1f * texture(uAmbientOcclusionMap, vHeightCoord).r;
+
 //    fColor = color * (albedo + diffuse + specular);
-    fColor = pow(vFinalTexColor, vec4(1/2.224)) * (albedo + diffuse + specular);
+    fColor = pow(vFinalTexColor, vec4(1/2.224)) * (albedo + diffuse + specular + ambient);
 }

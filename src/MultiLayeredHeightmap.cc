@@ -331,12 +331,12 @@ void MultiLayeredHeightmap::ComputeAmbientOcclusionMap()
     auto kernel = GaussianKernel(radius);
 
     // Kernel print for testing
-    for(auto ity: kernel)
-    {
-        for(auto itx : ity)
-            std::cout << itx << "\t";
-        std::cout << std::endl;
-    }
+//    for(auto ity: kernel)
+//    {
+//        for(auto itx : ity)
+//            std::cout << itx << "\t";
+//        std::cout << std::endl;
+//    }
 
     const glm::uvec2 max = mHeightmapDimensions - glm::uvec2(1, 1);
     glm::uvec2 loc;
@@ -354,16 +354,17 @@ void MultiLayeredHeightmap::ComputeAmbientOcclusionMap()
 
             float average = 0;
 
+#pragma omp for
             for(int j = start.y; j <= end.y; j++)
             {
                 // Don't ask... glm::clamp doesn't seem to be doing its job...
                 if(j >= mHeightmapDimensions.y)
-                    break;
+                    continue;
 
                 for(int i = start.x; i <= end.x; i++)
                 {
                     if(i >= mHeightmapDimensions.x)
-                        break;
+                        continue;
 
                     glm::ivec2 offset = glm::ivec2(loc) - glm::ivec2(i, j) + glm::ivec2(halfrad, halfrad);
                     average += kernel[offset.x][offset.y] * GetDisplacementAt({i, j});
