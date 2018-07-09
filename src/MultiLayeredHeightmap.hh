@@ -198,6 +198,7 @@ public:
     float GetMfBlockScale() const;
     FlowMapWater* mFlowMap;
     glow::SharedTexture2D mRainFlowMapTexture;
+    std::vector<glow::SharedArrayBuffer> mAbs;
 
 protected:
 
@@ -229,7 +230,6 @@ protected:
     std::vector<glow::SharedTextureData> mTextureNormal;
     std::vector<glow::SharedSurfaceData> mNormalSurface;
 
-    std::vector<glow::SharedArrayBuffer> mAbs;
     glow::SharedElementArrayBuffer mEab;
     glow::SharedVertexArray mVao;
     glow::SharedTexture2D mDisplacementTexture;

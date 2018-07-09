@@ -139,6 +139,7 @@ public:
     void SetRandomWind();
 
     std::vector<glm::vec3> mesh_positions;
+   // glm::mat4 mesh_model;
 
 };
 

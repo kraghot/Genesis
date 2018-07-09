@@ -124,10 +124,10 @@ void GlowApp::init()
 
 
     int a = 0;
-    int RADIUS = 60;
+    int RADIUS = 20;
     std::vector<glm::vec2> plist;
 
-    plist = mBiomes.poissonDiskSampling(RADIUS, 5);
+    plist = mBiomes.poissonDiskSampling(RADIUS, 20);
 
     addMesh("palm0");
     while(a < plist.size()){
@@ -351,22 +351,74 @@ void GlowApp::render(float elapsedSeconds)
             mHeightmap.getVao()->bind().draw();
         }
 
+        //========== mesh rendering ==========
+
+        auto mesh_shader = meshShader->use();
+        mesh_shader.setUniform("uView", view);
+        mesh_shader.setUniform("uProj", proj);
+        mesh_shader.setUniform("uLightPos", lightPos);
+        mesh_shader.setUniform("uCameraPos", camPos);
+
+        auto temp = mMeshes[0]->bind(); //MUST STAY
+        auto ab = glow::ArrayBuffer::create();
+        auto mesh_vao1 = mMeshes[0]->getCurrentVAO();
+
+        std::vector<glm::vec4> m1;
+        std::vector<glm::vec4> m2;
+        std::vector<glm::vec4> m3;
+        std::vector<glm::vec4> m4;
+
         {
             int a = 0;
+            std::vector<glow::SharedArrayBuffer> mAbs;
             while(a < mesh_positions.size()){
-                auto mesh_model =  glm::translate(glm::mat4(1.f), mesh_positions.at(a)) * glm::scale(glm::mat4(1.f), glm::vec3(10.f, 10.f, 10.f));  //glm::vec3(0, mHeightmap.mPositions.at(mHeightmap.WorldToLocalCoordinates(glm::vec3(0.f,0.f,0.f)).x * mHeightmap.mHeightmapDimensions.x + mHeightmap.WorldToLocalCoordinates(glm::vec3(0.f,0.f,0.f)).y).y, 0));
 
-                auto mesh_shader = meshShader->use();
-                mesh_shader.setUniform("uView", view);
-                mesh_shader.setUniform("uProj", proj);
-                mesh_shader.setUniform("uLightPos", lightPos);
-                mesh_shader.setUniform("uCameraPos", camPos);
-                mesh_shader.setUniform("uModel", mesh_model);
+                auto mesh_model =  glm::translate(glm::mat4(1.f), mesh_positions.at(a)) * glm::scale(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f));  //glm::vec3(0, mHeightmap.mPositions.at(mHeightmap.WorldToLocalCoordinates(glm::vec3(0.f,0.f,0.f)).x * mHeightmap.mHeightmapDimensions.x + mHeightmap.WorldToLocalCoordinates(glm::vec3(0.f,0.f,0.f)).y).y, 0));
+                m1.resize(mMeshes[0]->getVertexCount());
+                m2.resize(mMeshes[0]->getVertexCount());
+                m3.resize(mMeshes[0]->getVertexCount());
+                m4.resize(mMeshes[0]->getVertexCount());
 
-                mMeshes[0]->bind().draw();
+                m1.at(a) = {mesh_model[0][0], mesh_model[0][1], mesh_model[0][2], mesh_model[0][3]};
+                m2.at(a) = {mesh_model[1][0], mesh_model[1][1], mesh_model[1][2], mesh_model[1][3]};
+                m3.at(a) = {mesh_model[2][0], mesh_model[2][1], mesh_model[2][2], mesh_model[2][3]};
+                m4.at(a) = {mesh_model[3][0], mesh_model[3][1], mesh_model[3][2], mesh_model[3][3]};
+
                 a++;
             }
 
+            ab = glow::ArrayBuffer::create();
+            ab->defineAttribute<glm::vec4>("uM1");
+            ab->bind().setData(m1);
+            ab->setDivisor(1);
+            mAbs.push_back(ab);
+
+
+            ab = glow::ArrayBuffer::create();
+            ab->defineAttribute<glm::vec4>("uM2");
+            ab->bind().setData(m2);
+            ab->setDivisor(1);
+            mAbs.push_back(ab);
+
+
+            ab = glow::ArrayBuffer::create();
+            ab->defineAttribute<glm::vec4>("uM3");
+            ab->bind().setData(m3);
+            ab->setDivisor(1);
+            mAbs.push_back(ab);
+
+
+            ab = glow::ArrayBuffer::create();
+            ab->defineAttribute<glm::vec4>("uM4");
+            ab->bind().setData(m4);
+            ab->setDivisor(1);
+            mAbs.push_back(ab);
+
+
+            mesh_vao1->attach(mAbs);
+            mesh_vao1->draw(mesh_positions.size());
+
+            //===================================
 
             GLOW_SCOPED(enable, GL_BLEND);
             glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -431,11 +483,6 @@ void GlowApp::render(float elapsedSeconds)
 
 
             mHeightmap.getVao()->bind().draw();
-
-
-
-
-
         }
     }
 
