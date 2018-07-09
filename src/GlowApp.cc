@@ -323,14 +323,13 @@ void GlowApp::render(float elapsedSeconds)
         // Intersect
         {
             mMousePosWin = GlfwApp::getMousePosition();
-//            mMousePosWin.y = getWindowHeight() - mMousePosWin.y;
             glm::vec2 mouseNdc = {(mMousePosWin.x/(getWindowWidth()/2.f) - 1.f), ((getWindowHeight()-mMousePosWin.y)/(getWindowHeight()/2.f) - 1.f)};
-            std::cout << mouseNdc.x << " " << mouseNdc.y << std::endl;
-            float depth;
-            auto invProj = glm::inverse(cam->getProjectionMatrix());
-            auto invView = cam->getInverseViewMatrix();
-            glReadPixels(mMousePosWin.x, mMousePosWin.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-            mBrush.IntersectUnproject(mouseNdc, invView, invProj, depth);
+            float depth = 1;
+            auto invProj = glm::inverse(proj);
+            auto invView = glm::inverse(view);
+
+            if(depth != 1.0)
+                mBrush.IntersectUnproject(mouseNdc, invView, invProj, depth);
 
             auto lineShader = mShaderLine->use();
             lineShader.setUniform("uView", view);

@@ -22,11 +22,12 @@ glm::mat4 Brush::GetCircleRotation()
     else
         xVector = glm::cross({1, 0, 0}, normal);
 
+    xVector = glm::normalize(xVector);
 //    printf("%f %f %f \t %f %f %f \t %f %f %f\n", upVector.x, upVector.y, upVector.z, xVector.x, xVector.y, xVector.z, normal.x, normal.y, normal.z);
 //    std::cout << std::flush;
 
-    glm::mat4 rot = glm::lookAt(mIntersection + xVector,
-                                mIntersection + (2 * xVector),
+    glm::mat4 rot = glm::lookAt(mIntersection + (3 * xVector),
+                                mIntersection + (4 * xVector),
                                 normal);
 
     return inverse(rot);
@@ -516,7 +517,7 @@ void Brush::IntersectUnproject(const glm::vec2 &ndc, const glm::mat4 &vInv, cons
     coords = pInv * coords;
     coords /= coords.w;
     coords = vInv * coords;
-    mIntersection = coords;
+    mIntersection = glm::vec3(coords);
 
 //    glm::vec2 localFloatCoordinates = {coords.x, coords.z};
 //    localFloatCoordinates -= (glm::vec2(mHeightmap->mHeightmapDimensions)/2.0);
