@@ -328,6 +328,8 @@ void GlowApp::render(float elapsedSeconds)
             auto invProj = glm::inverse(proj);
             auto invView = glm::inverse(view);
 
+            glReadPixels(mMousePosWin.x, (getWindowHeight() - mMousePosWin.y), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+
             if(depth != 1.0)
                 mBrush.IntersectUnproject(mouseNdc, invView, invProj, depth);
 
