@@ -64,11 +64,11 @@ void GlowApp::init()
     GlfwApp::init(); // call to base!
 
     // check correct working dir
-    if (!std::ifstream("mesh/cube.obj").good())
-    {
-        glow::error() << "Working directory must be set to `bin/`!";
-        exit(0);
-    }
+//    if (!std::ifstream("mesh/cube.obj").good())
+//    {
+//        glow::error() << "Working directory must be set to `bin/`!";
+//        exit(0);
+//    }
 
     // configure GlfwApp
     setTitle("Genesis");
@@ -123,19 +123,6 @@ void GlowApp::init()
     std::cout << "seed: " << seed << std::endl;
 
 
-    int a = 0;
-    int RADIUS = 20;
-    std::vector<glm::vec2> plist;
-
-    plist = mBiomes.poissonDiskSampling(RADIUS, 20);
-
-    addMesh("palm0");
-    while(a < plist.size()){
-        auto worldCoordinates = mHeightmap.LocalToWorldCoordinates(plist[a]);
-        worldCoordinates.y = mHeightmap.GetDisplacementAt(plist[a]); //mHeightmap.mPositions.at(plist[a].x * mHeightmap.mHeightmapDimensions.x + plist[a].y).y;
-        mesh_positions.push_back(worldCoordinates);
-        a++;
-    }
 
     //set up mesh shaders
     meshShader = Program::createFromFile("shader/mesh");
@@ -151,7 +138,7 @@ void GlowApp::init()
     mFramebuffer = Framebuffer::create("fColor", mTargetColor, mTargetDepth);
 
     //setup background
-    auto pbt = util::pathOf(__FILE__) + "/../bin/cubemap/mountain/";
+    auto pbt = util::pathOf(__FILE__) + "/../bin/cubemap/sea/";
     mBackgroundTexture = glow::TextureCubeMap::createFromData(
                 glow::TextureData::createFromFileCube(pbt + "posx.jpg",
                                                       pbt + "negx.jpg",
@@ -160,6 +147,8 @@ void GlowApp::init()
                                                       pbt + "posz.jpg",
                                                       pbt + "negz.jpg",
                                                       glow::ColorSpace::sRGB));
+
+
     mShaderBg = glow::Program::createFromFile("shader/bg");
     mShaderLine = glow::Program::createFromFile("shader/line");
     mShaderWater = glow::Program::createFromFile("shader/water");
@@ -183,6 +172,21 @@ void GlowApp::init()
 
     mWaterTimeLoop[0] = 0.0f;
     mWaterTimeLoop[1] = 2.0f;
+
+    int a = 0;
+    int RADIUS = 6;
+    std::vector<glm::vec2> plist;
+
+    //plist = mBiomes.poissonDiskSampling(RADIUS, 20, glm::vec2(0,0), mHeightmap.mHeightmapDimensions);
+    plist = mBiomes.poissonDiskSampling(RADIUS, 30, mBiomes.rain_start, mBiomes.rain_end);
+
+    addMesh("lowpoly");
+    while(a < plist.size()){
+        auto worldCoordinates = mHeightmap.LocalToWorldCoordinates(plist[a]);
+        worldCoordinates.y = mHeightmap.GetDisplacementAt(plist[a]); //mHeightmap.mPositions.at(plist[a].x * mHeightmap.mHeightmapDimensions.x + plist[a].y).y;
+        mesh_positions.push_back(worldCoordinates);
+        a++;
+    }
 }
 
 void GlowApp::onResize(int w, int h)
@@ -304,7 +308,7 @@ void GlowApp::render(float elapsedSeconds)
             }
             mLineVao->bind().draw();
 
-            lineShader.setUniform("uModel", mBrush.GetCircleRotation());
+            lineShader.setUniform("uModel", mBrush.GetCircleRotation(mBrush.mIntersectionTriangle.normal, mBrush.mIntersection));
             mBrush.getCircleVao()->bind().draw();
 
             if(recalculateSplatmap){
@@ -373,7 +377,7 @@ void GlowApp::render(float elapsedSeconds)
             std::vector<glow::SharedArrayBuffer> mAbs;
             while(a < mesh_positions.size()){
 
-                auto mesh_model =  glm::translate(glm::mat4(1.f), mesh_positions.at(a)) * glm::scale(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f));  //glm::vec3(0, mHeightmap.mPositions.at(mHeightmap.WorldToLocalCoordinates(glm::vec3(0.f,0.f,0.f)).x * mHeightmap.mHeightmapDimensions.x + mHeightmap.WorldToLocalCoordinates(glm::vec3(0.f,0.f,0.f)).y).y, 0));
+                auto mesh_model =  glm::translate(glm::mat4(1.f), mesh_positions.at(a)) * glm::scale(glm::mat4(1.f), glm::vec3(0.1f, 0.1f, 0.1f)) * mBrush.GetCircleRotation(mHeightmap.mNormalsFinal.at(mHeightmap.WorldToLocalCoordinates({mesh_positions.at(a).x, mesh_positions.at(a).z}).y * mHeightmap.mHeightmapDimensions.x + mHeightmap.WorldToLocalCoordinates({mesh_positions.at(a).x, mesh_positions.at(a).z}).x), mesh_positions.at(a));  //glm::vec3(0, mHeightmap.mPositions.at(mHeightmap.WorldToLocalCoordinates(glm::vec3(0.f,0.f,0.f)).x * mHeightmap.mHeightmapDimensions.x + mHeightmap.WorldToLocalCoordinates(glm::vec3(0.f,0.f,0.f)).y).y, 0));
                 m1.resize(mMeshes[0]->getVertexCount());
                 m2.resize(mMeshes[0]->getVertexCount());
                 m3.resize(mMeshes[0]->getVertexCount());

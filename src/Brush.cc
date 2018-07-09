@@ -12,13 +12,13 @@ glow::SharedVertexArray Brush::getCircleVao() const
     return mCircleVao;
 }
 
-glm::mat4 Brush::GetCircleRotation()
+glm::mat4 Brush::GetCircleRotation(glm::vec3 normal, glm::vec3 intersection)
 {
     glm::vec3 upVector(0, 1, 0);
-    glm::vec3 xVector = glm::cross(upVector, mIntersectionTriangle.normal);
-    glm::mat4 rot = glm::lookAt(mIntersection,
-                                mIntersection + xVector,
-                                mIntersectionTriangle.normal);
+    glm::vec3 xVector = glm::cross(upVector, normal);
+    glm::mat4 rot = glm::lookAt(intersection,
+                                intersection + xVector,
+                                normal);
 
     return inverse(rot);
 

@@ -199,6 +199,7 @@ public:
     FlowMapWater* mFlowMap;
     glow::SharedTexture2D mRainFlowMapTexture;
     std::vector<glow::SharedArrayBuffer> mAbs;
+    std::vector<glm::vec3> mNormalsFinal;
 
 protected:
 
@@ -216,7 +217,6 @@ protected:
 
     std::vector<glm::vec3> mNormals1;
     std::vector<glm::vec3> mNormals2;
-    std::vector<glm::vec3> mNormalsFinal;
 
     std::vector<glm::vec3> mTangents1;
     std::vector<glm::vec3> mTangents2;
