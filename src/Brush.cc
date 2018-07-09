@@ -108,10 +108,8 @@ void Brush::SetHeightBrush(float factor){
             }
         }
 
-//    if(j < 0 || j >= mHeightmap->mHeightmapDimensions.x || i < 0 || i >= mHeightmap->mHeightmapDimensions.x)
-//        return;
 
-   mHeightmap->CalculateNormalsTangents({istart, iend},
+    mHeightmap->CalculateNormalsTangents({istart, iend},
                                         {jstart, jend});
     //mHeightmap->LoadSplatmap();
     mHeightmap->MakeVertexArray();
@@ -384,7 +382,7 @@ bool Brush::IntersectNode(const Ray &ray, const quadtree_node *node, glm::vec3& 
 
     for (int j = node->area.min.y; j < (node->area.max.y); j++ )
     {
-        if(j >= mHeightmap->mHeightmapDimensions.y)
+        if(j >= (mHeightmap->mHeightmapDimensions.y - 1))
             continue;
         for (int i = node->area.min.x; i < (node->area.max.x); i++ )
         {
@@ -448,7 +446,7 @@ void Brush::GenerateArc(float r)
 
 }
 
-glm::vec3 Brush::intersect_quadtree(const Ray& _ray, std::vector<quadtree_node> nodes){
+glm::vec3 Brush::intersect_quadtree(const Ray& _ray, std::vector<quadtree_node>& nodes){
     QuadTree quadtree(mHeightmap);
 
     std::vector<quadtree_node*> queue;

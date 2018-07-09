@@ -278,10 +278,8 @@ void GlowApp::render(float elapsedSeconds)
             testRay.origin = camPos;
             testRay.direction = glm::normalize(mMousePosFinal - camPos);
 
-
             if(isKeyPressed(71)) // GLFW_KEY_G
             {
-                mBrush.intersect_quadtree(testRay, RayIntersectionQuadtree_nodes);
 //                mBrush.intersect(testRay);
                 std::vector<glm::vec3> linePositions = {glm::vec3(0, 0, 0), glm::vec3(0, 100, 0)};
                 auto ab = glow::ArrayBuffer::create();
@@ -296,6 +294,8 @@ void GlowApp::render(float elapsedSeconds)
 
                 mLineVao = glow::VertexArray::create(ab, GL_LINES);
             }
+
+            mBrush.intersect_quadtree(testRay, RayIntersectionQuadtree_nodes);
 
             if(isKeyPressed(66)) //GLFW_KEY_B
             {

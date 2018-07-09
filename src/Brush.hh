@@ -27,7 +27,7 @@ public:
 
     void intersect(const Ray& _ray );
     bool IntersectNode(const Ray& ray, const quadtree_node *node, glm::vec3 &mIntersection);
-    glm::vec3 intersect_quadtree(const Ray& _ray, std::vector<quadtree_node> nodes);
+    glm::vec3 intersect_quadtree(const Ray& _ray, std::vector<quadtree_node> &nodes);
 
     glm::dvec3 getIntersectionPoint() const;
 
