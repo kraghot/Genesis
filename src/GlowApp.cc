@@ -225,7 +225,7 @@ void GlowApp::render(float elapsedSeconds)
 
     // render to framebuffer
     {
-        //auto fb = mFramebuffer->bind();
+//        auto fb = mFramebuffer->bind();
 //        GLOW_SCOPED(enable, GL_CULL_FACE);  // use backface culling
         //GLOW_SCOPED(enable, GL_DEPTH_TEST); // use z-Buffer
         GLOW_SCOPED(enable, GL_PRIMITIVE_RESTART);
@@ -238,6 +238,7 @@ void GlowApp::render(float elapsedSeconds)
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
 
+//        {
         {
             GLOW_SCOPED(disable, GL_CULL_FACE); // no backface culling
             glDepthMask(GL_FALSE);
@@ -253,59 +254,29 @@ void GlowApp::render(float elapsedSeconds)
 
             // draw fullscreen quad
             mMeshQuad->bind().draw();
-
-            glEnable(GL_DEPTH_TEST);
-            glDepthMask(GL_TRUE);
-
-            //world space mouse position
-            mMousePosWin = GlfwApp::getMousePosition();
-            mMouseNDC = glm::vec4((mMousePosWin.x/(getWindowWidth()/2.f) - 1.f), ((getWindowHeight()-mMousePosWin.y)/(getWindowHeight()/2.f) - 1.f), -1.0f, 1.f);
-            mMousePosWorld =invProj *  mMouseNDC;
-            mMousePosWorld /= mMousePosWorld.w;
-            mMousePosWorld = invView * mMousePosWorld;
-            mMousePosFinal = glm::vec3(mMousePosWorld);
-
         }
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
+
+        glClear(GL_DEPTH_BUFFER_BIT);
 
         // draw object
         {
-            auto lineShader = mShaderLine->use();
-            lineShader.setUniform("uView", view);
-            lineShader.setUniform("uProj", proj);
-            lineShader.setUniform("uModel", glm::mat4());
-
-            Ray testRay;
-            testRay.origin = camPos;
-            testRay.direction = glm::normalize(mMousePosFinal - camPos);
 
             if(isKeyPressed(71)) // GLFW_KEY_G
             {
-//                mBrush.intersect(testRay);
-                std::vector<glm::vec3> linePositions = {glm::vec3(0, 0, 0), glm::vec3(0, 100, 0)};
-                auto ab = glow::ArrayBuffer::create();
-                ab->defineAttribute<glm::vec3>("aPosition");
-                ab->bind().setData(linePositions);
-                ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Line");
-
                 auto intersectionPoint = mBrush.getIntersectionPoint();
                 auto localInterection = mHeightmap.WorldToLocalCoordinates({intersectionPoint.x, intersectionPoint.z});
                 printf("World: %f %f %f\nLocal: %u %u\n", intersectionPoint.x, intersectionPoint.y, intersectionPoint.z, localInterection.x, localInterection.y);
                 std::cout << std::flush;
-
-                mLineVao = glow::VertexArray::create(ab, GL_LINES);
             }
-
-            mBrush.intersect_quadtree(testRay, RayIntersectionQuadtree_nodes);
 
             if(isKeyPressed(66)) //GLFW_KEY_B
             {
                 mBiomes.generateRainMap(m_selectedWind);
                 mFlowMap.SetWindDirection(mBiomes.GetWindDirection());
             }
-            mLineVao->bind().draw();
-
-            lineShader.setUniform("uModel", mBrush.GetCircleRotation());
-            mBrush.getCircleVao()->bind().draw();
 
             if(recalculateSplatmap){
                 mHeightmap.LoadSplatmap();
@@ -320,8 +291,6 @@ void GlowApp::render(float elapsedSeconds)
 
             if(GlfwApp::isMouseButtonPressed(mRightClick))
                 m_selectedBrush == 0? mBrush.SetTextureBrush(m_selectedTexture, mBiomes.mBiomeMap, mBiomes.getBiomesTexture()) : mBrush.SetHeightBrush(mHeightBrushFactor);
-
-            //std::vector<glow::SharedTexture2D> selectedMap = {mHeightmap.getSplatmapTexture(), mBiomes.getRainTexture(), mHeightmap.getSplatmapTexture(), mHeightmap.mRainFlowMapTexture};
 
             std::vector<glow::SharedTexture2D> selectedMap = {mHeightmap.getSplatmapTexture(), mBiomes.getRainTexture(), mHeightmap.getSplatmapTexture(), mBiomes.getBiomesTexture()};
 
@@ -349,6 +318,25 @@ void GlowApp::render(float elapsedSeconds)
             shader.setUniform("fRenderHeight", mHeightmap.getMfHeightScale());
 
             mHeightmap.getVao()->bind().draw();
+        }
+
+        // Intersect
+        {
+            mMousePosWin = GlfwApp::getMousePosition();
+//            mMousePosWin.y = getWindowHeight() - mMousePosWin.y;
+            glm::vec2 mouseNdc = {(mMousePosWin.x/(getWindowWidth()/2.f) - 1.f), ((getWindowHeight()-mMousePosWin.y)/(getWindowHeight()/2.f) - 1.f)};
+            std::cout << mouseNdc.x << " " << mouseNdc.y << std::endl;
+            float depth;
+            auto invProj = glm::inverse(cam->getProjectionMatrix());
+            auto invView = cam->getInverseViewMatrix();
+            glReadPixels(mMousePosWin.x, mMousePosWin.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+            mBrush.IntersectUnproject(mouseNdc, invView, invProj, depth);
+
+            auto lineShader = mShaderLine->use();
+            lineShader.setUniform("uView", view);
+            lineShader.setUniform("uProj", proj);
+            lineShader.setUniform("uModel", mBrush.GetCircleRotation());
+            mBrush.getCircleVao()->bind().draw();
         }
 
         {
@@ -431,11 +419,6 @@ void GlowApp::render(float elapsedSeconds)
 
 
             mHeightmap.getVao()->bind().draw();
-
-
-
-
-
         }
     }
 

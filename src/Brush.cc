@@ -15,10 +15,19 @@ glow::SharedVertexArray Brush::getCircleVao() const
 glm::mat4 Brush::GetCircleRotation()
 {
     glm::vec3 upVector(0, 1, 0);
-    glm::vec3 xVector = glm::cross(upVector, mIntersectionTriangle.normal);
-    glm::mat4 rot = glm::lookAt(mIntersection,
-                                mIntersection + xVector,
-                                mIntersectionTriangle.normal);
+    glm::vec3 xVector;
+    auto& normal = mIntersectionTriangle.normal;
+    if(glm::dot(upVector, normal) < 0.98)
+        xVector = glm::cross(upVector, normal);
+    else
+        xVector = glm::cross({1, 0, 0}, normal);
+
+//    printf("%f %f %f \t %f %f %f \t %f %f %f\n", upVector.x, upVector.y, upVector.z, xVector.x, xVector.y, xVector.z, normal.x, normal.y, normal.z);
+//    std::cout << std::flush;
+
+    glm::mat4 rot = glm::lookAt(mIntersection + xVector,
+                                mIntersection + (2 * xVector),
+                                normal);
 
     return inverse(rot);
 
@@ -494,6 +503,30 @@ glm::vec3 Brush::intersect_quadtree(const Ray& _ray, std::vector<quadtree_node>&
 
     // No intersection found. Figure out what to do
     return {-10, -10, -10};
+}
+
+void Brush::IntersectUnproject(const glm::vec2 &ndc, const glm::mat4 &vInv, const glm::mat4& pInv, float depth)
+{
+    depth -= 0.5;
+    depth *= 2.0;
+
+//    std::cout << depth << std::endl;
+
+    glm::vec4 coords = {ndc.x, ndc.y, depth, 1.0};
+    coords = pInv * coords;
+    coords /= coords.w;
+    coords = vInv * coords;
+    mIntersection = coords;
+
+//    glm::vec2 localFloatCoordinates = {coords.x, coords.z};
+//    localFloatCoordinates -= (glm::vec2(mHeightmap->mHeightmapDimensions)/2.0);
+
+    auto local = mHeightmap->WorldToLocalCoordinates({coords.x, coords.z});
+    if((local.x < mHeightmap->mHeightmapDimensions.x) && (local.y < mHeightmap->mHeightmapDimensions.y))
+        mIntersectionTriangle.normal = mHeightmap->mNormals1[local.y * mHeightmap->mHeightmapDimensions.x + local.x];
+    else
+        mIntersectionTriangle.normal = {0, 1, 0};
+
 }
 
 

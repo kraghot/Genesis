@@ -198,6 +198,8 @@ public:
     float GetMfBlockScale() const;
     FlowMapWater* mFlowMap;
     glow::SharedTexture2D mRainFlowMapTexture;
+    std::vector<glm::vec3> mNormals;
+    std::vector<glm::vec3> mNormals1;
 
 protected:
 
@@ -206,14 +208,12 @@ protected:
     float mfHeightScale;
     float mHeightValue;
 
-    std::vector<glm::vec3> mNormals;
     std::vector<glm::vec4> mColors;
     std::vector<uint32_t> mIndices;
     std::vector<glm::vec2> mTexCoords;
     std::vector<glm::vec2> mHeightCoords;
     std::vector<float> mWaterLevel;
 
-    std::vector<glm::vec3> mNormals1;
     std::vector<glm::vec3> mNormals2;
     std::vector<glm::vec3> mNormalsFinal;
 
