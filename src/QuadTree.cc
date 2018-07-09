@@ -61,8 +61,12 @@ std::vector<quadtree_node> QuadTree::construct_quadtree(){
         nodes.at(i).height_min = 1000;
 
         if(i >= leaf_first_index){
-            for(int j = nodes.at(i).area.min.y; j < nodes.at(i).area.max.y; j++){
-                for(int k = nodes.at(i).area.min.x; k < nodes.at(i).area.max.x; k++){
+            for(int j = nodes.at(i).area.min.y; j <= nodes.at(i).area.max.y; j++){
+                if(j >= mHeightmap->mHeightmapDimensions.y)
+                    continue;
+                for(int k = nodes.at(i).area.min.x; k <= nodes.at(i).area.max.x; k++){
+                    if(k >= mHeightmap->mHeightmapDimensions.x)
+                        continue;
                     float height_value = mHeightmap->GetDisplacementAt({k, j});
                     auto& currentNode = nodes.at(i);
                     currentNode.height_max = std::max(nodes.at(i).height_max, height_value);

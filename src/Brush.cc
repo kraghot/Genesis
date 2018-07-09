@@ -115,7 +115,7 @@ void Brush::SetHeightBrush(float factor){
     mHeightmap->MakeVertexArray();
 }
 
-bool Brush::IntersectAabb(const Ray &ray, const quadtree_node &node, float& tmin, float& tmax)
+bool Brush::IntersectAabb(const Ray &ray, const quadtree_node &node, float& tmin)
 {
     glm::vec3 node_position_min;
     glm::vec3 node_position_max;
@@ -127,14 +127,16 @@ bool Brush::IntersectAabb(const Ray &ray, const quadtree_node &node, float& tmin
     node_position_max.x = node.area.max.x;
     node_position_max.y = node.height_max;
     node_position_max.z = node.area.max.y;
+    auto worldMinPos = mHeightmap->LocalToWorldCoordinates(node_position_min);
+    auto worldMaxPos = mHeightmap->LocalToWorldCoordinates(node_position_max);
 
-    tmin = (mHeightmap->LocalToWorldCoordinates(node_position_min).x - ray.origin.x) / ray.direction.x;
-    tmax = (mHeightmap->LocalToWorldCoordinates(node_position_max).x - ray.origin.x) / ray.direction.x;
+    tmin = (worldMinPos.x - ray.origin.x) / ray.direction.x;
+    float tmax = (worldMaxPos.x - ray.origin.x) / ray.direction.x;
 
     if (tmin > tmax) std::swap(tmin, tmax);
 
-    float tymin = (mHeightmap->LocalToWorldCoordinates(node_position_min).y - ray.origin.y) / ray.direction.y;
-    float tymax = (mHeightmap->LocalToWorldCoordinates(node_position_max).y - ray.origin.y) / ray.direction.y;
+    float tymin = (worldMinPos.y - ray.origin.y) / ray.direction.y;
+    float tymax = (worldMaxPos.y - ray.origin.y) / ray.direction.y;
 
     if (tymin > tymax) std::swap(tymin, tymax);
 
@@ -147,8 +149,8 @@ bool Brush::IntersectAabb(const Ray &ray, const quadtree_node &node, float& tmin
     if (tymax < tmax)
     tmax = tymax;
 
-    float tzmin = (mHeightmap->LocalToWorldCoordinates(node_position_min).z - ray.origin.z) / ray.direction.z;
-    float tzmax = (mHeightmap->LocalToWorldCoordinates(node_position_max).z - ray.origin.z) / ray.direction.z;
+    float tzmin = (worldMinPos.z - ray.origin.z) / ray.direction.z;
+    float tzmax = (worldMaxPos.z - ray.origin.z) / ray.direction.z;
 
     if (tzmin > tzmax) std::swap(tzmin, tzmax);
 
@@ -457,7 +459,7 @@ glm::vec3 Brush::intersect_quadtree(const Ray& _ray, std::vector<quadtree_node>&
         quadtree_node* node = queue.back();
         queue.pop_back();
         float t;
-        bool isIntersecting = IntersectAabb2(_ray, *node, t);
+        bool isIntersecting = IntersectAabb(_ray, *node, t);
 
         if(isIntersecting){
             if(node->isLeaf)
