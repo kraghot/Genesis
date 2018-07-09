@@ -13,7 +13,7 @@ out vec2 vTexCoords;
 void main()
 {
     vLightViewPos = uView * vec4(uLightPos, 1.0f);
-    vTexCoords = aPosition;
+    vTexCoords = aPosition * 15;
     vec2 extent = aPosition -  0.5;
     extent *= (1.5 * uHeightmapDim);
     vec4 worldPos = vec4(extent.x, 10, extent.y, 1.0);
