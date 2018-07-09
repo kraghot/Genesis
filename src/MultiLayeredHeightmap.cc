@@ -235,6 +235,7 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
         mIndices.push_back(restart);
     }
     CalculateNormalsTangents(glm::vec2(0,0), glm::vec2(dimX, dimY));
+    ComputeAmbientOcclusionMap();
     LoadSplatmap();
 }
 
@@ -318,6 +319,70 @@ glm::vec3 MultiLayeredHeightmap::LocalToWorldCoordinates(glm::vec3 pos)
 bool MultiLayeredHeightmap::IsWaterMass(glm::uvec2 pos)
 {
     return mRainFlowMap[LOCV(pos)] >= 0.98;
+}
+
+void MultiLayeredHeightmap::ComputeAmbientOcclusionMap()
+{
+    constexpr int radius = 9;
+    constexpr int halfrad = radius / 2;
+
+    std::vector<uint8_t> ambOcclData(mNumberOfVertices, 255);
+
+    auto kernel = GaussianKernel(radius);
+
+    // Kernel print for testing
+    for(auto ity: kernel)
+    {
+        for(auto itx : ity)
+            std::cout << itx << "\t";
+        std::cout << std::endl;
+    }
+
+    const glm::uvec2 max = mHeightmapDimensions - glm::uvec2(1, 1);
+    glm::uvec2 loc;
+
+    for(loc.y = 0; loc.y < mHeightmapDimensions.y; loc.y++)
+    {
+        for(loc.x = 0; loc.x < mHeightmapDimensions.x; loc.x++)
+        {
+            glm::uvec2 start = {loc.x - halfrad, loc.y - halfrad};
+            glm::uvec2 end = {loc.x + halfrad, loc.y + halfrad};
+
+            // Ensure we are not out of bounds
+            glm::clamp(start, {0, 0}, max);
+            glm::clamp(end, {0, 0}, max);
+
+            float average = 0;
+
+            for(int j = start.y; j <= end.y; j++)
+            {
+                // Don't ask... glm::clamp doesn't seem to be doing its job...
+                if(j >= mHeightmapDimensions.y)
+                    break;
+
+                for(int i = start.x; i <= end.x; i++)
+                {
+                    if(i >= mHeightmapDimensions.x)
+                        break;
+
+                    glm::ivec2 offset = glm::ivec2(loc) - glm::ivec2(i, j) + glm::ivec2(halfrad, halfrad);
+                    average += kernel[offset.x][offset.y] * GetDisplacementAt({i, j});
+                }
+            }
+
+            auto val = GetDisplacementAt(loc);
+            if(average > val)
+            {
+                ambOcclData[LOCV(loc)] = 255 - ((average - val) * 255);
+            }
+
+        }
+    }
+
+    mAmbientOcclusionMap = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RED);
+    mAmbientOcclusionMap->bind().setData(GL_RED, mHeightmapDimensions.x, mHeightmapDimensions.y, ambOcclData);
+    mAmbientOcclusionMap->bind().generateMipmaps();
+
 }
 
 glow::SharedVertexArray MultiLayeredHeightmap::getVao() const

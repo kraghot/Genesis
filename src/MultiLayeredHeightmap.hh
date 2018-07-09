@@ -172,6 +172,42 @@ public:
      */
     bool IsWaterMass(glm::uvec2 pos);
 
+    /**
+     * @brief ComputeAmbientOcclusionMap baked an ambient occlusion map using gaussian averages
+     */
+    void ComputeAmbientOcclusionMap();
+
+    inline std::vector<std::vector<float> > GaussianKernel(int radius)
+    {
+        double sigma = 1.0;
+        double r, s = 2.0 * sigma * sigma;
+
+        int halfrad = radius / 2;
+        float sum = 0;
+
+        std::vector<std::vector<float> > kernel(5, std::vector<float>(5, 0));
+//        glm::uvec2 start = {loc.x - halfrad, loc.y - halfrad};
+//        glm::uvec2 end = {loc.x + halfrad, loc.y + halfrad};
+
+//        glm::uvec2 max = mHeightmapDimensions - glm::uvec2(1, 1);
+
+//        glm::clamp(start, {0, 0}, max);
+//        glm::clamp(end, {0, 0}, max);
+
+        for(int j = -halfrad; j <= halfrad; j++)
+        {
+            for(int i = -halfrad; i <= halfrad; i++)
+            {
+                r = sqrt(i*i + j*j);
+                kernel[i + halfrad][j + halfrad] =
+                         (std::exp(-(r*r)/s))/(M_PI * s);
+                sum += kernel[i + halfrad][j + halfrad];
+            }
+        }
+
+        return kernel;
+    }
+
     glow::SharedVertexArray GetRainMesh() {return mRainMesh;}
 
     glow::SharedTexture2D GetDisplacementTexture() const;
@@ -198,6 +234,8 @@ public:
     float GetMfBlockScale() const;
     FlowMapWater* mFlowMap;
     glow::SharedTexture2D mRainFlowMapTexture;
+    glow::SharedTexture2D mAmbientOcclusionMap;
+
     std::vector<glm::vec3> mNormals;
     std::vector<glm::vec3> mNormals1;
 

@@ -82,8 +82,8 @@ void GlowApp::init()
     TwType BrushTwType = TwDefineEnum("BrushType", BrushChoices, 2);
     TwAddVarRW(tweakbar(), "Brush Type", BrushTwType, &m_selectedBrush, NULL);
 
-    TwEnumVal MapChoices[] = { {MAP_SPLAT, "Splatmap"}, {MAP_RAIN, "Rain map"}, {MAP_DROPLET, "Droplet Erode debug"}, {MAP_BIOMES, "Biomes Map"} };
-    TwType MapTwType = TwDefineEnum("MapType", MapChoices, 4);
+    TwEnumVal MapChoices[] = { {MAP_SPLAT, "Splatmap"}, {MAP_RAIN, "Rain map"}, {MAP_DROPLET, "Droplet Erode debug"}, {MAP_BIOMES, "Biomes Map"}, {MAP_OCCLUSION, "Amb. Occlusion"} };
+    TwType MapTwType = TwDefineEnum("MapType", MapChoices, 5);
     TwAddVarRW(tweakbar(), "Map Type", MapTwType, &m_selectedMap, NULL);
 
     TwEnumVal WindChoices[] = { {NS, "North -> South"}, {SN, "South -> North"}, {WE, "West -> East"}, {EW, "East -> West"}};
@@ -292,7 +292,7 @@ void GlowApp::render(float elapsedSeconds)
             if(GlfwApp::isMouseButtonPressed(mRightClick))
                 m_selectedBrush == 0? mBrush.SetTextureBrush(m_selectedTexture, mBiomes.mBiomeMap, mBiomes.getBiomesTexture()) : mBrush.SetHeightBrush(mHeightBrushFactor);
 
-            std::vector<glow::SharedTexture2D> selectedMap = {mHeightmap.getSplatmapTexture(), mBiomes.getRainTexture(), mHeightmap.getSplatmapTexture(), mBiomes.getBiomesTexture()};
+            std::vector<glow::SharedTexture2D> selectedMap = {mHeightmap.getSplatmapTexture(), mBiomes.getRainTexture(), mHeightmap.getSplatmapTexture(), mBiomes.getBiomesTexture(), mHeightmap.mAmbientOcclusionMap};
 
 
             auto model = glm::mat4(1.f); // glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
@@ -314,6 +314,7 @@ void GlowApp::render(float elapsedSeconds)
             shader.setTexture("uTerrainTex", mTexture);
             shader.setTexture("uTerrainNormal", mTexNormal);
             shader.setTexture("uTexDisplacement", mHeightmap.GetDisplacementTexture());
+            shader.setTexture("uAmbientOcclusionMap", mHeightmap.mAmbientOcclusionMap);
 
             shader.setUniform("fRenderHeight", mHeightmap.getMfHeightScale());
 
