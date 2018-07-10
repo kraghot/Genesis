@@ -54,7 +54,7 @@ void GlowApp::addMesh(const std::string &name)
     auto mesh = assimp::Importer().load("mesh/" + name + "/" + name + ".obj");
 //    mesh->setPrimitiveMode(GL_PATCHES);
 //    mesh->setVerticesPerPatch(3);
-    mMeshes.push_back(mesh);
+    mMeshesBiome1.push_back(mesh);
 }
 
 
@@ -173,20 +173,22 @@ void GlowApp::init()
     mWaterTimeLoop[0] = 0.0f;
     mWaterTimeLoop[1] = 2.0f;
 
+    //=====Poisson Disk Sampling for mesh positions======
+
     int a = 0;
     int RADIUS = 6;
-    std::vector<glm::vec2> plist;
 
-    //plist = mBiomes.poissonDiskSampling(RADIUS, 20, glm::vec2(0,0), mHeightmap.mHeightmapDimensions);
-    plist = mBiomes.poissonDiskSampling(RADIUS, 30, mBiomes.rain_start, mBiomes.rain_end);
+    rainforest.resize(4);
 
-    addMesh("lowpoly");
-    while(a < plist.size()){
-        auto worldCoordinates = mHeightmap.LocalToWorldCoordinates(plist[a]);
-        worldCoordinates.y = mHeightmap.GetDisplacementAt(plist[a]); //mHeightmap.mPositions.at(plist[a].x * mHeightmap.mHeightmapDimensions.x + plist[a].y).y;
-        mesh_positions.push_back(worldCoordinates);
-        a++;
-    }
+
+
+    addMesh("jungle_tree1");
+    addMesh("jungle_bush1");
+    addMesh("jungle_bush2");
+
+    getMeshPositions(rainforest);
+
+
 }
 
 void GlowApp::onResize(int w, int h)
@@ -213,6 +215,7 @@ void GlowApp::render(float elapsedSeconds)
         mBiomes.randomWindDirection();
         mFlowMap.SetWindDirection(mBiomes.GetWindDirection());
         buttonTerrain = false;
+        getMeshPositions(rainforest);
     }
 
     GlfwApp::render(elapsedSeconds); // call to base!
@@ -325,8 +328,6 @@ void GlowApp::render(float elapsedSeconds)
             if(GlfwApp::isMouseButtonPressed(mRightClick))
                 m_selectedBrush == 0? mBrush.SetTextureBrush(m_selectedTexture, mBiomes.mBiomeMap, mBiomes.getBiomesTexture()) : mBrush.SetHeightBrush(mHeightBrushFactor);
 
-            //std::vector<glow::SharedTexture2D> selectedMap = {mHeightmap.getSplatmapTexture(), mBiomes.getRainTexture(), mHeightmap.getSplatmapTexture(), mHeightmap.mRainFlowMapTexture};
-
             std::vector<glow::SharedTexture2D> selectedMap = {mHeightmap.getSplatmapTexture(), mBiomes.getRainTexture(), mHeightmap.getSplatmapTexture(), mBiomes.getBiomesTexture()};
 
 
@@ -357,80 +358,15 @@ void GlowApp::render(float elapsedSeconds)
 
         //========== mesh rendering ==========
 
-        auto mesh_shader = meshShader->use();
-        mesh_shader.setUniform("uView", view);
-        mesh_shader.setUniform("uProj", proj);
-        mesh_shader.setUniform("uLightPos", lightPos);
-        mesh_shader.setUniform("uCameraPos", camPos);
+        renderMesh(rainy_positions1, view, proj, 0);
 
-        auto temp = mMeshes[0]->bind(); //MUST STAY
-        auto ab = glow::ArrayBuffer::create();
-        auto mesh_vao1 = mMeshes[0]->getCurrentVAO();
+        if(rainy_positions2 != rainy_positions1)
+            renderMesh(rainy_positions2, view, proj, 1);
 
-        std::vector<glm::vec4> m1;
-        std::vector<glm::vec4> m2;
-        std::vector<glm::vec4> m3;
-        std::vector<glm::vec4> m4;
+        if(rainy_positions3 != rainy_positions2)
+            renderMesh(rainy_positions3, view, proj, 2);
 
-        {
-            int a = 0;
-            std::vector<glow::SharedArrayBuffer> mAbs;
-            while(a < mesh_positions.size()){
-
-                auto localCoords = mHeightmap.WorldToLocalCoordinates({mesh_positions.at(a).x, mesh_positions.at(a).z});
-                glm::mat4 mesh_model(1.0f);
-                auto rotMat = mBrush.GetCircleRotation(mHeightmap.mNormalsFinal.at(localCoords.y * mHeightmap.mHeightmapDimensions.x + localCoords.x), {0, 0, 0});
-                auto scalingMat = glm::scale(glm::vec3(0.1f, 0.1f, 0.1f));
-                auto translMat = glm::translate(mesh_positions.at(a));
-
-                mesh_model = translMat * scalingMat * rotMat * mesh_model;
-
-                //glm::vec3(0, mHeightmap.mPositions.at(mHeightmap.WorldToLocalCoordinates(glm::vec3(0.f,0.f,0.f)).x * mHeightmap.mHeightmapDimensions.x + mHeightmap.WorldToLocalCoordinates(glm::vec3(0.f,0.f,0.f)).y).y, 0));
-                m1.resize(mMeshes[0]->getVertexCount());
-                m2.resize(mMeshes[0]->getVertexCount());
-                m3.resize(mMeshes[0]->getVertexCount());
-                m4.resize(mMeshes[0]->getVertexCount());
-
-                m1.at(a) = {mesh_model[0][0], mesh_model[0][1], mesh_model[0][2], mesh_model[0][3]};
-                m2.at(a) = {mesh_model[1][0], mesh_model[1][1], mesh_model[1][2], mesh_model[1][3]};
-                m3.at(a) = {mesh_model[2][0], mesh_model[2][1], mesh_model[2][2], mesh_model[2][3]};
-                m4.at(a) = {mesh_model[3][0], mesh_model[3][1], mesh_model[3][2], mesh_model[3][3]};
-
-                a++;
-            }
-
-            ab = glow::ArrayBuffer::create();
-            ab->defineAttribute<glm::vec4>("uM1");
-            ab->bind().setData(m1);
-            ab->setDivisor(1);
-            mAbs.push_back(ab);
-
-
-            ab = glow::ArrayBuffer::create();
-            ab->defineAttribute<glm::vec4>("uM2");
-            ab->bind().setData(m2);
-            ab->setDivisor(1);
-            mAbs.push_back(ab);
-
-
-            ab = glow::ArrayBuffer::create();
-            ab->defineAttribute<glm::vec4>("uM3");
-            ab->bind().setData(m3);
-            ab->setDivisor(1);
-            mAbs.push_back(ab);
-
-
-            ab = glow::ArrayBuffer::create();
-            ab->defineAttribute<glm::vec4>("uM4");
-            ab->bind().setData(m4);
-            ab->setDivisor(1);
-            mAbs.push_back(ab);
-
-
-            mesh_vao1->attach(mAbs);
-            mesh_vao1->draw(mesh_positions.size());
-
-            //===================================
+        //===================================
 
             GLOW_SCOPED(enable, GL_BLEND);
             glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -495,7 +431,7 @@ void GlowApp::render(float elapsedSeconds)
 
 
             mHeightmap.getVao()->bind().draw();
-        }
+
     }
 
     // render to screen
@@ -574,4 +510,130 @@ void GlowApp::SetSplatmap(){
 
 void GlowApp::SetRandomWind(){
     randomWind = true;
+}
+
+void GlowApp::renderMesh(std::vector<glm::vec3> mesh_positions, glm::mat4 view, glm::mat4 proj, unsigned int vegType){
+
+    auto mesh_shader = meshShader->use();
+    mesh_shader.setUniform("uView", view);
+    mesh_shader.setUniform("uProj", proj);
+
+    auto temp = mMeshesBiome1[vegType]->bind(); //MUST STAY
+    auto ab = glow::ArrayBuffer::create();
+    auto mesh_vao1 = mMeshesBiome1[vegType]->getCurrentVAO();
+
+    std::vector<glm::mat4> scalingMatrices;
+
+    scalingMatrices = {glm::scale(glm::vec3(1.f, 1.f, 1.f)), glm::scale(glm::vec3(0.01f, 0.01f, 0.01f)), glm::scale(glm::vec3(0.01f, 0.01f, 0.01f))};
+
+    std::vector<glm::vec4> m1;
+    std::vector<glm::vec4> m2;
+    std::vector<glm::vec4> m3;
+    std::vector<glm::vec4> m4;
+
+    {
+        int a = 0;
+        std::vector<glow::SharedArrayBuffer> mAbs;
+        while(a < mesh_positions.size()){
+
+            auto localCoords = mHeightmap.WorldToLocalCoordinates({mesh_positions.at(a).x, mesh_positions.at(a).z});
+            glm::mat4 mesh_model(1.0f);
+            auto rotMat = mBrush.GetCircleRotation(mHeightmap.mNormalsFinal.at(localCoords.y * mHeightmap.mHeightmapDimensions.x + localCoords.x), {0, 0, 0});
+            //auto scalingMat = glm::scale(glm::vec3(0.1f, 0.1f, 0.1f));
+            auto translMat = glm::translate(mesh_positions.at(a));
+
+            mesh_model = translMat * scalingMatrices[vegType] * rotMat * mesh_model;
+
+            //glm::vec3(0, mHeightmap.mPositions.at(mHeightmap.WorldToLocalCoordinates(glm::vec3(0.f,0.f,0.f)).x * mHeightmap.mHeightmapDimensions.x + mHeightmap.WorldToLocalCoordinates(glm::vec3(0.f,0.f,0.f)).y).y, 0));
+            m1.resize(mesh_positions.size());
+            m2.resize(mesh_positions.size());
+            m3.resize(mesh_positions.size());
+            m4.resize(mesh_positions.size());
+
+
+            m1.at(a) = {mesh_model[0][0], mesh_model[0][1], mesh_model[0][2], mesh_model[0][3]};
+            m2.at(a) = {mesh_model[1][0], mesh_model[1][1], mesh_model[1][2], mesh_model[1][3]};
+            m3.at(a) = {mesh_model[2][0], mesh_model[2][1], mesh_model[2][2], mesh_model[2][3]};
+            m4.at(a) = {mesh_model[3][0], mesh_model[3][1], mesh_model[3][2], mesh_model[3][3]};
+
+
+            a++;
+        }
+
+        ab = glow::ArrayBuffer::create();
+        ab->defineAttribute<glm::vec4>("uM1");
+        ab->bind().setData(m1);
+        ab->setDivisor(1);
+        mAbs.push_back(ab);
+
+
+        ab = glow::ArrayBuffer::create();
+        ab->defineAttribute<glm::vec4>("uM2");
+        ab->bind().setData(m2);
+        ab->setDivisor(1);
+        mAbs.push_back(ab);
+
+
+        ab = glow::ArrayBuffer::create();
+        ab->defineAttribute<glm::vec4>("uM3");
+        ab->bind().setData(m3);
+        ab->setDivisor(1);
+        mAbs.push_back(ab);
+
+
+        ab = glow::ArrayBuffer::create();
+        ab->defineAttribute<glm::vec4>("uM4");
+        ab->bind().setData(m4);
+        ab->setDivisor(1);
+        mAbs.push_back(ab);
+
+
+        mesh_vao1->attach(mAbs);
+        mesh_vao1->draw(mesh_positions.size());
+
+        }
+
+}
+
+ void GlowApp::getMeshPositions(std::vector<std::vector<glm::vec2>> plist){
+     int a = 0;
+
+     plist.at(0) = mBiomes.poissonDiskSampling(6, 40, mBiomes.rain_start, mBiomes.rain_end, plist.at(0));
+     plist.at(1) = mBiomes.poissonDiskSampling(10, 80, mBiomes.rain_start, mBiomes.rain_end, plist.at(0));
+     plist.at(2) = mBiomes.poissonDiskSampling(10, 80, mBiomes.rain_start, mBiomes.rain_end, plist.at(1));
+
+            while(a < plist.at(0).size()){
+                auto worldCoordinates = mHeightmap.LocalToWorldCoordinates(plist.at(0)[a]);
+                worldCoordinates.y = mHeightmap.GetDisplacementAt(plist.at(0)[a]); //mHeightmap.mPositions.at(plist[a].x * mHeightmap.mHeightmapDimensions.x + plist[a].y).y;
+                rainy_positions1.push_back(worldCoordinates);
+                a++;
+            }
+
+            a = 0;
+
+            if(plist.at(1) == plist.at(0))
+                rainy_positions2 = rainy_positions1;
+
+            else{
+            while(a < plist.at(1).size()){
+                auto worldCoordinates = mHeightmap.LocalToWorldCoordinates(plist.at(1)[a]);
+                worldCoordinates.y = mHeightmap.GetDisplacementAt(plist.at(1)[a]); //mHeightmap.mPositions.at(plist[a].x * mHeightmap.mHeightmapDimensions.x + plist[a].y).y;
+                rainy_positions2.push_back(worldCoordinates);
+                a++;
+                }
+            }
+
+            a = 0;
+            if(plist.at(2) == plist.at(1))
+                rainy_positions3 = rainy_positions2;
+
+
+            else{
+            while(a < plist.at(2).size()){
+                auto worldCoordinates = mHeightmap.LocalToWorldCoordinates(plist.at(2)[a]);
+                worldCoordinates.y = mHeightmap.GetDisplacementAt(plist.at(2)[a]); //mHeightmap.mPositions.at(plist[a].x * mHeightmap.mHeightmapDimensions.x + plist[a].y).y;
+                rainy_positions3.push_back(worldCoordinates);
+                a++;
+                }
+            }
 }

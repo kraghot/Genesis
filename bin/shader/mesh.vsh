@@ -8,7 +8,6 @@ out vec3 vPosition;
 
 uniform mat4 uView;
 uniform mat4 uProj;
-//uniform mat4 uModel;
 
 
 void main() {

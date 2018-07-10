@@ -93,6 +93,8 @@ private:
     typedef enum { NS, SN, WE, EW} SelectedWind;
     SelectedWind m_selectedWind = NS;
 
+    void renderMesh(std::vector<glm::vec3> mesh_positions, glm::mat4 view, glm::mat4 proj, unsigned int vegType);
+
 public:
     GlowApp();
     // load resources, initialize app
@@ -105,8 +107,14 @@ public:
     void onResize(int w, int h) override;
 
     void addMesh(const std::string &name);
+    void getMeshPositions(std::vector<std::vector<glm::vec2>> plist);
 
-    std::vector<glow::SharedVertexArray> mMeshes;
+    std::vector<std::vector<glm::vec2>> rainforest;
+
+    std::vector<glow::SharedVertexArray> mMeshesBiome1;
+    std::vector<glow::SharedVertexArray> mMeshesBiome2;
+    std::vector<glow::SharedVertexArray> mMeshesBiome3;
+
     int mMeshIdx = 0;
     glow::SharedProgram meshShader;
     glow::SharedTexture2D meshTextureColor;
@@ -138,7 +146,9 @@ public:
     static void TW_CALL TweakRandomWind(void *clientData);
     void SetRandomWind();
 
-    std::vector<glm::vec3> mesh_positions;
+    std::vector<glm::vec3> rainy_positions1;
+    std::vector<glm::vec3> rainy_positions2;
+    std::vector<glm::vec3> rainy_positions3;
    // glm::mat4 mesh_model;
 
 };
