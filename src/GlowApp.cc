@@ -175,20 +175,13 @@ void GlowApp::init()
 
     //=====Poisson Disk Sampling for mesh positions======
 
-    int a = 0;
-    int RADIUS = 6;
-
     rainforest.resize(4);
-
-
 
     addMesh("jungle_tree1");
     addMesh("jungle_bush1");
     addMesh("jungle_bush2");
 
     getMeshPositions(rainforest);
-
-
 }
 
 void GlowApp::onResize(int w, int h)
@@ -215,7 +208,13 @@ void GlowApp::render(float elapsedSeconds)
         mBiomes.randomWindDirection();
         mFlowMap.SetWindDirection(mBiomes.GetWindDirection());
         buttonTerrain = false;
+
+        rainy_positions1.clear();
+        rainy_positions2.clear();
+        rainy_positions3.clear();
+
         getMeshPositions(rainforest);
+
     }
 
     GlfwApp::render(elapsedSeconds); // call to base!
@@ -601,6 +600,7 @@ void GlowApp::renderMesh(std::vector<glm::vec3> mesh_positions, glm::mat4 view, 
      plist.at(0) = mBiomes.poissonDiskSampling(6, 40, mBiomes.rain_start, mBiomes.rain_end, plist.at(0));
      plist.at(1) = mBiomes.poissonDiskSampling(10, 80, mBiomes.rain_start, mBiomes.rain_end, plist.at(0));
      plist.at(2) = mBiomes.poissonDiskSampling(10, 80, mBiomes.rain_start, mBiomes.rain_end, plist.at(1));
+
 
             while(a < plist.at(0).size()){
                 auto worldCoordinates = mHeightmap.LocalToWorldCoordinates(plist.at(0)[a]);
