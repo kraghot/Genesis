@@ -304,37 +304,31 @@ glm::vec2 Biomes::GetWindDirection()
 }
 
 std::vector<glm::vec2> Biomes::poissonDiskSampling(float radius, int k, glm::vec2 startpos, glm::vec2 endpos, std::vector<glm::vec2> takenPoints){
-    int N = 2;
+
     std::vector<glm::vec2> points;
     std::list<glm::vec2> active;
-
-    glm::vec2 start_end = {endpos.x - startpos.x, endpos.y - startpos.y};
-
-    std::cout << "starendx: " << start_end.x << ", " << start_end.y  << std::endl;
     glm::vec2 p0;
 
+    int N = 2;
     int attempts = 0;
+    glm::vec2 start_end = {endpos.x - startpos.x, endpos.y - startpos.y};
 
 
-    validateP0:
+
     do{
         p0 = {rand() % (unsigned int)start_end.x, rand() % (unsigned int)start_end.y};
         p0 = {startpos.x + p0.x, startpos.y + p0.y};
-        attempts++;
 
-    }while((mHeightmap->mPositions.at(p0.y * mHeightmap->mHeightmapDimensions.x + p0.x).y > 23 || mHeightmap->mPositions.at(p0.y * mHeightmap->mHeightmapDimensions.x + p0.x).y <= 14) && attempts <= k);
+    }while((mHeightmap->mPositions.at(p0.y * mHeightmap->mHeightmapDimensions.x + p0.x).y > 23 || mHeightmap->mPositions.at(p0.y * mHeightmap->mHeightmapDimensions.x + p0.x).y <= 14) );
 
-    if(takenPoints.size() != 0)
-        for (int i = 0; i < takenPoints.size(); i++){
-            if(p0 == takenPoints.at(i))
-                goto validateP0;
-        }
+//    if(takenPoints.size() != 0)
+//        for (int i = 0; i < takenPoints.size(); i++){
+//            if(p0 == takenPoints.at(i))
+//                goto validateP0;
+//        }
 
     if(attempts >= k)
         return takenPoints;
-
-
-
 
     float cellSize = std::floor(radius/sqrt(N));
 
@@ -394,14 +388,14 @@ void Biomes::insertPoint(std::vector<std::vector<glm::vec2>>& grid, float cellsi
 }
 
 bool Biomes::isValidPoint(std::vector<std::vector<glm::vec2>>& grid, float cellsize, int gwidth, int gheight, glm::vec2 p, float radius, glm::vec2 startpos, glm::vec2 endpos) {
-    /* Make sure the point is on the screen */
+
     if (p.x < startpos.x || p.x >= endpos.x || p.y < startpos.y || p.y >= endpos.y)
         return false;
 
     else if (mHeightmap->mPositions.at((int)p.y * mHeightmap->mHeightmapDimensions.x + (int)p.x).y > 23 || mHeightmap->mPositions.at((int)p.y * mHeightmap->mHeightmapDimensions.x + (int)p.x).y <= 14)
         return false;
 
-    /* Check neighboring eight cells */
+
     int xindex = floor((float)p.x / cellsize);
     int yindex = floor((float)p.y / cellsize);
     int i0 = std::max(xindex - 1, 0);
@@ -412,8 +406,6 @@ bool Biomes::isValidPoint(std::vector<std::vector<glm::vec2>>& grid, float cells
     for (int i = i0; i <= i1; i++){
         for (int j = j0; j <= j1; j++){
           if (grid[i][j].x != (-1)){
-
-              //float distance = (grid[i][j] - p).length();
 
               float xdiff = grid[i][j].x - p.x;
               float zdiff = grid[i][j].y - p.y;
@@ -427,7 +419,6 @@ bool Biomes::isValidPoint(std::vector<std::vector<glm::vec2>>& grid, float cells
         }
     }
 
-    /* If we get here, return true */
     return true;
 }
 

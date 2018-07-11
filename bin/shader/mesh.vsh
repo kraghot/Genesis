@@ -1,10 +1,20 @@
 in vec3 aPosition;
+in vec3 aNormal;
+in vec3 aTangent;
+in vec2 aTexCoord;
+
+
 in vec4 uM1;
 in vec4 uM2;
 in vec4 uM3;
 in vec4 uM4;
 
 out vec3 vPosition;
+out vec3 vWorldPosition;
+out vec3 vNormal;
+out vec3 vTangent;
+out vec2 vTexCoord;
+
 
 uniform mat4 uView;
 uniform mat4 uProj;
@@ -31,6 +41,11 @@ void main() {
     model[3][1] = uM4.y;
     model[3][2] = uM4.z;
     model[3][3] = uM4.w;
+
+    vWorldPosition = vec3(model * vec4(aPosition, 1));
+    vNormal = mat3(model) * aNormal;
+    vTangent = mat3(model) * aTangent;
+    vTexCoord = aTexCoord;
 
 
     vPosition = aPosition;

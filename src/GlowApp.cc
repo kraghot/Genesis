@@ -48,13 +48,16 @@ GlowApp::GlowApp():
 
 }
 
-void GlowApp::addMesh(const std::string &name)
+void GlowApp::addMesh(const std::string &name, const std::string &tex_path, const std::string &norm_path)
 {
-   // auto path = util::pathOf(__FILE__) + "/" + name + ".obj";
     auto mesh = assimp::Importer().load("mesh/" + name + "/" + name + ".obj");
-//    mesh->setPrimitiveMode(GL_PATCHES);
-//    mesh->setVerticesPerPatch(3);
-    mMeshesBiome1.push_back(mesh);
+    mMeshesArray.push_back(mesh);
+
+    auto tex = Texture2D::createFromFile(tex_path, ColorSpace::sRGB);
+    mesh_textures.push_back(tex);
+
+    auto norm = Texture2D::createFromFile(norm_path, ColorSpace::Linear);
+    mesh_normals.push_back(norm);
 }
 
 
@@ -92,10 +95,8 @@ void GlowApp::init()
 
 
     // set up tweakbar
-    //TwAddVarRW(tweakbar(), "bg color", TW_TYPE_COLOR3F, &mClearColor, "group=rendering");
     //TwAddVarRW(tweakbar(), "light direction", TW_TYPE_DIR3F, &mLightDir, "group=scene");
     TwAddVarRW(tweakbar(), "light distance", TW_TYPE_FLOAT, &mLightDis, "group=scene step=0.1 min=1 max=1000");
-    //TwAddVarRW(tweakbar(), "rotation speed", TW_TYPE_FLOAT, &mSpeed, "group=scene step=0.1");
     TwAddVarCB(tweakbar(), "seed", TW_TYPE_UINT16, GlowApp::setSeedTerrain, GlowApp::getSeedTerrain, &seed, "group=scene step=1");
     TwAddButton(tweakbar(), "terrain", GlowApp::randomTerrain, NULL, " label='Generate random terrain '");
     TwAddVarRW(tweakbar(), "Number of Iterations", TW_TYPE_UINT16, &mNumIterations, "group=scene step=1");
@@ -112,23 +113,14 @@ void GlowApp::init()
     mTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
     mTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
 
-
-
-    //addMesh("palm0");
-
     //generate first random seed for terrain
     std::srand(std::time(0));
     seed = std::rand();
     GlowApp::initTerrain();
     std::cout << "seed: " << seed << std::endl;
 
-
-
     //set up mesh shaders
     meshShader = Program::createFromFile("shader/mesh");
-    meshTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
-    meshTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
-
 
     // set up framebuffer and output
     mShaderOutput = Program::createFromFile("shader/output");
@@ -173,15 +165,19 @@ void GlowApp::init()
     mWaterTimeLoop[0] = 0.0f;
     mWaterTimeLoop[1] = 2.0f;
 
-    //=====Poisson Disk Sampling for mesh positions======
+    //rainforest
+    addMesh("jungle_tree1", "mesh/jungle_tree1/jungle_tree1.jpg", "mesh/jungle_tree1/jungle_tree1_normal.jpg");
+    addMesh("jungle_bush1", "mesh/jungle_bush1/jungle_bush1.png", "mesh/jungle_bush1/jungle_bush1_normal.png");
+    addMesh("lavender", "mesh/lavender/lavender.png", "mesh/grass/grass_normal.tga");
 
-    rainforest.resize(4);
+    //forest
+    addMesh("pinetree", "mesh/pinetree/pinetree.png", "mesh/pinetree/pinetree_normal.png");
+    addMesh("mushroom", "mesh/mushroom/mushroom.png", "mesh/rock/rock_normal.png");
+    addMesh("forest_bush", "mesh/forest_bush/forest_bush.png", "mesh/forest_bush/forest_bush_normal.png");
 
-    addMesh("jungle_tree1");
-    addMesh("jungle_bush1");
-    addMesh("jungle_bush2");
 
-    getMeshPositions(rainforest);
+    rainforest = getMeshPositions(true);
+    forest = getMeshPositions(false);
 }
 
 void GlowApp::onResize(int w, int h)
@@ -209,11 +205,11 @@ void GlowApp::render(float elapsedSeconds)
         mFlowMap.SetWindDirection(mBiomes.GetWindDirection());
         buttonTerrain = false;
 
-        rainy_positions1.clear();
-        rainy_positions2.clear();
-        rainy_positions3.clear();
+        rainforest.clear();
+        forest.clear();
 
-        getMeshPositions(rainforest);
+        rainforest = getMeshPositions(true);
+        forest = getMeshPositions(false);
 
     }
 
@@ -322,6 +318,12 @@ void GlowApp::render(float elapsedSeconds)
                 mBiomes.randomWindDirection();
                 mFlowMap.SetWindDirection(mBiomes.GetWindDirection());
                 randomWind = false;
+
+                rainforest.clear();
+                forest.clear();
+
+                rainforest = getMeshPositions(true);
+                forest = getMeshPositions(false);
             }
 
             if(GlfwApp::isMouseButtonPressed(mRightClick))
@@ -357,13 +359,8 @@ void GlowApp::render(float elapsedSeconds)
 
         //========== mesh rendering ==========
 
-        renderMesh(rainy_positions1, view, proj, 0);
-
-        if(rainy_positions2 != rainy_positions1)
-            renderMesh(rainy_positions2, view, proj, 1);
-
-        if(rainy_positions3 != rainy_positions2)
-            renderMesh(rainy_positions3, view, proj, 2);
+        renderMesh(rainforest, view, proj, true);
+        renderMesh(forest, view, proj, false);
 
         //===================================
 
@@ -432,9 +429,6 @@ void GlowApp::render(float elapsedSeconds)
             mHeightmap.getVao()->bind().draw();
 
     }
-
-    // render to screen
-    // (applies gamma correction and dithering)
 
 }
 
@@ -511,129 +505,148 @@ void GlowApp::SetRandomWind(){
     randomWind = true;
 }
 
-void GlowApp::renderMesh(std::vector<glm::vec3> mesh_positions, glm::mat4 view, glm::mat4 proj, unsigned int vegType){
+void GlowApp::renderMesh(std::vector<std::vector<glm::vec3>> mesh_positions, glm::mat4 view, glm::mat4 proj, bool rainy){
+
+    auto cam = getCamera();
+    auto lightPos = normalize(mLightDir) * mLightDis;
+    auto camPos = cam->getPosition();
 
     auto mesh_shader = meshShader->use();
     mesh_shader.setUniform("uView", view);
     mesh_shader.setUniform("uProj", proj);
+    mesh_shader.setUniform("uLightPos", lightPos);
+    mesh_shader.setUniform("uCamPos", camPos);
 
-    auto temp = mMeshesBiome1[vegType]->bind(); //MUST STAY
+
+    unsigned int rainy_inc;
+
+    if(rainy)
+       rainy_inc = 0;
+    else
+       rainy_inc = 3;
+
+    for(unsigned int i = 0; i < mesh_positions.size(); i++){
+
+    mesh_shader.setTexture("uTexColor", mesh_textures[i + rainy_inc]);
+    mesh_shader.setTexture("uTexNormal", mesh_normals[i + rainy_inc]);
+
+    auto temp = mMeshesArray[i + rainy_inc]->bind(); //MUST STAY
     auto ab = glow::ArrayBuffer::create();
-    auto mesh_vao1 = mMeshesBiome1[vegType]->getCurrentVAO();
+    auto mesh_vao1 = mMeshesArray[i + rainy_inc]->getCurrentVAO();
 
     std::vector<glm::mat4> scalingMatrices;
 
-    scalingMatrices = {glm::scale(glm::vec3(1.f, 1.f, 1.f)), glm::scale(glm::vec3(0.01f, 0.01f, 0.01f)), glm::scale(glm::vec3(0.01f, 0.01f, 0.01f))};
+    scalingMatrices = {glm::scale(glm::vec3(0.7f, 0.7f, 0.7f)), glm::scale(glm::vec3(1.f, 1.f, 1.f)), glm::scale(glm::vec3(0.003f, 0.003f, 0.003f)),glm::scale(glm::vec3(0.01f, 0.01f, 0.01f)), glm::scale(glm::vec3(2.0f, 2.0f, 2.0f)), glm::scale(glm::vec3(0.005f, 0.005f, 0.005f)) };
 
-    std::vector<glm::vec4> m1;
-    std::vector<glm::vec4> m2;
-    std::vector<glm::vec4> m3;
-    std::vector<glm::vec4> m4;
+    std::vector<std::vector<glm::vec4>> transformation_matrix;
 
-    {
+    transformation_matrix.resize(4);
+    transformation_matrix.at(0).resize(mesh_positions.at(i).size());
+    transformation_matrix.at(1).resize(mesh_positions.at(i).size());
+    transformation_matrix.at(2).resize(mesh_positions.at(i).size());
+    transformation_matrix.at(3).resize(mesh_positions.at(i).size());
+
         int a = 0;
         std::vector<glow::SharedArrayBuffer> mAbs;
-        while(a < mesh_positions.size()){
 
-            auto localCoords = mHeightmap.WorldToLocalCoordinates({mesh_positions.at(a).x, mesh_positions.at(a).z});
+        while(a < mesh_positions.at(i).size()){
+
+            auto localCoords = mHeightmap.WorldToLocalCoordinates({mesh_positions.at(i).at(a).x, mesh_positions.at(i).at(a).z});
             glm::mat4 mesh_model(1.0f);
             auto rotMat = mBrush.GetCircleRotation(mHeightmap.mNormalsFinal.at(localCoords.y * mHeightmap.mHeightmapDimensions.x + localCoords.x), {0, 0, 0});
-            //auto scalingMat = glm::scale(glm::vec3(0.1f, 0.1f, 0.1f));
-            auto translMat = glm::translate(mesh_positions.at(a));
+            auto translMat = glm::translate(mesh_positions.at(i).at(a));
 
-            mesh_model = translMat * scalingMatrices[vegType] * rotMat * mesh_model;
+            mesh_model = translMat * scalingMatrices[i + rainy_inc] * rotMat * mesh_model;
 
-            //glm::vec3(0, mHeightmap.mPositions.at(mHeightmap.WorldToLocalCoordinates(glm::vec3(0.f,0.f,0.f)).x * mHeightmap.mHeightmapDimensions.x + mHeightmap.WorldToLocalCoordinates(glm::vec3(0.f,0.f,0.f)).y).y, 0));
-            m1.resize(mesh_positions.size());
-            m2.resize(mesh_positions.size());
-            m3.resize(mesh_positions.size());
-            m4.resize(mesh_positions.size());
-
-
-            m1.at(a) = {mesh_model[0][0], mesh_model[0][1], mesh_model[0][2], mesh_model[0][3]};
-            m2.at(a) = {mesh_model[1][0], mesh_model[1][1], mesh_model[1][2], mesh_model[1][3]};
-            m3.at(a) = {mesh_model[2][0], mesh_model[2][1], mesh_model[2][2], mesh_model[2][3]};
-            m4.at(a) = {mesh_model[3][0], mesh_model[3][1], mesh_model[3][2], mesh_model[3][3]};
-
+            transformation_matrix.at(0).at(a) = {mesh_model[0][0], mesh_model[0][1], mesh_model[0][2], mesh_model[0][3]};
+            transformation_matrix.at(1).at(a) = {mesh_model[1][0], mesh_model[1][1], mesh_model[1][2], mesh_model[1][3]};
+            transformation_matrix.at(2).at(a) = {mesh_model[2][0], mesh_model[2][1], mesh_model[2][2], mesh_model[2][3]};
+            transformation_matrix.at(3).at(a) = {mesh_model[3][0], mesh_model[3][1], mesh_model[3][2], mesh_model[3][3]};
 
             a++;
         }
 
         ab = glow::ArrayBuffer::create();
         ab->defineAttribute<glm::vec4>("uM1");
-        ab->bind().setData(m1);
+        ab->bind().setData(transformation_matrix.at(0));
         ab->setDivisor(1);
         mAbs.push_back(ab);
 
 
         ab = glow::ArrayBuffer::create();
         ab->defineAttribute<glm::vec4>("uM2");
-        ab->bind().setData(m2);
+        ab->bind().setData(transformation_matrix.at(1));
         ab->setDivisor(1);
         mAbs.push_back(ab);
 
 
         ab = glow::ArrayBuffer::create();
         ab->defineAttribute<glm::vec4>("uM3");
-        ab->bind().setData(m3);
+        ab->bind().setData(transformation_matrix.at(2));
         ab->setDivisor(1);
         mAbs.push_back(ab);
 
 
         ab = glow::ArrayBuffer::create();
         ab->defineAttribute<glm::vec4>("uM4");
-        ab->bind().setData(m4);
+        ab->bind().setData(transformation_matrix.at(3));
         ab->setDivisor(1);
         mAbs.push_back(ab);
 
 
         mesh_vao1->attach(mAbs);
-        mesh_vao1->draw(mesh_positions.size());
+        mesh_vao1->draw(mesh_positions.at(i).size());
 
         }
 
 }
 
- void GlowApp::getMeshPositions(std::vector<std::vector<glm::vec2>> plist){
+ std::vector<std::vector<glm::vec3>> GlowApp::getMeshPositions(bool rainy){
      int a = 0;
+     std::vector<std::vector<glm::vec2>> plist;
+     std::vector<std::vector<glm::vec3>> mesh_positions;
 
-     plist.at(0) = mBiomes.poissonDiskSampling(6, 40, mBiomes.rain_start, mBiomes.rain_end, plist.at(0));
-     plist.at(1) = mBiomes.poissonDiskSampling(10, 80, mBiomes.rain_start, mBiomes.rain_end, plist.at(0));
-     plist.at(2) = mBiomes.poissonDiskSampling(10, 80, mBiomes.rain_start, mBiomes.rain_end, plist.at(1));
+     plist.resize(3);
+     mesh_positions.resize(3);
 
+     if(rainy){
+         plist.at(0) = mBiomes.poissonDiskSampling(4, 40, mBiomes.rain_start, mBiomes.rain_end, plist.at(0));
+         plist.at(1) = mBiomes.poissonDiskSampling(4, 80, mBiomes.rain_start, mBiomes.rain_end, plist.at(0));
+         plist.at(2) = mBiomes.poissonDiskSampling(12 , 80, mBiomes.rain_start, mBiomes.rain_end, plist.at(1));
+     }
+         else{
+         plist.at(0) = mBiomes.poissonDiskSampling(5, 40, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(0));
+         plist.at(1) = mBiomes.poissonDiskSampling(5, 80, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(0));
+         plist.at(2) = mBiomes.poissonDiskSampling(15, 80, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(1));
+     }
 
             while(a < plist.at(0).size()){
                 auto worldCoordinates = mHeightmap.LocalToWorldCoordinates(plist.at(0)[a]);
-                worldCoordinates.y = mHeightmap.GetDisplacementAt(plist.at(0)[a]); //mHeightmap.mPositions.at(plist[a].x * mHeightmap.mHeightmapDimensions.x + plist[a].y).y;
-                rainy_positions1.push_back(worldCoordinates);
+                worldCoordinates.y = mHeightmap.GetDisplacementAt(plist.at(0)[a]);
+                mesh_positions.at(0).push_back(worldCoordinates);
                 a++;
             }
 
             a = 0;
 
-            if(plist.at(1) == plist.at(0))
-                rainy_positions2 = rainy_positions1;
 
-            else{
             while(a < plist.at(1).size()){
                 auto worldCoordinates = mHeightmap.LocalToWorldCoordinates(plist.at(1)[a]);
-                worldCoordinates.y = mHeightmap.GetDisplacementAt(plist.at(1)[a]); //mHeightmap.mPositions.at(plist[a].x * mHeightmap.mHeightmapDimensions.x + plist[a].y).y;
-                rainy_positions2.push_back(worldCoordinates);
+                worldCoordinates.y = mHeightmap.GetDisplacementAt(plist.at(1)[a]);
+                 mesh_positions.at(1).push_back(worldCoordinates);
                 a++;
                 }
-            }
+
 
             a = 0;
-            if(plist.at(2) == plist.at(1))
-                rainy_positions3 = rainy_positions2;
 
-
-            else{
             while(a < plist.at(2).size()){
                 auto worldCoordinates = mHeightmap.LocalToWorldCoordinates(plist.at(2)[a]);
-                worldCoordinates.y = mHeightmap.GetDisplacementAt(plist.at(2)[a]); //mHeightmap.mPositions.at(plist[a].x * mHeightmap.mHeightmapDimensions.x + plist[a].y).y;
-                rainy_positions3.push_back(worldCoordinates);
+                worldCoordinates.y = mHeightmap.GetDisplacementAt(plist.at(2)[a]);
+                mesh_positions.at(2).push_back(worldCoordinates);
                 a++;
                 }
-            }
+
+
+            return mesh_positions;
 }
