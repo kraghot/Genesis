@@ -28,7 +28,7 @@ void main()
     vec4 worldPos;
     float flow = texture(uTexRainFlow, vTexCoords).r;
     if(flow > 0.8)
-        flow = (flow - 0.8) * 10.0;
+        flow = (flow - 0.8) * 20.0;
     else
         flow = 0;
 
