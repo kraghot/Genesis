@@ -168,7 +168,7 @@ void GlowApp::init()
     //rainforest
     addMesh("jungle_tree1", "mesh/jungle_tree1/jungle_tree1.jpg", "mesh/jungle_tree1/jungle_tree1_normal.jpg");
     addMesh("jungle_bush1", "mesh/jungle_bush1/jungle_bush1.png", "mesh/jungle_bush1/jungle_bush1_normal.png");
-    addMesh("lavender", "mesh/lavender/lavender.png", "mesh/grass/grass_normal.tga");
+    addMesh("lavender", "mesh/lavender/lavender.png", "mesh/lavender/lavender_normal.png");
 
     //forest
     addMesh("pinetree", "mesh/pinetree/pinetree.png", "mesh/pinetree/pinetree_normal.png");
@@ -306,7 +306,7 @@ void GlowApp::render(float elapsedSeconds)
             }
             mLineVao->bind().draw();
 
-            lineShader.setUniform("uModel", mBrush.GetCircleRotation(mBrush.mIntersectionTriangle.normal, mBrush.mIntersection));
+            lineShader.setUniform("uModel", mBrush.GetCircleRotation(mBrush.mIntersectionTriangle.normal, mBrush.mIntersection, {0, 1, 0}));
             mBrush.getCircleVao()->bind().draw();
 
             if(recalculateSplatmap){
@@ -553,7 +553,13 @@ void GlowApp::renderMesh(std::vector<std::vector<glm::vec3>> mesh_positions, glm
 
             auto localCoords = mHeightmap.WorldToLocalCoordinates({mesh_positions.at(i).at(a).x, mesh_positions.at(i).at(a).z});
             glm::mat4 mesh_model(1.0f);
-            auto rotMat = mBrush.GetCircleRotation(mHeightmap.mNormalsFinal.at(localCoords.y * mHeightmap.mHeightmapDimensions.x + localCoords.x), {0, 0, 0});
+            glm::mat4 rotMat;
+
+            if(i == 0)
+                rotMat = mBrush.GetCircleRotation(glm::normalize(glm::vec3(mHeightmap.mNormalsFinal.at(localCoords.y * mHeightmap.mHeightmapDimensions.x + localCoords.x).x, mHeightmap.mNormalsFinal.at(localCoords.y * mHeightmap.mHeightmapDimensions.x + localCoords.x).y + 10, mHeightmap.mNormalsFinal.at(localCoords.y * mHeightmap.mHeightmapDimensions.x + localCoords.x).z)), {0, 0, 0}, {0, 1, 0});
+            else
+                rotMat = mBrush.GetCircleRotation(mHeightmap.mNormalsFinal.at(localCoords.y * mHeightmap.mHeightmapDimensions.x + localCoords.x), {0, 0, 0}, {0, 1, 0});
+
             auto translMat = glm::translate(mesh_positions.at(i).at(a));
 
             mesh_model = translMat * scalingMatrices[i + rainy_inc] * rotMat * mesh_model;
