@@ -71,5 +71,5 @@ void main()
     float ambient = 0.1f * texture(uAmbientOcclusionMap, vHeightCoord).r;
 
 //    fColor = color * (albedo + diffuse + specular);
-    fColor = pow(vFinalTexColor, vec4(1/2.224)) * (albedo + diffuse + specular + ambient);
+    fColor = pow(vFinalTexColor * (albedo + diffuse + specular), vec4(1/2.224));
 }

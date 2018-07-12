@@ -16,13 +16,19 @@ public:
     void randomWindDirection();
     glm::vec2 GetWindDirection();
     //void generateBiomes();
-    std::vector<glm::vec2> poissonDiskSampling(float radius, int k);
+    std::vector<glm::vec2> poissonDiskSampling(float radius, int k, glm::vec2 startpos, glm::vec2 endpos, std::vector<glm::vec2> takenPoints);
     std::vector<glm::vec4> mBiomeMap;
+
+    glm::vec2 rain_start;
+    glm::vec2 rain_end;
+
+    glm::vec2 NoRain_start;
+    glm::vec2 NoRain_end;
 
 private:
     //glm::vec3 randomWindDirection();
     void insertPoint(std::vector<std::vector<glm::vec2> > &grid, float cellsize, glm::vec2 point);
-    bool isValidPoint(std::vector<std::vector<glm::vec2>>& grid, float cellsize, int gwidth, int gheight, glm::vec2 p, float radius);
+    bool isValidPoint(std::vector<std::vector<glm::vec2>>& grid, float cellsize, int gwidth, int gheight, glm::vec2 p, float radius, glm::vec2 startpos, glm::vec2 endpos);
 
     MultiLayeredHeightmap *mHeightmap;
 

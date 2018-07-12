@@ -94,6 +94,13 @@ private:
     typedef enum { NS, SN, WE, EW} SelectedWind;
     SelectedWind m_selectedWind = NS;
 
+    void renderMesh(std::vector<std::vector<glm::vec3>> mesh_positions, glm::mat4 view, glm::mat4 proj, bool rainy);
+    std::vector<std::vector<glm::vec3>> getMeshPositions(bool rainy);
+
+    std::vector<std::vector<glm::vec3>> rainforest;
+    std::vector<std::vector<glm::vec3>> forest;
+
+
 public:
     GlowApp();
     // load resources, initialize app
@@ -105,13 +112,36 @@ public:
     // called after window is resized
     void onResize(int w, int h) override;
 
-    void addMesh(const std::string &name);
+    void addMesh(const std::string &name, const std::string &tex_path, const std::string &norm_path);
+    //void getMeshPositions(std::vector<std::vector<glm::vec2>> plist);
 
-    std::vector<glow::SharedVertexArray> mMeshes;
+    std::vector<glow::SharedVertexArray> mMeshesArray;
+
     int mMeshIdx = 0;
     glow::SharedProgram meshShader;
-    glow::SharedTexture2D meshTextureColor;
-    glow::SharedTexture2D meshTextureNormal;
+    glow::SharedTexture2D meshTextureColor_rainforest1;
+    glow::SharedTexture2D meshTextureColor_rainforest2;
+    glow::SharedTexture2D meshTextureColor_rainforest3;
+
+    glow::SharedTexture2D meshNormalColor_rainforest1;
+    glow::SharedTexture2D meshNormalColor_rainforest2;
+    glow::SharedTexture2D meshNormalColor_rainforest3;
+
+    glow::SharedTexture2D meshTextureColor_forest1;
+    glow::SharedTexture2D meshTextureColor_forest2;
+    glow::SharedTexture2D meshTextureColor_forest3;
+
+    glow::SharedTexture2D meshNormalColor_forest1;
+    glow::SharedTexture2D meshNormalColor_forest2;
+    glow::SharedTexture2D meshNormalColor_forest3;
+
+    std::vector<glow::SharedTexture2D> rainforest_textures;
+    std::vector<glow::SharedTexture2D> forest_textures;
+
+    std::vector<glow::SharedTexture2D> mesh_textures;
+    std::vector<glow::SharedTexture2D> mesh_normals;
+
+
 
     void randomTerrain();
     void initTerrain();
@@ -139,7 +169,10 @@ public:
     static void TW_CALL TweakRandomWind(void *clientData);
     void SetRandomWind();
 
-    std::vector<glm::vec3> mesh_positions;
+    std::vector<glm::vec3> rainy_positions1;
+    std::vector<glm::vec3> rainy_positions2;
+    std::vector<glm::vec3> rainy_positions3;
+   // glm::mat4 mesh_model;
 
 };
 

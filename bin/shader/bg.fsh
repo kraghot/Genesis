@@ -18,5 +18,5 @@ void main() {
     near = uInvView * near;
     far = uInvView * far;
 
-    fColor = texture(uTexture, (far - near).xyz).rgb;
+    fColor = pow(texture(uTexture, (far - near).xyz), vec4(1/2.224)).rgb;
 }

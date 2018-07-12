@@ -33,7 +33,7 @@ public:
     glm::dvec3 getIntersectionPoint() const;
 
     glow::SharedVertexArray getCircleVao() const;
-    glm::mat4 GetCircleRotation();
+    glm::mat4 GetCircleRotation(glm::vec3 normal, glm::vec3 intersection);
     void GenerateArc(float r);
 
     void SetTextureBrush(int seletedTexture, std::vector<glm::vec4> &biomesMap, glow::SharedTexture2D mBiomesTexture);
@@ -46,6 +46,8 @@ public:
       return std::max(lower, std::min(n, upper));
     }
 
+    Face mIntersectionTriangle;
+    glm::vec3 mIntersection = {0.f, 0.f, 0.f};
 private:
 
     bool bary_coord(const glm::vec3& _p, const glm::vec3& _u, const glm::vec3& _v, const glm::vec3& _w, glm::vec3& _result) const;
@@ -54,11 +56,9 @@ private:
     {
         return a.t_min < b.t_min;
     }
-    glm::vec3 mIntersection = {0.f, 0.f, 0.f};
     float _t = 0.f;
     float epsilon = 0.001f;
 
-    Face mIntersectionTriangle;
     glow::SharedVertexArray mCircleVao;
     unsigned int mIntersectionHeight = 0;
     unsigned int mIntersectionWidth = 0;
