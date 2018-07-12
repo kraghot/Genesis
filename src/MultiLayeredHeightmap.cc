@@ -497,8 +497,8 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
         auto next = GetLowestNeigh(neigh);
 
         // Stop when in ocean
-//        if(GetDisplacementAt(next) < mFlowMap->GetWaterLevel() - 2)
-//            return;
+        // if(GetDisplacementAt(next) < mFlowMap->GetWaterLevel() - 2)
+        //  return;
 
         float heightDifference = GetDisplacementAt(currPos) - GetDisplacementAt(next);
 
@@ -510,7 +510,9 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
             continue;
         }
 
-        mSplatmap.at(LOC(currPos.x, currPos.y)).a = /*0.1f * (i+1)*/1.0f;
+
+        // Debug draw to splatman
+        // mSplatmap.at(LOC(currPos.x, currPos.y)).a = /*0.1f * (i+1)*/1.0f;
 
         // If this location is the deepest in the neigh try to deposit everything
         if(heightDifference < 0.0001)
@@ -872,6 +874,9 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(std::vector<Gener
     FillData(heights);
     MakeVertexArray();
 
+
+    mRainFlowMap.clear();
+
     mRainFlowMap.resize(dimX * dimY, 0.0f);
     mRainFlowMapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RED);
     mRainFlowMapTexture->bind().setData(GL_RED, mHeightmapDimensions.x, mHeightmapDimensions.y, mRainFlowMap);
@@ -975,7 +980,7 @@ void MultiLayeredHeightmap::LoadSplatmap(){
 //    }
 
     //beach
-    if (mPositions.at(i).y >= 9 && mPositions.at(i).y < 14 && fScale_slope <= fRange4_slope){
+    if (mPositions.at(i).y < 14 && fScale_slope <= fRange4_slope){
         a = 1.f;
         r = 0.f;
         g = 0.f;

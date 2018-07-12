@@ -44,6 +44,10 @@ public:
 
     float GetWaterLevel() {return mWaterLevel;}
 
+    /**
+     * @brief ResetMap zeroes the flowmap out
+     */
+    void ResetMap();
 private:
     friend class MultiLayeredHeightmap;
 

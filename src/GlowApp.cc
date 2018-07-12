@@ -480,6 +480,9 @@ void GlowApp::initTerrain(){
     mTexNormal = mHeightmap.LoadNormal(mTerrainNormals);
 
     RayIntersectionQuadtree_nodes = quadtree.construct_quadtree();
+
+    mFlowMap.SetWindDirection(mBiomes.GetWindDirection());
+
 }
 
 void GlowApp::setSeed(unsigned int var){

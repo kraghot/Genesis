@@ -6,7 +6,7 @@
 FlowMapWater::FlowMapWater(unsigned width, unsigned height, MultiLayeredHeightmap* heightmap):
     mWidth(width * 1.5),
     mHeight(height * 1.5),
-    mFlowData(mWidth * mHeight, glm::vec2(0, 0)),
+    mFlowData(mWidth * mHeight, glm::vec2(0.5, 0.5)),
     mHeightmap(heightmap)
 {
     mOffsetToTerrain.x = (mWidth - width) / 2.0;
@@ -94,6 +94,11 @@ void FlowMapWater::GenerateFlowTexture()
     mFlowTexture = glow::Texture2D::create(mWidth, mHeight, GL_RG);
     mFlowTexture->bind().setData(GL_RG, mWidth, mHeight, mFlowData);
     mFlowTexture->bind().generateMipmaps();
+}
+
+void FlowMapWater::ResetMap()
+{
+    mFlowData = std::vector<glm::vec2>(mWidth * mHeight, glm::vec2(0.5, 0.5));
 }
 
 void FlowMapWater::FlowParticle(glm::vec2 &particle, const glm::vec2 &direction)
