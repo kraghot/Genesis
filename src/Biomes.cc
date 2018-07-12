@@ -41,32 +41,32 @@ NS:
         for(j = 0; j < mHeightmap->mHeightmapDimensions.y; j++){
 
             if(firstIteration){
-                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0171f)); // default: /100
+                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 10)/(mHeightmap->mHeightmapDimensions.x * 40)); // default: /0.0171f
                     initRainValue = rainAmount[y][x];
                     biomesMerge[x][y] = 1.f;
             }
 
             else if(rainAmount[y-1][x] > 0)
-                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0171f));
+                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 10)/(mHeightmap->mHeightmapDimensions.x * 40));
 
             rainAmount[y][x] = rainAmount[y][x] < 0.0 ? 0.0 : rainAmount[y][x];
 
-            if(rainAmount[y][x] > initRainValue * 0.5f){
+            if(rainAmount[y][x] > initRainValue * 0.7f){
                 mRainMap.at(CURRPOS_NS) ={1.f, 0.f, 0.f, 0.f};
                 biomesMerge[x][y] = 1.f;
             }
 
             else{
-                biomesMerge[x][y] = biomesMerge[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0512f));
+                biomesMerge[x][y] = biomesMerge[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/(mHeightmap->mHeightmapDimensions.x /0.05));
                 biomesMerge[x][y] = biomesMerge[x][y] < 0.0 ? 0.0 : biomesMerge[x][y];
                 mRainMap.at(CURRPOS_NS) ={biomesMerge[x][y], 1.f - biomesMerge[x][y], 0.f, 0.f};
             }
 
-            if(rainAmount[y][x] > initRainValue * 0.3f){
-                rain_end.x = mHeightmap->mHeightmapDimensions.x; //std::max((unsigned int)rain_end.x, j);
-                rain_end.y = mHeightmap->mHeightmapDimensions.y;  //std::max((unsigned int)rain_end.y, i);
-                rain_start.x = 0; //std::min((unsigned int)rain_start.x, j);
-                rain_start.y = i; //std::min((unsigned int)rain_start.y, i);
+            if(rainAmount[y][x] > initRainValue * 0.8777f){
+                rain_end.x = (mHeightmap->mHeightmapDimensions.x) - 1;
+                rain_end.y = (mHeightmap->mHeightmapDimensions.y) - 1;
+                rain_start.x = 0;
+                rain_start.y = i;
             }
 
             mBiomeMap.at(CURRPOS_NS) = {mRainMap.at(CURRPOS_NS).r, mRainMap.at(CURRPOS_NS).g , mHeightmap->mSplatmap.at(CURRPOS_NS).b * 5, mHeightmap->mSplatmap.at(CURRPOS_NS).a * 8};
@@ -95,32 +95,27 @@ SN:
         for(j = 0; j < mHeightmap->mHeightmapDimensions.y; j++){
 
             if(firstIteration){
-                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0171f)); // default: /100
+                rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 10)/(mHeightmap->mHeightmapDimensions.x * 40)); // default: /0.0171f
                     initRainValue = rainAmount[y][x];
                     biomesMerge[x][y] = 1.f;
             }
 
             else if(rainAmount[y-1][x] > 0)
-                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0171f));
+                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 10)/(mHeightmap->mHeightmapDimensions.x * 40));
 
             rainAmount[y][x] = rainAmount[y][x] < 0.0 ? 0.0 : rainAmount[y][x];
 
-            if(rainAmount[y][x] > initRainValue * 0.5f){
+            if(rainAmount[y][x] > initRainValue * 0.7f){
                 mRainMap.at(CURRPOS_NS) ={1.f, 0.f, 0.f, 0.f};
                 biomesMerge[x][y] = 1.f;
-
-                rain_start.x = std::min((unsigned int)rain_start.x, i);
-                rain_start.y = std::min((unsigned int)rain_start.y, j);
-                rain_end.x = std::max((unsigned int)rain_end.x, i);
-                rain_end.y = std::max((unsigned int)rain_end.y, j);
             }
             else{
-                biomesMerge[x][y] = biomesMerge[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0512f));
+                biomesMerge[x][y] = biomesMerge[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_NS) + 100)/(mHeightmap->mHeightmapDimensions.x/0.05));
                 biomesMerge[x][y] = biomesMerge[x][y] < 0.0 ? 0.0 : biomesMerge[x][y];
                 mRainMap.at(CURRPOS_NS) ={biomesMerge[x][y], 1.f - biomesMerge[x][y], 0.f, 0.f};
             }
 
-            if(rainAmount[y][x] > initRainValue * 0.3f){
+            if(rainAmount[y][x] > initRainValue * 0.8777f){
                 rain_end.x = mHeightmap->mHeightmapDimensions.x-1;
                 rain_end.y = i;
                 rain_start.x = 0;
@@ -146,7 +141,7 @@ SN:
     }
 
     NoRain_start = {0, rain_end.y};
-    NoRain_end = {mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y};
+    NoRain_end = {mHeightmap->mHeightmapDimensions.x- 1, mHeightmap->mHeightmapDimensions.y - 1};
 
     goto bindRainMap;
 
@@ -155,28 +150,28 @@ WE:
         for(j = 0; j < mHeightmap->mHeightmapDimensions.y * mHeightmap->mHeightmapDimensions.y; j+= mHeightmap->mHeightmapDimensions.y){
 
             if(firstIteration){
-                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0171f)); // default: /100
+                rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 10)/(mHeightmap->mHeightmapDimensions.x * 40)); // default: /0.0171f
                     initRainValue = rainAmount[y][x];
                     biomesMerge[x][y] = 1.f;
             }
 
             else if(rainAmount[y-1][x] > 0)
-                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0171f));
+                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 10)/(mHeightmap->mHeightmapDimensions.x * 40));
 
             rainAmount[y][x] = rainAmount[y][x] < 0.0 ? 0.0 : rainAmount[y][x];
 
-            if(rainAmount[y][x] > initRainValue * 0.5f){
+            if(rainAmount[y][x] > initRainValue * 0.7f){
                 mRainMap.at(CURRPOS_WE) ={1.f, 0.f, 0.f, 0.f};
                 biomesMerge[x][y] = 1.f;
             }
 
             else{
-                biomesMerge[x][y] = biomesMerge[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0512f));
+                biomesMerge[x][y] = biomesMerge[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/(mHeightmap->mHeightmapDimensions.x /0.05));
                 biomesMerge[x][y] = biomesMerge[x][y] < 0.0 ? 0.0 : biomesMerge[x][y];
                 mRainMap.at(CURRPOS_WE) ={biomesMerge[x][y], 1.f - biomesMerge[x][y], 0.f, 0.f};
             }
 
-            if(rainAmount[y][x] > initRainValue * 0.3f){
+            if(rainAmount[y][x] > initRainValue * 0.8777f){
                 NoRain_start.x = 0;
                 NoRain_start.y = 0;
                 NoRain_end.x = mHeightmap->WorldToLocalCoordinates({mHeightmap->mPositions.at(CURRPOS_WE).x, mHeightmap->mPositions.at(CURRPOS_WE).z}).x;
@@ -215,27 +210,27 @@ EW:
         for(j = 0; j < mHeightmap->mHeightmapDimensions.y * mHeightmap->mHeightmapDimensions.y; j+=mHeightmap->mHeightmapDimensions.y){
 
             if(firstIteration){
-                    rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0171f)); // default: /100
+                rainAmount[y][x] = 1.f - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 10)/(mHeightmap->mHeightmapDimensions.x * 40)); // default: /0.0171f
                     initRainValue = rainAmount[y][x];
                     biomesMerge[x][y] = 1.f;
             }
 
             else if(rainAmount[y-1][x] > 0)
-                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0171f));
+                rainAmount[y][x] = rainAmount[y-1][x] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 10)/(mHeightmap->mHeightmapDimensions.x * 40));
 
             rainAmount[y][x] = rainAmount[y][x] < 0.0 ? 0.0 : rainAmount[y][x];
 
-            if(rainAmount[y][x] > initRainValue * 0.5f){
+            if(rainAmount[y][x] > initRainValue * 0.7f){
                 mRainMap.at(CURRPOS_WE) ={1.f, 0.f, 0.f, 0.f};
                 biomesMerge[x][y] = 1.f;
             }
             else{
-                biomesMerge[x][y] = biomesMerge[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/(mHeightmap->mHeightmapDimensions.x /0.0512f));
+                biomesMerge[x][y] = biomesMerge[x][y-1] - ((mHeightmap->mDisplacement.at(CURRPOS_WE) + 100)/(mHeightmap->mHeightmapDimensions.x /0.05));
                 biomesMerge[x][y] = biomesMerge[x][y] < 0.0 ? 0.0 : biomesMerge[x][y];
                 mRainMap.at(CURRPOS_WE) ={biomesMerge[x][y], 1.f - biomesMerge[x][y], 0.f, 0.f};
             }
 
-            if(rainAmount[y][x] > initRainValue * 0.3f){
+            if(rainAmount[y][x] > initRainValue * 0.8777f){
                 NoRain_start.x = mHeightmap->WorldToLocalCoordinates({mHeightmap->mPositions.at(CURRPOS_WE).x, mHeightmap->mPositions.at(CURRPOS_WE).z}).x;
                 NoRain_start.y = 0;
                 NoRain_end.x = mHeightmap->mHeightmapDimensions.x-1;
@@ -303,7 +298,7 @@ glm::vec2 Biomes::GetWindDirection()
     return glm::vec2(0, 0);
 }
 
-std::vector<glm::vec2> Biomes::poissonDiskSampling(float radius, int k, glm::vec2 startpos, glm::vec2 endpos, std::vector<glm::vec2> takenPoints){
+std::vector<glm::vec2> Biomes::poissonDiskSampling(float radius, int k, glm::vec2 startpos, glm::vec2 endpos, std::vector<glm::vec2> takenPoints, bool rainy){
 
     std::vector<glm::vec2> points;
     std::list<glm::vec2> active;
@@ -318,14 +313,8 @@ std::vector<glm::vec2> Biomes::poissonDiskSampling(float radius, int k, glm::vec
     do{
         p0 = {rand() % (unsigned int)start_end.x, rand() % (unsigned int)start_end.y};
         p0 = {startpos.x + p0.x, startpos.y + p0.y};
-
-    }while((mHeightmap->mPositions.at(p0.y * mHeightmap->mHeightmapDimensions.x + p0.x).y > 23 || mHeightmap->mPositions.at(p0.y * mHeightmap->mHeightmapDimensions.x + p0.x).y <= 14) );
-
-//    if(takenPoints.size() != 0)
-//        for (int i = 0; i < takenPoints.size(); i++){
-//            if(p0 == takenPoints.at(i))
-//                goto validateP0;
-//        }
+        attempts++;
+    }while((mHeightmap->mPositions.at(p0.y * mHeightmap->mHeightmapDimensions.x + p0.x).y > 23 || mHeightmap->mPositions.at(p0.y * mHeightmap->mHeightmapDimensions.x + p0.x).y <= 14) && attempts <= k);
 
     if(attempts >= k)
         return takenPoints;
@@ -363,7 +352,7 @@ std::vector<glm::vec2> Biomes::poissonDiskSampling(float radius, int k, glm::vec
             float pnewy = p.y + new_radius * sin(glm::radians(theta));
             glm::vec2 pnew = {pnewx, pnewy};
 
-            if (!isValidPoint(grid, cellSize, ncells_width, ncells_height, pnew, radius, startpos, endpos))
+            if (!isValidPoint(grid, cellSize, ncells_width, ncells_height, pnew, radius, startpos, endpos, rainy))
                 continue;
 
             points.push_back(pnew);
@@ -387,12 +376,27 @@ void Biomes::insertPoint(std::vector<std::vector<glm::vec2>>& grid, float cellsi
     grid[xindex][yindex] = point;
 }
 
-bool Biomes::isValidPoint(std::vector<std::vector<glm::vec2>>& grid, float cellsize, int gwidth, int gheight, glm::vec2 p, float radius, glm::vec2 startpos, glm::vec2 endpos) {
+bool Biomes::isValidPoint(std::vector<std::vector<glm::vec2>>& grid, float cellsize, int gwidth, int gheight, glm::vec2 p, float radius, glm::vec2 startpos, glm::vec2 endpos, bool rainy) {
+    float rain;
+    float noRain;
+
 
     if (p.x < startpos.x || p.x >= endpos.x || p.y < startpos.y || p.y >= endpos.y)
         return false;
 
     else if (mHeightmap->mPositions.at((int)p.y * mHeightmap->mHeightmapDimensions.x + (int)p.x).y > 23 || mHeightmap->mPositions.at((int)p.y * mHeightmap->mHeightmapDimensions.x + (int)p.x).y <= 14)
+        return false;
+
+    if(rainy){
+        rain = mRainMap.at((unsigned int)p.y * mHeightmap->mHeightmapDimensions.y + (unsigned int)p.x).x;
+        noRain = 0;
+    }
+    else{
+        rain = 1;
+        noRain = mRainMap.at(p.y * mHeightmap->mHeightmapDimensions.y + p.x).x;
+    }
+
+    if(rain < 0.7 && noRain > 0.00000005)
         return false;
 
 
@@ -422,4 +426,25 @@ bool Biomes::isValidPoint(std::vector<std::vector<glm::vec2>>& grid, float cells
     return true;
 }
 
+#define LOC i * mHeightmap->mHeightmapDimensions.y + j
+void Biomes::loadBiomesMap(){
+    float sum;
+
+    for (unsigned int i = 0; i < mHeightmap->mHeightmapDimensions.y; i++){
+        for (unsigned int j = 0; j < mHeightmap->mHeightmapDimensions.x; j++){
+            mBiomeMap.at(LOC) = {mRainMap.at(LOC).r, mRainMap.at(LOC).g , mHeightmap->mSplatmap.at(LOC).b * 5, mHeightmap->mSplatmap.at(LOC).a * 8};
+            sum = mBiomeMap.at(LOC).r + mBiomeMap.at(LOC).g + mBiomeMap.at(LOC).b + mBiomeMap.at(LOC).a;
+
+            mBiomeMap.at(LOC).r /= sum;
+            mBiomeMap.at(LOC).g /= sum;
+            mBiomeMap.at(LOC).b /= sum;
+            mBiomeMap.at(LOC).a /= sum;
+        }
+    }
+
+    mBiomesTexture = glow::Texture2D::create(mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, GL_RGBA);
+    mBiomesTexture->bind().setData(GL_RGBA, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mBiomeMap);
+    mBiomesTexture->bind().generateMipmaps();
+
+}
 

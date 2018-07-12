@@ -106,12 +106,15 @@ void GlowApp::init()
     TwAddVarRW(tweakbar(), "DebugFlow", TW_TYPE_BOOLCPP, &mDebugFlow, "group=scene key=l label='DebugFlow'");
     TwAddButton(tweakbar(), "splatmap", GlowApp::TweakSetSplatmap, NULL, " label='Recalculate textures '");
     TwAddButton(tweakbar(), "wind", GlowApp::TweakRandomWind, NULL, " label='Random wind direction '");
+    TwAddVarRW(tweakbar(), "Edit mode", TW_TYPE_BOOLCPP, &mEditMode, "group=scene key=l label='Edit Mode'");
 
     // load object
     mMeshCube = assimp::Importer().load("mesh/cube.obj");
     mShaderObj = Program::createFromFile("shader/obj");
     mTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
     mTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
+
+    mBrush.GenerateArc(mCircleRadius);
 
     //generate first random seed for terrain
     std::srand(std::time(0));
@@ -145,7 +148,7 @@ void GlowApp::init()
     mShaderLine = glow::Program::createFromFile("shader/line");
     mShaderWater = glow::Program::createFromFile("shader/water");
     mShaderRiver = glow::Program::createFromFile("shader/river");
-    mBrush.GenerateArc(mCircleRadius);
+
 
     mWaterNormal1 = glow::Texture2D::createFromFile("texture/waternormal1.jpg", ColorSpace::Linear);
     mWaterNormal2 = glow::Texture2D::createFromFile("texture/waternormal2.jpg", ColorSpace::Linear);
@@ -283,6 +286,7 @@ void GlowApp::render(float elapsedSeconds)
 
             if(isKeyPressed(71)) // GLFW_KEY_G
             {
+                mBrush.GenerateArc(mCircleRadius);
                 mBrush.intersect_quadtree(testRay, RayIntersectionQuadtree_nodes);
 //                mBrush.intersect(testRay);
                 std::vector<glm::vec3> linePositions = {glm::vec3(0, 0, 0), glm::vec3(0, 100, 0)};
@@ -311,6 +315,7 @@ void GlowApp::render(float elapsedSeconds)
 
             if(recalculateSplatmap){
                 mHeightmap.LoadSplatmap();
+                mBiomes.loadBiomesMap();
                 recalculateSplatmap = false;
             }
 
@@ -359,8 +364,12 @@ void GlowApp::render(float elapsedSeconds)
 
         //========== mesh rendering ==========
 
-        renderMesh(rainforest, view, proj, true);
-        renderMesh(forest, view, proj, false);
+        if(!mEditMode){
+            if(!rainforest.empty())
+                renderMesh(rainforest, view, proj, true);
+            if(!forest.empty())
+                renderMesh(forest, view, proj, false);
+        }
 
         //===================================
 
@@ -616,14 +625,14 @@ void GlowApp::renderMesh(std::vector<std::vector<glm::vec3>> mesh_positions, glm
      mesh_positions.resize(3);
 
      if(rainy){
-         plist.at(0) = mBiomes.poissonDiskSampling(4, 40, mBiomes.rain_start, mBiomes.rain_end, plist.at(0));
-         plist.at(1) = mBiomes.poissonDiskSampling(4, 80, mBiomes.rain_start, mBiomes.rain_end, plist.at(0));
-         plist.at(2) = mBiomes.poissonDiskSampling(12 , 80, mBiomes.rain_start, mBiomes.rain_end, plist.at(1));
+         plist.at(0) = mBiomes.poissonDiskSampling(4, 40, mBiomes.rain_start, mBiomes.rain_end, plist.at(0), true);
+         plist.at(1) = mBiomes.poissonDiskSampling(4, 80, mBiomes.rain_start, mBiomes.rain_end, plist.at(0), true);
+         plist.at(2) = mBiomes.poissonDiskSampling(12 , 80, mBiomes.rain_start, mBiomes.rain_end, plist.at(1), true);
      }
          else{
-         plist.at(0) = mBiomes.poissonDiskSampling(5, 40, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(0));
-         plist.at(1) = mBiomes.poissonDiskSampling(5, 80, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(0));
-         plist.at(2) = mBiomes.poissonDiskSampling(15, 80, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(1));
+         plist.at(0) = mBiomes.poissonDiskSampling(5, 40, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(0), false);
+         plist.at(1) = mBiomes.poissonDiskSampling(5, 80, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(0), false);
+         plist.at(2) = mBiomes.poissonDiskSampling(15, 80, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(1), false);
      }
 
             while(a < plist.at(0).size()){
