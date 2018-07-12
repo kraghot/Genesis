@@ -165,6 +165,7 @@ void GlowApp::init()
     mShaderLine = glow::Program::createFromFile("shader/line");
     mShaderWater = glow::Program::createFromFile("shader/water");
     mShaderRiver = glow::Program::createFromFile("shader/river");
+    mShaderInfiniteWater = glow::Program::createFromFile("shader/infinitewater");
     mBrush.GenerateArc(mCircleRadius);
 
     mWaterNormal1 = glow::Texture2D::createFromFile("texture/waternormal1.jpg", ColorSpace::Linear);
@@ -420,8 +421,17 @@ void GlowApp::render(float elapsedSeconds)
             shaderRiver.setTexture("uTexDisplacement", mHeightmap.GetDisplacementTexture());
             shaderRiver.setTexture("uTexRainFlow", mHeightmap.mRainFlowMapTexture);
 
-
             mHeightmap.getVao()->bind().draw();
+
+            auto shaderInfinite = mShaderInfiniteWater->use();
+            shaderInfinite.setUniform("uView", view);
+            shaderInfinite.setUniform("uProj", proj);
+            shaderInfinite.setTexture("uNormalMap1", mWaterNormal1);
+            shaderInfinite.setTexture("uCubeMap", mBackgroundTexture);
+
+
+            mMeshQuad->bind().draw();
+
         }
     }
 
@@ -436,7 +446,7 @@ void GlowApp::initTerrain(){
     PerlinNoiseGenerator perlinNoise(seed);
     DiamondSquareNoiseGenerator diamondNoise(heightMapDim, heightMapDim, 64);
 //    IslandMaskGenerator islandFilter(glm::vec2(heightMapDim - 100, heightMapDim - 100), glm::vec2(heightMapDim, heightMapDim), seed);
-    CircularIslandMaskFilter islandFilter(0.8f, 1.0f, perlinNoise);
+    CircularIslandMaskFilter islandFilter(0.8f, 0.95f, perlinNoise);
 
     std::vector<MultiLayeredHeightmap::GeneratorProperties> properties;
 
