@@ -72,6 +72,8 @@ private:
 
     bool mDebugFlow = false;
 
+    bool mEditMode = true;
+
     Brush mBrush;
     Biomes mBiomes;
 

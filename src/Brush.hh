@@ -33,7 +33,7 @@ public:
     glm::dvec3 getIntersectionPoint() const;
 
     glow::SharedVertexArray getCircleVao() const;
-    glm::mat4 GetCircleRotation(glm::vec3 normal, glm::vec3 intersection);
+    glm::mat4 GetCircleRotation(glm::vec3 normal, glm::vec3 intersection, glm::vec3 upVector);
     void GenerateArc(float r);
 
     void SetTextureBrush(int seletedTexture, std::vector<glm::vec4> &biomesMap, glow::SharedTexture2D mBiomesTexture);

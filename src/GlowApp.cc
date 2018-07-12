@@ -107,12 +107,15 @@ void GlowApp::init()
     TwAddVarRW(tweakbar(), "DebugFlow", TW_TYPE_BOOLCPP, &mDebugFlow, "group=scene key=l label='DebugFlow'");
     TwAddButton(tweakbar(), "splatmap", GlowApp::TweakSetSplatmap, NULL, " label='Recalculate textures '");
     TwAddButton(tweakbar(), "wind", GlowApp::TweakRandomWind, NULL, " label='Random wind direction '");
+    TwAddVarRW(tweakbar(), "Edit mode", TW_TYPE_BOOLCPP, &mEditMode, "group=scene key=l label='Edit Mode'");
 
     // load object
     mMeshCube = assimp::Importer().load("mesh/cube.obj");
     mShaderObj = Program::createFromFile("shader/obj");
     mTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
     mTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
+
+    mBrush.GenerateArc(mCircleRadius);
 
     //generate first random seed for terrain
     std::srand(std::time(0));
@@ -147,7 +150,7 @@ void GlowApp::init()
     mShaderWater = glow::Program::createFromFile("shader/water");
     mShaderRiver = glow::Program::createFromFile("shader/river");
     mShaderInfiniteWater = glow::Program::createFromFile("shader/infinitewater");
-    mBrush.GenerateArc(mCircleRadius);
+
 
     mWaterNormal1 = glow::Texture2D::createFromFile("texture/waternormal1.jpg", ColorSpace::Linear);
     mWaterNormal2 = glow::Texture2D::createFromFile("texture/waternormal2.jpg", ColorSpace::Linear);
@@ -170,7 +173,7 @@ void GlowApp::init()
     //rainforest
     addMesh("jungle_tree1", "mesh/jungle_tree1/jungle_tree1.jpg", "mesh/jungle_tree1/jungle_tree1_normal.jpg");
     addMesh("jungle_bush1", "mesh/jungle_bush1/jungle_bush1.png", "mesh/jungle_bush1/jungle_bush1_normal.png");
-    addMesh("lavender", "mesh/lavender/lavender.png", "mesh/jungle_bush1/jungle_bush1_normal.png");
+    addMesh("lavender", "mesh/lavender/lavender.png", "mesh/lavender/lavender_normal.png");
 
     //forest
     addMesh("pinetree", "mesh/pinetree/pinetree.png", "mesh/pinetree/pinetree_normal.png");
@@ -259,6 +262,7 @@ void GlowApp::render(float elapsedSeconds)
 
             if(isKeyPressed(71)) // GLFW_KEY_G
             {
+                mBrush.GenerateArc(mCircleRadius);
                 auto intersectionPoint = mBrush.getIntersectionPoint();
                 auto localInterection = mHeightmap.WorldToLocalCoordinates({intersectionPoint.x, intersectionPoint.z});
                 printf("World: %f %f %f\nLocal: %u %u\n", intersectionPoint.x, intersectionPoint.y, intersectionPoint.z, localInterection.x, localInterection.y);
@@ -270,10 +274,10 @@ void GlowApp::render(float elapsedSeconds)
                 mBiomes.generateRainMap(m_selectedWind);
                 mFlowMap.SetWindDirection(mBiomes.GetWindDirection());
             }
-            mLineVao->bind().draw();
 
             if(recalculateSplatmap){
                 mHeightmap.LoadSplatmap();
+                mBiomes.loadBiomesMap();
                 recalculateSplatmap = false;
             }
 
@@ -337,14 +341,18 @@ void GlowApp::render(float elapsedSeconds)
             auto lineShader = mShaderLine->use();
             lineShader.setUniform("uView", view);
             lineShader.setUniform("uProj", proj);
-            lineShader.setUniform("uModel", mBrush.GetCircleRotation(mBrush.mIntersectionTriangle.normal, mBrush.mIntersection));
+            lineShader.setUniform("uModel", mBrush.GetCircleRotation(mBrush.mIntersectionTriangle.normal, mBrush.mIntersection, {0, 1, 0}));
             mBrush.getCircleVao()->bind().draw();
         }
 
         //========== mesh rendering ==========
 
-        renderMesh(rainforest, view, proj, true);
-        renderMesh(forest, view, proj, false);
+        if(!mEditMode){
+            if(!rainforest.empty())
+                renderMesh(rainforest, view, proj, true);
+            if(!forest.empty())
+                renderMesh(forest, view, proj, false);
+        }
 
         //===================================
 
@@ -546,7 +554,13 @@ void GlowApp::renderMesh(std::vector<std::vector<glm::vec3>> mesh_positions, glm
 
             auto localCoords = mHeightmap.WorldToLocalCoordinates({mesh_positions.at(i).at(a).x, mesh_positions.at(i).at(a).z});
             glm::mat4 mesh_model(1.0f);
-            auto rotMat = mBrush.GetCircleRotation(mHeightmap.mNormalsFinal.at(localCoords.y * mHeightmap.mHeightmapDimensions.x + localCoords.x), {0, 0, 0});
+            glm::mat4 rotMat;
+
+            if(i == 0)
+                rotMat = mBrush.GetCircleRotation(glm::normalize(glm::vec3(mHeightmap.mNormalsFinal.at(localCoords.y * mHeightmap.mHeightmapDimensions.x + localCoords.x).x, mHeightmap.mNormalsFinal.at(localCoords.y * mHeightmap.mHeightmapDimensions.x + localCoords.x).y + 10, mHeightmap.mNormalsFinal.at(localCoords.y * mHeightmap.mHeightmapDimensions.x + localCoords.x).z)), {0, 0, 0}, {0, 1, 0});
+            else
+                rotMat = mBrush.GetCircleRotation(mHeightmap.mNormalsFinal.at(localCoords.y * mHeightmap.mHeightmapDimensions.x + localCoords.x), {0, 0, 0}, {0, 1, 0});
+
             auto translMat = glm::translate(mesh_positions.at(i).at(a));
 
             mesh_model = translMat * scalingMatrices[i + rainy_inc] * rotMat * mesh_model;
@@ -603,14 +617,14 @@ void GlowApp::renderMesh(std::vector<std::vector<glm::vec3>> mesh_positions, glm
      mesh_positions.resize(3);
 
      if(rainy){
-         plist.at(0) = mBiomes.poissonDiskSampling(4, 40, mBiomes.rain_start, mBiomes.rain_end, plist.at(0));
-         plist.at(1) = mBiomes.poissonDiskSampling(4, 80, mBiomes.rain_start, mBiomes.rain_end, plist.at(0));
-         plist.at(2) = mBiomes.poissonDiskSampling(12 , 80, mBiomes.rain_start, mBiomes.rain_end, plist.at(1));
+         plist.at(0) = mBiomes.poissonDiskSampling(4, 40, mBiomes.rain_start, mBiomes.rain_end, plist.at(0), true);
+         plist.at(1) = mBiomes.poissonDiskSampling(4, 80, mBiomes.rain_start, mBiomes.rain_end, plist.at(0), true);
+         plist.at(2) = mBiomes.poissonDiskSampling(12 , 80, mBiomes.rain_start, mBiomes.rain_end, plist.at(1), true);
      }
          else{
-         plist.at(0) = mBiomes.poissonDiskSampling(5, 40, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(0));
-         plist.at(1) = mBiomes.poissonDiskSampling(5, 80, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(0));
-         plist.at(2) = mBiomes.poissonDiskSampling(15, 80, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(1));
+         plist.at(0) = mBiomes.poissonDiskSampling(5, 40, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(0), false);
+         plist.at(1) = mBiomes.poissonDiskSampling(5, 80, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(0), false);
+         plist.at(2) = mBiomes.poissonDiskSampling(15, 80, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(1), false);
      }
 
             while(a < plist.at(0).size()){
