@@ -17,7 +17,7 @@ in vec3 vNormal;
 in vec3 vTangent;
 in vec2 vTexCoord;
 
-out vec3 fColor;
+out vec4 fColor;
 
 void main()
 {
@@ -28,8 +28,8 @@ void main()
     float ks = 0.3;
 
     // read textures
-    vec3 color = texture(uTexColor, vTexCoord).rgb;
-    vec3 normalMap = texture(uTexNormal, vTexCoord).rgb;
+    vec4 color = texture(uTexColor, vTexCoord);
+    vec4 normalMap = texture(uTexNormal, vTexCoord);
 
     // build local coordinate system
     vec3 L = normalize(uLightPos - vWorldPosition);
@@ -42,11 +42,13 @@ void main()
 
     // apply normal mapping
     normalMap.xy = normalMap.xy * 2 - 1;
-    N = normalize(tbn * normalMap);
+    N = normalize(tbn * normalMap.rgb);
 
     // blinn-phong model
     float albedo = ka;
     float diffuse = kd * max(0, dot(N, L));
     float specular = ks * pow(max(0, dot(N, H)), shininess);
-    fColor = pow(color * (albedo + diffuse + specular), vec3(1/2.224));
+    vec4 final = pow(color * (albedo + diffuse + specular), vec4(1/2.224));
+    final.a = color.a;
+    fColor = final;
 }

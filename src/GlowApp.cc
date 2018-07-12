@@ -347,11 +347,15 @@ void GlowApp::render(float elapsedSeconds)
 
         //========== mesh rendering ==========
 
-        if(!mEditMode){
-            if(!rainforest.empty())
-                renderMesh(rainforest, view, proj, true);
-            if(!forest.empty())
-                renderMesh(forest, view, proj, false);
+        {
+            GLOW_SCOPED(enable, GL_BLEND);
+            glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            if(!mEditMode){
+                if(!rainforest.empty())
+                    renderMesh(rainforest, view, proj, true);
+                if(!forest.empty())
+                    renderMesh(forest, view, proj, false);
+            }
         }
 
         //===================================
@@ -623,8 +627,8 @@ void GlowApp::renderMesh(std::vector<std::vector<glm::vec3>> mesh_positions, glm
      }
          else{
          plist.at(0) = mBiomes.poissonDiskSampling(5, 40, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(0), false);
-         plist.at(1) = mBiomes.poissonDiskSampling(5, 80, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(0), false);
-         plist.at(2) = mBiomes.poissonDiskSampling(15, 80, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(1), false);
+         plist.at(1) = mBiomes.poissonDiskSampling(15, 80, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(0), false);
+         plist.at(2) = mBiomes.poissonDiskSampling(7, 80, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(1), false);
      }
 
             while(a < plist.at(0).size()){

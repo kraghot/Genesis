@@ -517,6 +517,9 @@ void Brush::IntersectUnproject(const glm::vec2 &ndc, const glm::mat4 &vInv, cons
     else
         mIntersectionTriangle.normal = {0, 1, 0};
 
+    mIntersectionWidth = local.x;
+    mIntersectionHeight = local.y;
+
 }
 
 
