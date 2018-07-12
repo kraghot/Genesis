@@ -14,6 +14,7 @@ double CircularIslandMaskFilter::filter(double x, double y, double val)
     glm::vec2 directionVector = glm::vec2(x, y) - center;
     glm::vec2 normalizedDir = glm::normalize(directionVector);
 
+    /// @todo Decide if even needed. Looks plausable even without the perlin component
     double perlinSample = mPerlin.noise(normalizedDir.x, normalizedDir.y, 0.6);
 
     float length = glm::length(directionVector);
