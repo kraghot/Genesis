@@ -23,8 +23,10 @@ void main(){
     // Slow down the flow
     flowmap /= 100.0f;
 
-    vec2 flownTexCoords1 = flowmap * uElapsedTime1 + vTexCoords;
-    vec2 flownTexCoords2 = flowmap * uElapsedTime2 + vTexCoords;
+    vec2 scaledTexCoords = vTexCoords * 15.0f;
+
+    vec2 flownTexCoords1 = flowmap * uElapsedTime1 + scaledTexCoords;
+    vec2 flownTexCoords2 = flowmap * uElapsedTime2 + scaledTexCoords;
     //    vec2 flownTexCoords = vTexCoords;
     vec4 normal1 = texture(uNormalMap1, flownTexCoords1);
     vec4 normal2 = texture(uNormalMap2, flownTexCoords2);

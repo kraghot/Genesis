@@ -16,7 +16,15 @@ void main()
 {
     vLightViewPos = uView * vec4(uLightPos, 1.0f);
     vTexCoords = aHeightCoord;
-    float displacement = texture(uTexDisplacement, vTexCoords).r;
+
+    float displacement;
+    for(int i = 0; i < 4; i++)
+        for(int j = 0; j < 4; j++)
+        {
+            vec2 offsetCoords = vTexCoords + vec2(i, j);
+            displacement += texture(uTexDisplacement, offsetCoords).r;
+        }
+    displacement /= 16;
     vec4 worldPos;
     float flow = texture(uTexRainFlow, vTexCoords).r;
     if(flow > 0.8)
