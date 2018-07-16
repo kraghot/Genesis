@@ -25,7 +25,12 @@ void main()
     float heightOffset = texture(uTexDisplacement, aHeightCoord).r;
     vec4 hPosition = vec4(aPosition, 1.0f);
     hPosition.y = heightOffset;
-    vWorldPosition = vec3(uModel * hPosition);
+
+    // Make the extra vertices of a terrain "disappear" (just don't look from below :P)
+    if(heightOffset < 0.02)
+        vWorldPosition = vec3(0, 0, 0);
+    else
+        vWorldPosition = vec3(uModel * hPosition);
     vNormal = mat3(uModel) * aNormal;
     vColor = aColor;
     vTangent = mat3(uModel) * aTangent;
