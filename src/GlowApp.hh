@@ -31,7 +31,6 @@ private:
     unsigned int mNumIterations = 1000;
 
     glm::vec2 mMousePosWin;
-    const int mLeftClick = 0;
     const int mRightClick = 1;
 
     glm::vec3 mMousePosFinal;
@@ -141,9 +140,6 @@ public:
     std::vector<glow::SharedTexture2D> mesh_textures;
     std::vector<glow::SharedTexture2D> mesh_normals;
 
-
-
-    void randomTerrain();
     void initTerrain();
 
     static void TW_CALL randomTerrain(void *clientData){

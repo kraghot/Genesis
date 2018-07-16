@@ -248,10 +248,10 @@ void GlowApp::render(float elapsedSeconds)
 
         // draw object
         {
+            mBrush.GenerateArc(mCircleRadius);
 
             if(isKeyPressed(71)) // GLFW_KEY_G
             {
-                mBrush.GenerateArc(mCircleRadius);
                 auto intersectionPoint = mBrush.getIntersectionPoint();
                 auto localInterection = mHeightmap.WorldToLocalCoordinates({intersectionPoint.x, intersectionPoint.z});
                 printf("World: %f %f %f\nLocal: %u %u\n", intersectionPoint.x, intersectionPoint.y, intersectionPoint.z, localInterection.x, localInterection.y);
