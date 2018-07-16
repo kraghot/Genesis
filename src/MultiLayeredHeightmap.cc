@@ -424,6 +424,10 @@ void MultiLayeredHeightmap::ThermalErodeTerrain()
         }
     }
     std::cout << counter << std::endl;
+
+    mDisplacementTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_R32F);
+    mDisplacementTexture->bind().setData(GL_R32F, mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RED, GL_FLOAT, mDisplacement.data());
+    mDisplacementTexture->bind().generateMipmaps();
 }
 
 void MultiLayeredHeightmap::HydraulicErodeTerrain()
