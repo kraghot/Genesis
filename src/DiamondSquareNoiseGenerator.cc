@@ -23,6 +23,7 @@ DiamondSquareNoiseGenerator::DiamondSquareNoiseGenerator(const unsigned dimX, co
     mData.resize(dimX * dimY);
 
 
+    // Set initial random values
     for(auto y = 0u; y < dimY; y+=featureSize)
     {
         for(auto x = 0u; x < dimX; x+=featureSize)
