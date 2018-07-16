@@ -11,6 +11,7 @@ class Biomes
 public:
     enum TextureIndices
     {
+        Undefined = 255,
         LightGrass = 0,
         DarkGrass = 1,
         Rock = 2,
@@ -27,7 +28,7 @@ public:
     //void generateBiomes();
     std::vector<glm::vec2> poissonDiskSampling(float radius, int k, glm::vec2 startpos, glm::vec2 endpos, std::vector<glm::vec2> takenPoints, bool rainy);
     std::vector<glm::vec4> mBiomeMap;
-    std::vector<glm::vec4> mIndicesMap;
+    std::vector<glm::uvec4> mIndicesMap;
 
     void LoadBiomesMap();
 

@@ -416,4 +416,8 @@ void Biomes::LoadBiomesMap()
     mBiomesTexture->bind().setData(GL_RGBA, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mBiomeMap);
     mBiomesTexture->bind().generateMipmaps();
 
+    mIndicesTexture = glow::Texture2D::create(mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, GL_RGBA8);
+    mIndicesTexture->bind().setData(GL_RGBA8, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mIndicesMap);
+    mIndicesTexture->bind().generateMipmaps();
+
 }
