@@ -384,7 +384,7 @@ bool Biomes::isValidPoint(std::vector<std::vector<glm::vec2>>& grid, float cells
     if (p.x < startpos.x || p.x >= endpos.x || p.y < startpos.y || p.y >= endpos.y)
         return false;
 
-    else if (mHeightmap->mPositions.at((int)p.y * mHeightmap->mHeightmapDimensions.x + (int)p.x).y > 23 || mHeightmap->mPositions.at((int)p.y * mHeightmap->mHeightmapDimensions.x + (int)p.x).y <= 14)
+    else if (mHeightmap->mPositions.at((int)p.y * mHeightmap->mHeightmapDimensions.x + (int)p.x).y > 23 || mHeightmap->mDisplacement.at((int)p.y * mHeightmap->mHeightmapDimensions.x + (int)p.x) <= 14)
         return false;
 
     if(rainy){

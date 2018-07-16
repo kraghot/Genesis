@@ -414,9 +414,9 @@ void MultiLayeredHeightmap::ThermalErodeTerrain()
                 }
             }
 
-            if(0 < dMax && dMax <= T)
+            if((dMax > 0) && (dMax >= T))
             {
-                float deltaH = dMax;
+                float deltaH = dMax / 4.0;
                 AddClampedDisplacementAt({i, j}, -deltaH, 0.1);
                 AddClampedDisplacementAt(l, deltaH, 0.1);
                 counter++;
@@ -958,68 +958,68 @@ void MultiLayeredHeightmap::LoadSplatmap(){
     float sum;
 
 
-    for(unsigned int i = 0; i<mNumberOfVertices; i++){
+    for(unsigned int i = 0; i<mNumberOfVertices; i++)
+    {
+        fScale_slope = mSlopeY.at(i);
+        fScale_height = mDisplacement.at(i)/mfHeightScale;
 
-    fScale_slope = mSlopeY.at(i);
-    fScale_height = mPositions.at(i).y/mfHeightScale;
+        mTemperatureMap.at(i) = CalculateRGBA(fRange1_height, fRange2_height, fRange3_height, fRange4_height, fScale_height);
+        mSlopeMap.at(i) = CalculateRGBA(fRange1_slope, fRange2_slope, fRange3_slope, fRange4_slope, fScale_slope);
 
-    mTemperatureMap.at(i) = CalculateRGBA(fRange1_height, fRange2_height, fRange3_height, fRange4_height, fScale_height);
-    mSlopeMap.at(i) = CalculateRGBA(fRange1_slope, fRange2_slope, fRange3_slope, fRange4_slope, fScale_slope);
+        //underwater
+    //    if(mPositions.at(i).y <= 9.5f){
+    //        a = 1.f;
+    //        r = 0.f;
+    //        g = 0.f;
+    //        b = 0.f;
 
-    //underwater
-//    if(mPositions.at(i).y <= 9.5f){
-//        a = 1.f;
-//        r = 0.f;
-//        g = 0.f;
-//        b = 0.f;
+    //        mTemperatureMap.at(i) = {r, g, b, a};
+    //        mSlopeMap.at(i) = {r, g, b, a};
+    //    }
 
-//        mTemperatureMap.at(i) = {r, g, b, a};
-//        mSlopeMap.at(i) = {r, g, b, a};
-//    }
+        //beach
+        if (mPositions.at(i).y < 14 && fScale_slope <= fRange4_slope){
+            a = 1.f;
+            r = 0.f;
+            g = 0.f;
+            b = 0.f;
 
-    //beach
-    if (mPositions.at(i).y < 14 && fScale_slope <= fRange4_slope){
-        a = 1.f;
-        r = 0.f;
-        g = 0.f;
-        b = 0.f;
+            mTemperatureMap.at(i) = {r, g, b, a};
+            mSlopeMap.at(i) = {r, g, b, a};
+        }
 
-        mTemperatureMap.at(i) = {r, g, b, a};
-        mSlopeMap.at(i) = {r, g, b, a};
+    //    else if (mPositions.at(i).y >= 11 && mPositions.at(i).y < 14 && fScale_slope <= fRange4_slope){
+    //        a = 0.002;
+    //        r *= 0.888f;
+    //        g *= 0.888f;
+    //        b *= 0.888f;
+
+    //        mTemperatureMap.at(i) = {r, g, b, a};
+    //        mSlopeMap.at(i) = {r, g, b, a};
+    //    }
+
+    //    else if (mPositions.at(i).y >= 14 && mPositions.at(i).y < 16 && fScale_slope <= fRange4_slope){
+    //        a = 0.0001f;
+    //        r *= 0.9999f;
+    //        g *= 0.9999f;
+    //        b *= 0.9999f;
+
+    //        mTemperatureMap.at(i) = {r, g, b, a};
+    //        mSlopeMap.at(i) = {r, g, b, a};
+    //    }
+
+        mSplatmap.at(i) = {mTemperatureMap.at(i).x, mTemperatureMap.at(i).y, mSlopeMap.at(i).z + mTemperatureMap.at(i).z, mTemperatureMap.at(i).w};
+
+        sum = mSplatmap.at(i).x + mSplatmap.at(i).y + mSplatmap.at(i).z + mSplatmap.at(i).w;
+
+        mSplatmap.at(i).x /= sum;
+        mSplatmap.at(i).y /= sum;
+        mSplatmap.at(i).z /= sum;
+        mSplatmap.at(i).w /= sum;
+
+
+        //std::cout << "RGBA: {" << mSplatmap.at(i).x << "," << mSplatmap.at(i).y << "," << mSplatmap.at(i).z << "," << mSplatmap.at(i).w << "}" << std::endl;
     }
-
-//    else if (mPositions.at(i).y >= 11 && mPositions.at(i).y < 14 && fScale_slope <= fRange4_slope){
-//        a = 0.002;
-//        r *= 0.888f;
-//        g *= 0.888f;
-//        b *= 0.888f;
-
-//        mTemperatureMap.at(i) = {r, g, b, a};
-//        mSlopeMap.at(i) = {r, g, b, a};
-//    }
-
-//    else if (mPositions.at(i).y >= 14 && mPositions.at(i).y < 16 && fScale_slope <= fRange4_slope){
-//        a = 0.0001f;
-//        r *= 0.9999f;
-//        g *= 0.9999f;
-//        b *= 0.9999f;
-
-//        mTemperatureMap.at(i) = {r, g, b, a};
-//        mSlopeMap.at(i) = {r, g, b, a};
-//    }
-
-    mSplatmap.at(i) = {mTemperatureMap.at(i).x, mTemperatureMap.at(i).y, mSlopeMap.at(i).z + mTemperatureMap.at(i).z, mTemperatureMap.at(i).w};
-
-    sum = mSplatmap.at(i).x + mSplatmap.at(i).y + mSplatmap.at(i).z + mSplatmap.at(i).w;
-
-    mSplatmap.at(i).x /= sum;
-    mSplatmap.at(i).y /= sum;
-    mSplatmap.at(i).z /= sum;
-    mSplatmap.at(i).w /= sum;
-
-
-    //std::cout << "RGBA: {" << mSplatmap.at(i).x << "," << mSplatmap.at(i).y << "," << mSplatmap.at(i).z << "," << mSplatmap.at(i).w << "}" << std::endl;
-}
 
     mSplatmapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RGBA);
     mSplatmapTexture->bind().setData(GL_RGBA, mHeightmapDimensions.x, mHeightmapDimensions.y, mSplatmap);
