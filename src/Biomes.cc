@@ -11,7 +11,7 @@ Biomes::Biomes(MultiLayeredHeightmap *h){
 
 void Biomes::CalculateBiomeAtLocation(size_t pos)
 {
-    mIndicesMap.at(pos) = {TextureIndices::LightGrass, TextureIndices::DarkGrass, TextureIndices::Rock, TextureIndices::Beach};
+    mIndicesMap.at(pos) = {TextureIndices::Undefined, TextureIndices::Undefined, TextureIndices::Undefined, TextureIndices::Undefined};
     mBiomeMap.at(pos) = {mRainMap.at(pos).r, mRainMap.at(pos).g , mHeightmap->mSplatmap.at(pos).b * 5, mHeightmap->mSplatmap.at(pos).a * 8};
     float sum = mBiomeMap.at(pos).x + mBiomeMap.at(pos).y + mBiomeMap.at(pos).z + mBiomeMap.at(pos).w;
 
@@ -28,6 +28,10 @@ void Biomes::generateRainMap(unsigned int randomWindDir){
     bool firstIteration = true;
     float initRainValue = 0.f;
     std::vector<std::vector<double>> biomesMerge(mHeightmap->mHeightmapDimensions.x,std::vector<double>(mHeightmap->mHeightmapDimensions.y,0));
+
+    mRainMap.clear();
+    mBiomeMap.clear();
+    mIndicesMap.clear();
 
     mRainMap.resize(mHeightmap->GetNumberOfVertices());
     mBiomeMap.resize(mHeightmap->GetNumberOfVertices());
@@ -254,6 +258,10 @@ bindRainMap:
     mBiomesTexture = glow::Texture2D::create(mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, GL_RGBA);
     mBiomesTexture->bind().setData(GL_RGBA, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mBiomeMap);
     mBiomesTexture->bind().generateMipmaps();
+
+    mIndicesTexture = glow::Texture2D::create(mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, GL_RGBA8);
+    mIndicesTexture->bind().setData(GL_RGBA8, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mIndicesMap);
+    mIndicesTexture->bind().generateMipmaps();
 
 }
 

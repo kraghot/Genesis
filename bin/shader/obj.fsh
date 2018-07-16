@@ -28,22 +28,27 @@ void main()
 {
     vec4 SplatmapColor = texture(uSplatmapTex, vHeightCoord);
     vec4 indexMap = texture(uIndexMap, vHeightCoord);
-    indexMap *= 255;
     float weights[4] = {SplatmapColor.r, SplatmapColor.g, SplatmapColor.b, SplatmapColor.a};
-    float indices[4] = {indexMap.r, indexMap.g, indexMap.b, indexMap.a};
+    float indices[4] = {indexMap.r * 255, indexMap.g * 255, indexMap.b * 255, indexMap.a * 255};
+//    float indices[4] = {indexMap.r, indexMap.g, indexMap.b, indexMap.a};
 
-    vec3 normalMap;
-    vec4 vFinalTexColor;
+    vec3 normalMap = {0, 0, 0};
+    vec4 vFinalTexColor = {0, 0, 0, 0};
 
     for(int i = 0; i < 4; i++)
     {
         // magic number that means no texture
         if(indices[i] == 255)
+        {
+            vFinalTexColor = vec4(1.0, 1.0, 1.0, 1.0);
             continue;
+        }
 
         normalMap += texture(uTerrainNormal, vec3(vTexCoord, indices[i])).rgb * weights[i];
         vFinalTexColor += texture(uTerrainTex, vec3(vTexCoord, indices[i])) * weights[i];
     }
+//    vFinalTexColor = vec4(indices[0] / 3.0, indices[1] / 3.0, indices[2] / 3.0, 1.0);
+//    vFinalTexColor = SplatmapColor;
 
 //    vec3 normalMap = (texture(uTerrainNormal, vec3(vTexCoord, 0.0)) * SplatmapColor.r  + texture(uTerrainNormal, vec3(vTexCoord, 1.0)) * SplatmapColor.g + texture(uTerrainNormal, vec3(vTexCoord, 2.0)) * SplatmapColor.b + texture(uTerrainNormal, vec3(vTexCoord, 3.0)) * SplatmapColor.a).rgb;
 
