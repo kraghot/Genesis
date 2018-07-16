@@ -5,12 +5,24 @@
 #include "PerlinNoiseGenerator.hh"
 #include <glm/common.hpp>
 
-class IslandMaskGenerator : public FilterGenerator
+/**
+ * @brief The SquareIslandMaskGenerator class is a filter that generates square shaped islands
+ */
+class SquareIslandMaskGenerator : public FilterGenerator
 {
 public:
-    IslandMaskGenerator(glm::vec2 innerSquare, glm::vec2 outerSquare, unsigned seed);
-    IslandMaskGenerator(glm::vec2 innerSquare, glm::vec2 outerSquare, PerlinNoiseGenerator& perlin);
+    /**
+     * @param innerSquare is the size of the square form the center of the heightmap where there should be no fall-off
+     * @param outerSquare is the size of the square from the center where all point should reach 0
+     * @param seed is the seed for the random component using PerlinNoiseGenerator
+     */
+    SquareIslandMaskGenerator(glm::vec2 innerSquare, glm::vec2 outerSquare, unsigned seed);
+    SquareIslandMaskGenerator(glm::vec2 innerSquare, glm::vec2 outerSquare, PerlinNoiseGenerator& perlin);
 
+    /**
+     * Filters the height of the terrain by returning 1 when in InnerSquare and falling of between
+     * inner Square and OuterSquare according to the random factor given by Perlin. 0 Otherwise.
+     */
     double filter(double x, double y, double input);
 
 private:
@@ -22,6 +34,9 @@ private:
         return noise;
     }
 
+    /**
+     * @brief Get1DLerp returns 1D interpolation used for sides
+     */
     inline double Get1DLerp(double currPos, double noise)
     {
         if(currPos > noise)
@@ -31,6 +46,9 @@ private:
         return scaled;
     }
 
+    /**
+     * @brief Get2DLerp returns 2d interpolation used for corners
+     */
     inline double Get2DLerp(double currPosX, double xNoise, double currPosY, double yNoise)
     {
         if(currPosX > xNoise && currPosY > yNoise)
@@ -40,14 +58,6 @@ private:
         double scaledY = currPosY / yNoise;
         if(scaledX > 1.0) scaledX = 1.0;
         if(scaledY > 1.0) scaledY = 1.0;
-
-//        double flippedX = 1.0 - scaledX;
-//        double flippedY = 1.0 - scaledY;
-
-//        double average = (flippedX * flippedY);
-//        average = 1.0 - average;
-//        return average - 1.0;
-//        return ((scaledX + scaledY) / 2.0f) - 1.0;
         return scaledX * scaledY;
     }
 

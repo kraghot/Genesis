@@ -1,11 +1,11 @@
 #include <QuadTree.hh>
 
-QuadTree::QuadTree(MultiLayeredHeightmap *h){
-
-   mHeightmap = h;
+QuadTree::QuadTree(MultiLayeredHeightmap *h):
+    mHeightmap(h)
+{
 }
 
-std::vector<quadtree_node> QuadTree::construct_quadtree(){
+std::vector<quadtree_node> QuadTree::ConstructQuadtree(){
     //MultiLayeredHeightmap heightmap(20.0f,1.0f);
     int d = std::log2(mHeightmap->GetNumberOfVertices()/8500);
 

@@ -5,6 +5,9 @@
 
 #define LOCV(i, j) j * width + i
 
+/**
+ * Returns blurred 2d data with X dimension = width and radius = r
+ */
 template<typename T>
 void LinearBlur(std::vector<T>& data, int width, int r)
 {

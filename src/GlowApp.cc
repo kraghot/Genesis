@@ -468,7 +468,7 @@ void GlowApp::initTerrain(){
     //load normals of textures for terrain
     mTexNormal = mHeightmap.LoadNormal(mTerrainNormals);
 
-    RayIntersectionQuadtree_nodes = quadtree.construct_quadtree();
+    RayIntersectionQuadtree_nodes = quadtree.ConstructQuadtree();
 
     mFlowMap.SetWindDirection(mBiomes.GetWindDirection());
 

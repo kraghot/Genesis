@@ -1,6 +1,6 @@
 #include "IslandMaskGenerator.hh"
 
-IslandMaskGenerator::IslandMaskGenerator(glm::vec2 innerSquare, glm::vec2 outerSquare, unsigned seed):
+SquareIslandMaskGenerator::SquareIslandMaskGenerator(glm::vec2 innerSquare, glm::vec2 outerSquare, unsigned seed):
     mPerlin(seed),
     mInnerSquare(innerSquare),
     mOuterSquare(outerSquare)
@@ -10,7 +10,7 @@ IslandMaskGenerator::IslandMaskGenerator(glm::vec2 innerSquare, glm::vec2 outerS
     mRelRanges /= 2.0;
 }
 
-IslandMaskGenerator::IslandMaskGenerator(glm::vec2 innerSquare, glm::vec2 outerSquare, PerlinNoiseGenerator &perlin):
+SquareIslandMaskGenerator::SquareIslandMaskGenerator(glm::vec2 innerSquare, glm::vec2 outerSquare, PerlinNoiseGenerator &perlin):
     mPerlin(perlin),
     mInnerSquare(innerSquare),
     mOuterSquare(outerSquare)
@@ -20,7 +20,7 @@ IslandMaskGenerator::IslandMaskGenerator(glm::vec2 innerSquare, glm::vec2 outerS
     mRelRanges /= 2.0;
 }
 
-double IslandMaskGenerator::filter(double x, double y, double input)
+double SquareIslandMaskGenerator::filter(double x, double y, double input)
 {
     double val = 1.0;
     double z = 0.75;
