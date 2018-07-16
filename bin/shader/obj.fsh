@@ -9,6 +9,7 @@ uniform sampler2D uAmbientOcclusionMap;
 
 uniform sampler2DArray uTerrainTex;
 uniform sampler2DArray uTerrainNormal;
+uniform sampler2D uIndexMap;
 
 uniform float fRenderHeight;
 uniform bool uDrawDebugRain;
@@ -26,10 +27,27 @@ out vec4 fColor;
 void main()
 {
     vec4 SplatmapColor = texture(uSplatmapTex, vHeightCoord);
+    vec4 indexMap = texture(uIndexMap, vHeightCoord);
+    indexMap *= 255;
+    float weights[4] = {SplatmapColor.r, SplatmapColor.g, SplatmapColor.b, SplatmapColor.a};
+    float indices[4] = {indexMap.r, indexMap.g, indexMap.b, indexMap.a};
 
-    vec3 normalMap = (texture(uTerrainNormal, vec3(vTexCoord, 0.0)) * SplatmapColor.r  + texture(uTerrainNormal, vec3(vTexCoord, 1.0)) * SplatmapColor.g + texture(uTerrainNormal, vec3(vTexCoord, 2.0)) * SplatmapColor.b + texture(uTerrainNormal, vec3(vTexCoord, 3.0)) * SplatmapColor.a).rgb;
+    vec3 normalMap;
+    vec4 vFinalTexColor;
 
-    vec4 vFinalTexColor = texture(uTerrainTex, vec3(vTexCoord, 0.0)) * SplatmapColor.r + texture(uTerrainTex, vec3(vTexCoord, 1.0)) * SplatmapColor.g + texture(uTerrainTex, vec3(vTexCoord, 2.0)) * SplatmapColor.b + texture(uTerrainTex, vec3(vTexCoord, 3.0)) * SplatmapColor.a;
+    for(int i = 0; i < 4; i++)
+    {
+        // magic number that means no texture
+        if(indices[i] == 255)
+            continue;
+
+        normalMap += texture(uTerrainNormal, vec3(vTexCoord, indices[i])).rgb * weights[i];
+        vFinalTexColor += texture(uTerrainTex, vec3(vTexCoord, indices[i])) * weights[i];
+    }
+
+//    vec3 normalMap = (texture(uTerrainNormal, vec3(vTexCoord, 0.0)) * SplatmapColor.r  + texture(uTerrainNormal, vec3(vTexCoord, 1.0)) * SplatmapColor.g + texture(uTerrainNormal, vec3(vTexCoord, 2.0)) * SplatmapColor.b + texture(uTerrainNormal, vec3(vTexCoord, 3.0)) * SplatmapColor.a).rgb;
+
+//    vec4 vFinalTexColor = texture(uTerrainTex, vec3(vTexCoord, 0.0)) * SplatmapColor.r + texture(uTerrainTex, vec3(vTexCoord, 1.0)) * SplatmapColor.g + texture(uTerrainTex, vec3(vTexCoord, 2.0)) * SplatmapColor.b + texture(uTerrainTex, vec3(vTexCoord, 3.0)) * SplatmapColor.a;
 
     if(uDrawDebugRain)
     {

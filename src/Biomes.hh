@@ -38,6 +38,8 @@ public:
     glm::vec2 NoRain_start;
     glm::vec2 NoRain_end;
 
+    glow::SharedTexture2D GetIndicesTexture() const;
+
 private:
     //glm::vec3 randomWindDirection();
     void CalculateBiomeAtLocation(size_t pos);

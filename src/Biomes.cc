@@ -9,9 +9,9 @@ Biomes::Biomes(MultiLayeredHeightmap *h){
     mHeightmap = h;
 }
 
-// r, g, kricavo i tamno trava, b rock alpha beach
 void Biomes::CalculateBiomeAtLocation(size_t pos)
 {
+    mIndicesMap.at(pos) = {TextureIndices::LightGrass, TextureIndices::DarkGrass, TextureIndices::Rock, TextureIndices::Beach};
     mBiomeMap.at(pos) = {mRainMap.at(pos).r, mRainMap.at(pos).g , mHeightmap->mSplatmap.at(pos).b * 5, mHeightmap->mSplatmap.at(pos).a * 8};
     float sum = mBiomeMap.at(pos).x + mBiomeMap.at(pos).y + mBiomeMap.at(pos).z + mBiomeMap.at(pos).w;
 
@@ -31,6 +31,7 @@ void Biomes::generateRainMap(unsigned int randomWindDir){
 
     mRainMap.resize(mHeightmap->GetNumberOfVertices());
     mBiomeMap.resize(mHeightmap->GetNumberOfVertices());
+    mIndicesMap.resize(mHeightmap->GetNumberOfVertices());
 
     mLastWindDir = randomWindDir;
 
@@ -408,6 +409,11 @@ bool Biomes::isValidPoint(std::vector<std::vector<glm::vec2>>& grid, float cells
     }
 
     return true;
+}
+
+glow::SharedTexture2D Biomes::GetIndicesTexture() const
+{
+    return mIndicesTexture;
 }
 
 void Biomes::LoadBiomesMap()

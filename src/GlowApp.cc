@@ -26,7 +26,7 @@
 
 unsigned int seed;
 bool buttonTerrain;
-bool recalculateSplatmap;
+bool recalculateSplatmap = true;
 bool randomWind;
 
 using namespace glow;
@@ -294,6 +294,7 @@ void GlowApp::render(float elapsedSeconds)
             shader.setTexture("uTexNormal", mTextureNormal);
 
             shader.setTexture("uSplatmapTex", selectedMap[m_selectedMap]);
+            shader.setTexture("uIndexMap", mBiomes.GetIndicesTexture());
             shader.setUniform("uDrawDebugRain", (m_selectedMap == MAP_DROPLET));
 
             //terrain 2d texture array
