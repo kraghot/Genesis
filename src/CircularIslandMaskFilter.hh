@@ -5,13 +5,25 @@
 #include "PerlinNoiseGenerator.hh"
 #include <glm/glm.hpp>
 
+/**
+ * @brief The CircularIslandMaskFilter class will filter the island so that is has a circular fall-off
+ */
 class CircularIslandMaskFilter : public FilterGenerator
 {
 public:
+    /**
+     * @param innerRadius is the radius until which there should be no fall-off [0, 1]
+     * @param outerRadius is the radius until which the house should be 0 [0, 1]
+     * @param perlin is a perlin generator for a random element
+     */
     CircularIslandMaskFilter(float innerRadius, float outerRadius, PerlinNoiseGenerator& perlin);
     double filter(double x, double y, double val);
 
 private:
+    /**
+     * @brief vectorAngle gets an angle in radians from a 2D vector
+     * @warning unused
+     */
     float vectorAngle(glm::vec2 vec) {
         if (vec.x == 0) // special cases
             return (vec.y > 0)? 90
