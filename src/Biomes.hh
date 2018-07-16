@@ -28,7 +28,7 @@ public:
     //void generateBiomes();
     std::vector<glm::vec2> poissonDiskSampling(float radius, int k, glm::vec2 startpos, glm::vec2 endpos, std::vector<glm::vec2> takenPoints, bool rainy);
     std::vector<glm::vec4> mBiomeMap;
-    std::vector<glm::uvec4> mIndicesMap;
+    std::vector<glm::vec4> mIndicesMap;
 
     void LoadBiomesMap();
 

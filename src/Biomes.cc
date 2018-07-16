@@ -11,7 +11,7 @@ Biomes::Biomes(MultiLayeredHeightmap *h){
 
 void Biomes::CalculateBiomeAtLocation(size_t pos)
 {
-    mIndicesMap.at(pos) = {TextureIndices::Undefined, TextureIndices::Undefined, TextureIndices::Undefined, TextureIndices::Undefined};
+    mIndicesMap.at(pos) = {TextureIndices::LightGrass, TextureIndices::DarkGrass, TextureIndices::Rock, TextureIndices::Beach};
     mBiomeMap.at(pos) = {mRainMap.at(pos).r, mRainMap.at(pos).g , mHeightmap->mSplatmap.at(pos).b * 5, mHeightmap->mSplatmap.at(pos).a * 8};
     float sum = mBiomeMap.at(pos).x + mBiomeMap.at(pos).y + mBiomeMap.at(pos).z + mBiomeMap.at(pos).w;
 
@@ -255,14 +255,6 @@ bindRainMap:
     mRainTexture->bind().setData(GL_RGBA, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mRainMap);
     mRainTexture->bind().generateMipmaps();
 
-    mBiomesTexture = glow::Texture2D::create(mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, GL_RGBA);
-    mBiomesTexture->bind().setData(GL_RGBA, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mBiomeMap);
-    mBiomesTexture->bind().generateMipmaps();
-
-    mIndicesTexture = glow::Texture2D::create(mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, GL_RGBA8);
-    mIndicesTexture->bind().setData(GL_RGBA8, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mIndicesMap);
-    mIndicesTexture->bind().generateMipmaps();
-
 }
 
 glow::SharedTexture2D Biomes::getRainTexture() const
@@ -430,8 +422,8 @@ void Biomes::LoadBiomesMap()
     mBiomesTexture->bind().setData(GL_RGBA, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mBiomeMap);
     mBiomesTexture->bind().generateMipmaps();
 
-    mIndicesTexture = glow::Texture2D::create(mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, GL_RGBA8);
-    mIndicesTexture->bind().setData(GL_RGBA8, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mIndicesMap);
+    mIndicesTexture = glow::Texture2D::create(mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, GL_RGBA32F);
+    mIndicesTexture->bind().setData(GL_RGBA32F, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mIndicesMap);
     mIndicesTexture->bind().generateMipmaps();
 
 }

@@ -29,8 +29,8 @@ void main()
     vec4 SplatmapColor = texture(uSplatmapTex, vHeightCoord);
     vec4 indexMap = texture(uIndexMap, vHeightCoord);
     float weights[4] = {SplatmapColor.r, SplatmapColor.g, SplatmapColor.b, SplatmapColor.a};
-    float indices[4] = {indexMap.r * 255, indexMap.g * 255, indexMap.b * 255, indexMap.a * 255};
-//    float indices[4] = {indexMap.r, indexMap.g, indexMap.b, indexMap.a};
+//    float indices[4] = {indexMap.r * 255, indexMap.g * 255, indexMap.b * 255, indexMap.a * 255};
+    float indices[4] = {indexMap.r, indexMap.g, indexMap.b, indexMap.a};
 
     vec3 normalMap = {0, 0, 0};
     vec4 vFinalTexColor = {0, 0, 0, 0};
