@@ -386,7 +386,7 @@ void MultiLayeredHeightmap::ComputeAmbientOcclusionMap()
 
 }
 
-glow::SharedVertexArray MultiLayeredHeightmap::getVao() const
+glow::SharedVertexArray MultiLayeredHeightmap::GetVao() const
 {
     return mVao;
 }
@@ -699,7 +699,7 @@ void MultiLayeredHeightmap::CalculateNormalsTangents(glm::vec2 start_pos, glm::v
     }
 }
 
-glow::SharedTexture2D MultiLayeredHeightmap::getSplatmapTexture() const
+glow::SharedTexture2D MultiLayeredHeightmap::GetSplatmapTexture() const
 {
     return mSplatmapTexture;
 }

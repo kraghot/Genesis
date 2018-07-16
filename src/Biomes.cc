@@ -20,8 +20,8 @@ void Biomes::generateRainMap(unsigned int randomWindDir){
 
     float sum;
 
-    mRainMap.resize(mHeightmap->mNumberOfVertices);
-    mBiomeMap.resize(mHeightmap->mNumberOfVertices);
+    mRainMap.resize(mHeightmap->GetNumberOfVertices());
+    mBiomeMap.resize(mHeightmap->GetNumberOfVertices());
 
     mLastWindDir = randomWindDir;
 

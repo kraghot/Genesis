@@ -285,7 +285,7 @@ void GlowApp::render(float elapsedSeconds)
             if(GlfwApp::isMouseButtonPressed(mRightClick))
                 m_selectedBrush == 0? mBrush.SetTextureBrush(m_selectedTexture, mBiomes.mBiomeMap, mBiomes.getBiomesTexture()) : mBrush.SetHeightBrush(mHeightBrushFactor);
 
-            std::vector<glow::SharedTexture2D> selectedMap = {mHeightmap.getSplatmapTexture(), mBiomes.getRainTexture(), mHeightmap.getSplatmapTexture(), mBiomes.getBiomesTexture(), mHeightmap.mAmbientOcclusionMap};
+            std::vector<glow::SharedTexture2D> selectedMap = {mHeightmap.GetSplatmapTexture(), mBiomes.getRainTexture(), mHeightmap.GetSplatmapTexture(), mBiomes.getBiomesTexture(), mHeightmap.mAmbientOcclusionMap};
 
 
             auto model = glm::mat4(1.f); // glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
@@ -311,7 +311,7 @@ void GlowApp::render(float elapsedSeconds)
 
             shader.setUniform("fRenderHeight", mHeightmap.getMfHeightScale());
 
-            mHeightmap.getVao()->bind().draw();
+            mHeightmap.GetVao()->bind().draw();
         }
 
         // Intersect
@@ -411,7 +411,7 @@ void GlowApp::render(float elapsedSeconds)
             shaderRiver.setTexture("uTexDisplacement", mHeightmap.GetDisplacementTexture());
             shaderRiver.setTexture("uTexRainFlow", mHeightmap.mRainFlowMapTexture);
 
-            mHeightmap.getVao()->bind().draw();
+            mHeightmap.GetVao()->bind().draw();
 
             auto shaderInfinite = mShaderInfiniteWater->use();
             shaderInfinite.setUniform("uView", view);
