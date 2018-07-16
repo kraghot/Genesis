@@ -53,9 +53,7 @@ private:
     glow::SharedProgram mShaderWater;
     glow::SharedProgram mShaderRiver;
     glow::SharedProgram mShaderInfiniteWater;
-    glow::SharedVertexArray mMeshCube;
     glow::SharedVertexArray mPerlinTest;
-    glow::SharedVertexArray mLineVao;
     glow::SharedTexture2D mTextureColor;
     glow::SharedTexture2D mTextureNormal;
 

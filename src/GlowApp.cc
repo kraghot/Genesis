@@ -67,16 +67,8 @@ void GlowApp::init()
 
     GlfwApp::init(); // call to base!
 
-    // check correct working dir
-//    if (!std::ifstream("mesh/cube.obj").good())
-//    {
-//        glow::error() << "Working directory must be set to `bin/`!";
-//        exit(0);
-//    }
-
     // configure GlfwApp
     setTitle("Genesis");
-
 
     TwEnumVal TextureChoices[] = { {TEXTURE_SNOW, "Snow"},{TEXTURE_GRASS, "Grass"}, {TEXTURE_ROCK, "Rock"} };
     TwType TextureTwType = TwDefineEnum("TextureType", TextureChoices, 3);
@@ -110,7 +102,6 @@ void GlowApp::init()
     TwAddVarRW(tweakbar(), "Edit mode", TW_TYPE_BOOLCPP, &mEditMode, "group=scene key=l label='Edit Mode'");
 
     // load object
-    mMeshCube = assimp::Importer().load("mesh/cube.obj");
     mShaderObj = Program::createFromFile("shader/obj");
     mTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
     mTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
@@ -160,8 +151,6 @@ void GlowApp::init()
     ab->defineAttribute<glm::vec3>("aPosition");
     ab->bind().setData(linePositions);
     ab->setObjectLabel(ab->getAttributes()[0].name + " of " + "Line");
-
-    mLineVao = glow::VertexArray::create(ab, GL_LINES);
 
     mBiomes.randomWindDirection();
     mFlowMap.SetWindDirection(mBiomes.GetWindDirection());
