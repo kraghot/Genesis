@@ -450,16 +450,16 @@ void GlowApp::InitTerrain(){
     mPerlinTest = mHeightmap.GenerateTerrain(properties, filters, heightMapDim, heightMapDim);
 
     //define textures for terrain
-    std::vector<std::string> mTerrainTextures = {"texture/01grass.jpg", "texture/04grass.jpg", "texture/rock007.jpg", "texture/beach.jpg"};
+    std::vector<std::string> terrainTextures = {"texture/01grass.jpg", "texture/04grass.jpg", "texture/rock007.jpg", "texture/beach.jpg", "texture/underwater.png"};
 
     //define normals of textures for terrain (in the same order as the textures)
-    std::vector<std::string> mTerrainNormals = {"texture/01grass.png", "texture/04grass.png", "texture/rock007_normal9.png", "texture/beach_normal.png"};
+    std::vector<std::string> terrainNormals = {"texture/01grass.png", "texture/04grass.png", "texture/rock007_normal9.png", "texture/beach_normal.png", "texture/underwater_normal.png"};
 
     //load textures for terrain
-    mTexture = mHeightmap.LoadTexture(mTerrainTextures);
+    mTexture = mHeightmap.LoadTexture(terrainTextures);
 
     //load normals of textures for terrain
-    mTexNormal = mHeightmap.LoadNormal(mTerrainNormals);
+    mTexNormal = mHeightmap.LoadNormal(terrainNormals);
 
     RayIntersectionQuadtree_nodes = quadtree.ConstructQuadtree();
 

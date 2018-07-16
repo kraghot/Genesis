@@ -9,6 +9,17 @@ Biomes::Biomes(MultiLayeredHeightmap *h){
     mHeightmap = h;
 }
 
+// r, g, kricavo i tamno trava, b rock alpha beach
+void Biomes::CalculateBiomeAtLocation(size_t pos)
+{
+    mBiomeMap.at(pos) = {mRainMap.at(pos).r, mRainMap.at(pos).g , mHeightmap->mSplatmap.at(pos).b * 5, mHeightmap->mSplatmap.at(pos).a * 8};
+    float sum = mBiomeMap.at(pos).x + mBiomeMap.at(pos).y + mBiomeMap.at(pos).z + mBiomeMap.at(pos).w;
+
+    mBiomeMap.at(pos).x /= sum;
+    mBiomeMap.at(pos).y /= sum;
+    mBiomeMap.at(pos).z /= sum;
+    mBiomeMap.at(pos).w /= sum;
+}
 
 void Biomes::generateRainMap(unsigned int randomWindDir){
 
@@ -17,8 +28,6 @@ void Biomes::generateRainMap(unsigned int randomWindDir){
     bool firstIteration = true;
     float initRainValue = 0.f;
     std::vector<std::vector<double>> biomesMerge(mHeightmap->mHeightmapDimensions.x,std::vector<double>(mHeightmap->mHeightmapDimensions.y,0));
-
-    float sum;
 
     mRainMap.resize(mHeightmap->GetNumberOfVertices());
     mBiomeMap.resize(mHeightmap->GetNumberOfVertices());
@@ -69,13 +78,7 @@ NS:
                 rain_start.y = i;
             }
 
-            mBiomeMap.at(CURRPOS_NS) = {mRainMap.at(CURRPOS_NS).r, mRainMap.at(CURRPOS_NS).g , mHeightmap->mSplatmap.at(CURRPOS_NS).b * 5, mHeightmap->mSplatmap.at(CURRPOS_NS).a * 8};
-            sum = mBiomeMap.at(CURRPOS_NS).x + mBiomeMap.at(CURRPOS_NS).y + mBiomeMap.at(CURRPOS_NS).z + mBiomeMap.at(CURRPOS_NS).w;
-
-            mBiomeMap.at(CURRPOS_NS).x /= sum;
-            mBiomeMap.at(CURRPOS_NS).y /= sum;
-            mBiomeMap.at(CURRPOS_NS).z /= sum;
-            mBiomeMap.at(CURRPOS_NS).w /= sum;
+            CalculateBiomeAtLocation(CURRPOS_NS);
 
             x++;
         }
@@ -122,13 +125,7 @@ SN:
                 rain_start.y = 0;
             }
 
-            mBiomeMap.at(CURRPOS_NS) = {mRainMap.at(CURRPOS_NS).r, mRainMap.at(CURRPOS_NS).g , mHeightmap->mSplatmap.at(CURRPOS_NS).b * 5, mHeightmap->mSplatmap.at(CURRPOS_NS).a* 8};
-            sum = mBiomeMap.at(CURRPOS_NS).x + mBiomeMap.at(CURRPOS_NS).y + mBiomeMap.at(CURRPOS_NS).z + mBiomeMap.at(CURRPOS_NS).w;
-
-            mBiomeMap.at(CURRPOS_NS).x /= sum;
-            mBiomeMap.at(CURRPOS_NS).y /= sum;
-            mBiomeMap.at(CURRPOS_NS).z /= sum;
-            mBiomeMap.at(CURRPOS_NS).w /= sum;
+            CalculateBiomeAtLocation(CURRPOS_NS);
 
             x++;
 
@@ -178,13 +175,7 @@ WE:
                 NoRain_end.y = mHeightmap->mHeightmapDimensions.y-1;
             }
 
-            mBiomeMap.at(CURRPOS_WE) = {mRainMap.at(CURRPOS_WE).r, mRainMap.at(CURRPOS_WE).g , mHeightmap->mSplatmap.at(CURRPOS_WE).b * 5, mHeightmap->mSplatmap.at(CURRPOS_WE).a* 8};
-            sum = mBiomeMap.at(CURRPOS_WE).x + mBiomeMap.at(CURRPOS_WE).y + mBiomeMap.at(CURRPOS_WE).z + mBiomeMap.at(CURRPOS_WE).w;
-
-            mBiomeMap.at(CURRPOS_WE).x /= sum;
-            mBiomeMap.at(CURRPOS_WE).y /= sum;
-            mBiomeMap.at(CURRPOS_WE).z /= sum;
-            mBiomeMap.at(CURRPOS_WE).w /= sum;
+            CalculateBiomeAtLocation(CURRPOS_WE);
 
             x++;
         }
@@ -238,14 +229,7 @@ EW:
 
             }
 
-            mBiomeMap.at(CURRPOS_WE) = {mRainMap.at(CURRPOS_WE).r, mRainMap.at(CURRPOS_WE).g , mHeightmap->mSplatmap.at(CURRPOS_WE).b * 5, mHeightmap->mSplatmap.at(CURRPOS_WE).a* 8};
-
-            sum = mBiomeMap.at(CURRPOS_WE).x + mBiomeMap.at(CURRPOS_WE).y + mBiomeMap.at(CURRPOS_WE).z + mBiomeMap.at(CURRPOS_WE).w;
-
-            mBiomeMap.at(CURRPOS_WE).x /= sum;
-            mBiomeMap.at(CURRPOS_WE).y /= sum;
-            mBiomeMap.at(CURRPOS_WE).z /= sum;
-            mBiomeMap.at(CURRPOS_WE).w /= sum;
+            CalculateBiomeAtLocation(CURRPOS_WE);
 
             x++;
         }
@@ -447,4 +431,5 @@ void Biomes::loadBiomesMap(){
     mBiomesTexture->bind().generateMipmaps();
 
 }
+#undef LOC
 

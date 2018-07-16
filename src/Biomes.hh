@@ -9,6 +9,15 @@
 class Biomes
 {
 public:
+    enum TextureIndices
+    {
+        LightGrass = 0,
+        DarkGrass = 1,
+        Rock = 2,
+        Beach = 3,
+        Underwater = 4
+    };
+
     Biomes(MultiLayeredHeightmap *h);
     void generateRainMap(unsigned int randomWindDir);
     glow::SharedTexture2D getRainTexture() const;
@@ -18,6 +27,7 @@ public:
     //void generateBiomes();
     std::vector<glm::vec2> poissonDiskSampling(float radius, int k, glm::vec2 startpos, glm::vec2 endpos, std::vector<glm::vec2> takenPoints, bool rainy);
     std::vector<glm::vec4> mBiomeMap;
+    std::vector<glm::vec4> mIndicesMap;
 
     void loadBiomesMap();
 
@@ -29,6 +39,7 @@ public:
 
 private:
     //glm::vec3 randomWindDirection();
+    void CalculateBiomeAtLocation(size_t pos);
     void insertPoint(std::vector<std::vector<glm::vec2> > &grid, float cellsize, glm::vec2 point);
     bool isValidPoint(std::vector<std::vector<glm::vec2>>& grid, float cellsize, int gwidth, int gheight, glm::vec2 p, float radius, glm::vec2 startpos, glm::vec2 endpos, bool rainy);
 
@@ -38,6 +49,7 @@ private:
     std::vector<glm::vec4> mRainMap;
 
     glow::SharedTexture2D mBiomesTexture;
+    glow::SharedTexture2D mIndicesTexture;
 
     unsigned mLastWindDir;
 };
