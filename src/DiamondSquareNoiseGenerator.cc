@@ -5,7 +5,6 @@
 #define LOC(a, b) b * mDimY + a
 
 DiamondSquareNoiseGenerator::DiamondSquareNoiseGenerator(const unsigned seed, const unsigned dimX, const unsigned dimY, const unsigned featureSize)
-    : mSeed(seed)
 {
     srand(seed);
     // Forward to the other constructor

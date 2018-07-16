@@ -42,7 +42,6 @@ private:
     unsigned mDimX;
     unsigned mDimY;
     std::vector<float> mData;
-    unsigned mSeed;
 };
 
 #endif // DIAMONDSQUARENOISEGENERATOR_HH
