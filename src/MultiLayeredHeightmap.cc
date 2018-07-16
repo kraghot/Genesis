@@ -397,16 +397,16 @@ void MultiLayeredHeightmap::ThermalErodeTerrain()
     float T = 8.0f / (float) mHeightmapDimensions.x;
     int counter = 0;
 #pragma omp for
-    for(auto i = 0u; i < mHeightmapDimensions.y; i++)
+    for(auto j = 0u; j < mHeightmapDimensions.y; j++)
     {
-        for(auto j = 0u; j < mHeightmapDimensions.x; j++)
+        for(auto i = 0u; i < mHeightmapDimensions.x; i++)
         {
             float dMax = 0;
             glm::vec2 l;
             auto neigh = GetNeighborhood(j, i);
             for(auto it : neigh)
             {
-                float diff = mDisplacement.at(LOC(j, i)) - mDisplacement.at(LOC(it.x, it.y));
+                float diff = GetDisplacementAt({i, j}) - GetDisplacementAt(it);
                 if(diff > dMax)
                 {
                     dMax = diff;
@@ -417,8 +417,8 @@ void MultiLayeredHeightmap::ThermalErodeTerrain()
             if(0 < dMax && dMax <= T)
             {
                 float deltaH = dMax;
-                mDisplacement.at(LOC(j, i)) -= deltaH;
-                mDisplacement.at(LOC(l.x, l.y)) += deltaH;
+                AddClampedDisplacementAt({i, j}, -deltaH, 0.1);
+                AddClampedDisplacementAt(l, deltaH, 0.1);
                 counter++;
             }
         }
@@ -475,12 +475,6 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
           minSlope=0.05f,
           // Water evaporation speed
           Cw=0.001f,
-          // Erosion speed
-          //Cr=0.9f,
-          // Deposition speed
-          //Cd=0.02f,
-          // Direction inertia
-          //Ci=0.1f,
           // Gravity acceleration
           Cg=20;
     const unsigned maxPathLength = mHeightmapDimensions.x;
