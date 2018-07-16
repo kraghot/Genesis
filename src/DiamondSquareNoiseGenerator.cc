@@ -55,7 +55,10 @@ double DiamondSquareNoiseGenerator::noise(double x, double y, double z)
     double height = mData.at(LOC(locX, locY));
     height = height / 2.0 + 0.5;
 
-    return height;
+    if(height > 0.01)
+        return height;
+    else
+        return 0.01;
 }
 
 void DiamondSquareNoiseGenerator::DiamondSquare(int stepsize, double scale)
