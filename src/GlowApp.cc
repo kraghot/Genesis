@@ -32,14 +32,6 @@ bool randomWind;
 using namespace glow;
 const int heightMapDim = 512;
 
-void TW_CALL GlowApp::TweakSetSplatmap(void *clientData){
-    static_cast<GlowApp *>(clientData)->SetSplatmap();
-}
-
-void TW_CALL GlowApp::TweakRandomWind(void *clientData){
-    static_cast<GlowApp *>(clientData)->SetRandomWind();
-}
-
 GlowApp::GlowApp():
      mHeightmap(20.0f,1.0f),
      mBrush(&mHeightmap),
@@ -111,7 +103,7 @@ void GlowApp::init()
     //generate first random seed for terrain
     std::srand(std::time(0));
     seed = std::rand();
-    GlowApp::initTerrain();
+    GlowApp::InitTerrain();
     std::cout << "seed: " << seed << std::endl;
 
     //set up mesh shaders
@@ -194,7 +186,7 @@ void GlowApp::update(float elapsedSeconds)
 void GlowApp::render(float elapsedSeconds)
 {
     if(buttonTerrain){
-        GlowApp::initTerrain();
+        GlowApp::InitTerrain();
         mBiomes.randomWindDirection();
         mFlowMap.SetWindDirection(mBiomes.GetWindDirection());
         buttonTerrain = false;
@@ -425,7 +417,7 @@ void GlowApp::render(float elapsedSeconds)
     }
 }
 
-void GlowApp::initTerrain(){
+void GlowApp::InitTerrain(){
     QuadTree quadtree(&mHeightmap);
 
     PerlinNoiseGenerator perlinNoise(seed);
@@ -474,7 +466,7 @@ void GlowApp::initTerrain(){
 
 }
 
-void GlowApp::setSeed(unsigned int var){
+void GlowApp::SetSeed(unsigned int var){
 
     if(seed != var){
       seed = var;
@@ -485,13 +477,18 @@ void GlowApp::setSeed(unsigned int var){
       buttonTerrain = false;
 }
 
-unsigned int GlowApp::getSeed() const{
+unsigned int GlowApp::GetSeed() const{
     return seed;
 }
 
-void GlowApp::dropletErodeIterations()
+void GlowApp::DropletErodeIterations()
 {
     mHeightmap.IterateDroplet(mNumIterations);
+}
+
+void GlowApp::ThermalErosion()
+{
+    mHeightmap.ThermalErodeTerrain();
 }
 
 void GlowApp::SetSplatmap(){

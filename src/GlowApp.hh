@@ -140,36 +140,37 @@ public:
     std::vector<glow::SharedTexture2D> mesh_textures;
     std::vector<glow::SharedTexture2D> mesh_normals;
 
-    void initTerrain();
+    void InitTerrain();
+    void SetSeed(unsigned int var);
+    unsigned int GetSeed() const;
+    void DropletErodeIterations();
+    void ThermalErosion();
+    void SetSplatmap();
+    void SetRandomWind();
 
     static void TW_CALL randomTerrain(void *clientData){
-        static_cast<GlowApp *>(clientData)->setSeed(std::rand());
+        static_cast<GlowApp *>(clientData)->SetSeed(std::rand());
     }
     static void TW_CALL setSeedTerrain(const void *value, void *clientData){
-        static_cast<GlowApp *>(clientData)->setSeed(*static_cast<const unsigned int *>(value));
+        static_cast<GlowApp *>(clientData)->SetSeed(*static_cast<const unsigned int *>(value));
     }
     static void TW_CALL getSeedTerrain(void *value, void *clientData){
 
-        *static_cast<unsigned int *>(value) = static_cast<const GlowApp *>(clientData)->getSeed();
+        *static_cast<unsigned int *>(value) = static_cast<const GlowApp *>(clientData)->GetSeed();
     }
     static void TW_CALL dropletErode(void* clientData){
-        static_cast<GlowApp *>(clientData)->dropletErodeIterations();
+        static_cast<GlowApp *>(clientData)->DropletErodeIterations();
+    }
+    static void TW_CALL thermalErode(void* clientData){
+        static_cast<GlowApp*>(clientData)->ThermalErosion();
+    }
+    static void TW_CALL TweakSetSplatmap(void *clientData){
+        static_cast<GlowApp *>(clientData)->SetSplatmap();
     }
 
-    void setSeed(unsigned int var);
-    unsigned int getSeed() const;
-    void dropletErodeIterations();
-    void SetSplatmap();
-    static void TW_CALL TweakSetSplatmap(void *clientData);
-
-    static void TW_CALL TweakRandomWind(void *clientData);
-    void SetRandomWind();
-
-    std::vector<glm::vec3> rainy_positions1;
-    std::vector<glm::vec3> rainy_positions2;
-    std::vector<glm::vec3> rainy_positions3;
-   // glm::mat4 mesh_model;
-
+    static void TW_CALL TweakRandomWind(void *clientData){
+        static_cast<GlowApp *>(clientData)->SetRandomWind();
+    }
 };
 
 #endif
