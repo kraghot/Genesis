@@ -410,26 +410,10 @@ bool Biomes::isValidPoint(std::vector<std::vector<glm::vec2>>& grid, float cells
     return true;
 }
 
-#define LOC i * mHeightmap->mHeightmapDimensions.y + j
-void Biomes::loadBiomesMap(){
-    float sum;
-
-    for (unsigned int i = 0; i < mHeightmap->mHeightmapDimensions.y; i++){
-        for (unsigned int j = 0; j < mHeightmap->mHeightmapDimensions.x; j++){
-            mBiomeMap.at(LOC) = {mRainMap.at(LOC).r, mRainMap.at(LOC).g , mHeightmap->mSplatmap.at(LOC).b * 5, mHeightmap->mSplatmap.at(LOC).a * 8};
-            sum = mBiomeMap.at(LOC).r + mBiomeMap.at(LOC).g + mBiomeMap.at(LOC).b + mBiomeMap.at(LOC).a;
-
-            mBiomeMap.at(LOC).r /= sum;
-            mBiomeMap.at(LOC).g /= sum;
-            mBiomeMap.at(LOC).b /= sum;
-            mBiomeMap.at(LOC).a /= sum;
-        }
-    }
-
+void Biomes::LoadBiomesMap()
+{
     mBiomesTexture = glow::Texture2D::create(mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, GL_RGBA);
     mBiomesTexture->bind().setData(GL_RGBA, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mBiomeMap);
     mBiomesTexture->bind().generateMipmaps();
 
 }
-#undef LOC
-

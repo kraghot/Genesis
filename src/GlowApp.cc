@@ -259,7 +259,7 @@ void GlowApp::render(float elapsedSeconds)
 
             if(recalculateSplatmap){
                 mHeightmap.LoadSplatmap();
-                mBiomes.loadBiomesMap();
+                mBiomes.LoadBiomesMap();
                 recalculateSplatmap = false;
             }
 

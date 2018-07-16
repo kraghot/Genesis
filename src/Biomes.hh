@@ -29,7 +29,7 @@ public:
     std::vector<glm::vec4> mBiomeMap;
     std::vector<glm::vec4> mIndicesMap;
 
-    void loadBiomesMap();
+    void LoadBiomesMap();
 
     glm::vec2 rain_start;
     glm::vec2 rain_end;
