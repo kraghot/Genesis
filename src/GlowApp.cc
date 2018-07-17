@@ -153,7 +153,7 @@ void GlowApp::init()
     mWaterTimeLoop[1] = 2.0f;
 
     //rainforest
-    addMesh("jungle_tree1", "mesh/jungle_tree1/jungle_tree1.jpg", "mesh/jungle_tree1/jungle_tree1_normal.jpg");
+    addMesh("jungle_tree1", "mesh/jungle_tree1/jungle_tree1.png", "mesh/jungle_tree1/jungle_tree1_normal.jpg");
     addMesh("jungle_bush1", "mesh/jungle_bush1/jungle_bush1.png", "mesh/jungle_bush1/jungle_bush1_normal.png");
     addMesh("lavender", "mesh/lavender/lavender.png", "mesh/lavender/lavender_normal.png");
 
