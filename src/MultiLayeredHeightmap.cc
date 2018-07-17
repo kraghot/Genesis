@@ -350,23 +350,16 @@ void MultiLayeredHeightmap::ComputeAmbientOcclusionMap()
             glm::uvec2 end = {loc.x + halfrad, loc.y + halfrad};
 
             // Ensure we are not out of bounds
-            glm::clamp(start, {0, 0}, max);
-            glm::clamp(end, {0, 0}, max);
+            start = glm::clamp(start, {0, 0}, max);
+            end = glm::clamp(end, {0, 0}, max);
 
             float average = 0;
 
 #pragma omp for
             for(int j = start.y; j <= end.y; j++)
             {
-                // Don't ask... glm::clamp doesn't seem to be doing its job...
-                if(j >= mHeightmapDimensions.y)
-                    continue;
-
                 for(int i = start.x; i <= end.x; i++)
                 {
-                    if(i >= mHeightmapDimensions.x)
-                        continue;
-
                     glm::ivec2 offset = glm::ivec2(loc) - glm::ivec2(i, j) + glm::ivec2(halfrad, halfrad);
                     average += kernel[offset.x][offset.y] * GetDisplacementAt({i, j});
                 }
