@@ -407,8 +407,6 @@ void GlowApp::render(float elapsedSeconds)
         //========== mesh rendering ==========
 
         {
-            GLOW_SCOPED(enable, GL_BLEND);
-            glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             if(!mEditMode){
                 if(!rainforest.empty())
                     renderMesh(rainforest, view, proj, true);
