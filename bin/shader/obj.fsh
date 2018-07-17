@@ -95,4 +95,12 @@ void main()
 
 //    fColor = color * (albedo + diffuse + specular);
     fColor = pow(vFinalTexColor * (albedo + diffuse + specular + ambient), vec4(1/2.224));
+
+    if(vWorldPosition.y < 8)
+    {
+        float mixFactor = vWorldPosition.y / 8;
+        fColor.a = mix(0, 1, mixFactor);
+    }
+    else
+        fColor.a = 1.0;
 }

@@ -280,6 +280,8 @@ void GlowApp::render(float elapsedSeconds)
 
             std::vector<glow::SharedTexture2D> selectedMap = {mHeightmap.GetSplatmapTexture(), mBiomes.getRainTexture(), mHeightmap.GetSplatmapTexture(), mBiomes.getBiomesTexture(), mHeightmap.mAmbientOcclusionMap};
 
+            GLOW_SCOPED(enable, GL_BLEND);
+            glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
             auto model = glm::mat4(1.f); // glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
             auto shader = mShaderObj->use();
