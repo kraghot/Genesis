@@ -355,7 +355,7 @@ void MultiLayeredHeightmap::ComputeAmbientOcclusionMap()
 
             float average = 0;
 
-#pragma omp for
+#pragma omp parallel for
             for(int j = start.y; j <= end.y; j++)
             {
                 for(int i = start.x; i <= end.x; i++)
@@ -390,7 +390,7 @@ void MultiLayeredHeightmap::ThermalErodeTerrain()
 
     float T = 8.0f / (float) mHeightmapDimensions.x;
     int counter = 0;
-#pragma omp for
+#pragma omp parallel for
     for(auto j = 0u; j < mHeightmapDimensions.y; j++)
     {
         for(auto i = 0u; i < mHeightmapDimensions.x; i++)
@@ -428,7 +428,7 @@ void MultiLayeredHeightmap::HydraulicErodeTerrain()
 {
     const float rainfall = 0.01f;
     const float sediment = 0.01f * mfHeightScale;
-#pragma omp for
+#pragma omp parallel for
     for(auto i = 0u; i < mHeightmapDimensions.y; i++)
     {
         for(auto j = 0u; j < mHeightmapDimensions.x; j++)
@@ -735,7 +735,7 @@ void MultiLayeredHeightmap::AddSoftDisplacement(glm::uvec2 pos, float addition)
 
 void MultiLayeredHeightmap::IterateDroplet(int num)
 {
-#pragma omp for
+#pragma omp parallel for
     for(auto i=0u; i < num; i++)
     {
         glm::uvec2 coords;
@@ -824,7 +824,7 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(std::vector<Gener
         {
             // Use OpenMp here. It can't be used in for loops above because
             // the same element could be accessed by different threads at once
-#pragma omp for
+#pragma omp parallel for
             for(auto i = 0u; i < dimY; i++)
             {
                 for(auto j = 0u; j < dimX; j++)
@@ -850,7 +850,7 @@ glow::SharedVertexArray MultiLayeredHeightmap::GenerateTerrain(std::vector<Gener
 
     for(auto filter: filters)
     {
-#pragma omp for
+#pragma omp parallel for
             for(auto i = 0u; i < dimY; i++)
             {
                 for(auto j = 0u; j < dimX; j++)
