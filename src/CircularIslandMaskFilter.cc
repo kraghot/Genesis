@@ -22,9 +22,7 @@ double CircularIslandMaskFilter::filter(double x, double y, double val)
         return val;
     else if(length < mOuterRadius)
     {
-        float diffLength = length - mInnerRadius;
-        const float lerpSpace = mOuterRadius - mInnerRadius;
-        return val * (1 - (diffLength / lerpSpace));
+        return val * glm::smoothstep(mOuterRadius, mInnerRadius, length);
     }
     else
         return 0;
