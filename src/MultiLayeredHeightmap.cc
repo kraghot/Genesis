@@ -967,7 +967,7 @@ void MultiLayeredHeightmap::LoadSplatmap(){
     //    }
 
         //beach
-        if (mDisplacement.at(i) < 14 && fScale_slope <= fRange4_slope){
+        if (mDisplacement.at(i) < 12 && fScale_slope <= fRange4_slope){
             a = 1.f;
             r = 0.f;
             g = 0.f;

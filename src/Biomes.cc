@@ -416,8 +416,16 @@ glow::SharedTexture2D Biomes::GetIndicesTexture() const
     return mIndicesTexture;
 }
 
+#define LOC i * mHeightmap->mHeightmapDimensions.y + j
 void Biomes::LoadBiomesMap()
 {
+
+    for (unsigned int i = 0; i < mHeightmap->mHeightmapDimensions.y; i++){
+        for (unsigned int j = 0; j < mHeightmap->mHeightmapDimensions.x; j++){
+            CalculateBiomeAtLocation(LOC);
+        }
+    }
+
     mBiomesTexture = glow::Texture2D::create(mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, GL_RGBA);
     mBiomesTexture->bind().setData(GL_RGBA, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mBiomeMap);
     mBiomesTexture->bind().generateMipmaps();
