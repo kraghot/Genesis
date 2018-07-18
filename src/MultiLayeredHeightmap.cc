@@ -235,7 +235,7 @@ void MultiLayeredHeightmap::FillData(std::vector<float>& heights)
 
         mIndices.push_back(restart);
     }
-    CalculateNormalsTangents(glm::vec2(0,0), glm::vec2(dimX, dimY));
+    CalculateNormalsTangents(glm::vec2(0,0), glm::vec2(dimX-1, dimY-1));
     ComputeAmbientOcclusionMap();
     LoadSplatmap();
 }
@@ -557,9 +557,9 @@ void MultiLayeredHeightmap::CalculateNormalsTangents(glm::vec2 start_pos, glm::v
     int dimX = mHeightmapDimensions.x;
     int dimY = mHeightmapDimensions.y;
 
-    for (int j = start_pos.y; j < end_pos.y-1; j++ )
+    for (int j = start_pos.x; j < end_pos.x; j++ )
     {
-        for (int i = start_pos.x; i < end_pos.x-1; i++ )
+        for (int i = start_pos.y; i < end_pos.y; i++ )
         {
             unsigned int index = ( j * dimX ) + i;
 
@@ -967,7 +967,7 @@ void MultiLayeredHeightmap::LoadSplatmap(){
     //    }
 
         //beach
-        if (mDisplacement.at(i) < 12 && fScale_slope <= fRange4_slope){
+        if (mDisplacement.at(i) < 13 && fScale_slope <= fRange4_slope){
             a = 1.f;
             r = 0.f;
             g = 0.f;

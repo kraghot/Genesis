@@ -260,6 +260,7 @@ void GlowApp::render(float elapsedSeconds)
             if(recalculateSplatmap){
                 mHeightmap.LoadSplatmap();
                 mBiomes.LoadBiomesMap();
+                mHeightmap.ComputeAmbientOcclusionMap();
                 recalculateSplatmap = false;
             }
 
@@ -271,8 +272,8 @@ void GlowApp::render(float elapsedSeconds)
                 rainforest.clear();
                 forest.clear();
 
-                rainforest = getMeshPositions(true);
-                forest = getMeshPositions(false);
+                rainforest = getMeshPositions(true); //true = it's the first biome
+                forest = getMeshPositions(false); // false = it's not the first  biome
             }
 
             if(GlfwApp::isMouseButtonPressed(mRightClick))

@@ -255,6 +255,10 @@ bindRainMap:
     mRainTexture->bind().setData(GL_RGBA, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mRainMap);
     mRainTexture->bind().generateMipmaps();
 
+    mBiomesTexture = glow::Texture2D::create(mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, GL_RGBA);
+    mBiomesTexture->bind().setData(GL_RGBA, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, mBiomeMap);
+    mBiomesTexture->bind().generateMipmaps();
+
 }
 
 glow::SharedTexture2D Biomes::getRainTexture() const

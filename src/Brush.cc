@@ -91,16 +91,18 @@ void Brush::SetHeightBrush(float factor){
 
             float distance = pointPositionx + pointPositiony + pointPositionz;
 
-                if(distance < Radius2 && distance > (0.7 * Radius2)){
-                    mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i) += factor < (100 * 0.004f)? (100 * 0.002f) : factor - (100 * 0.004f);
-                }
+//                if(distance < Radius2 && distance > (0.7 * Radius2)){
+//                    mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i) += factor < (100 * 0.002f)? (100 * 0.002f) : factor - (100 * 0.004f);
+//                }
 
-                else if(distance < (0.7 * Radius2) && distance > (0.5 * Radius2)){
-                    mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i) += factor < (100 * 0.002f)? (100 * 0.001f) : factor - (100 * 0.002f);
-                }
-                else if(distance < (0.5 * Radius2)){
-                     mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i) += factor;
-                }
+//                else if(distance < (0.7 * Radius2) && distance > (0.5 * Radius2)){
+//                    mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i) += factor < (100 * 0.004f)? (100 * 0.001f) : factor - (100 * 0.002f);
+//                }
+//                else if(distance < (0.5 * Radius2)){
+//                     mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i) += factor;
+//                }
+            if(distance < Radius2)
+                mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i) += factor * glm::smoothstep(Radius2, 0.f, distance);
 
                 mHeightmap->mPositions.at(j*mHeightmap->mHeightmapDimensions.x + i).y = mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i);
 
@@ -108,8 +110,7 @@ void Brush::SetHeightBrush(float factor){
         }
 
 
-    mHeightmap->CalculateNormalsTangents({istart, iend},
-                                        {jstart, jend});
+    mHeightmap->CalculateNormalsTangents({jstart, istart}, {jend, iend});
     //mHeightmap->LoadSplatmap();
     mHeightmap->MakeVertexArray();
 }
