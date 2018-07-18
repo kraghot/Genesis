@@ -31,7 +31,7 @@ void main()
     vec4 color = texture(uTexColor, vTexCoord);
     vec4 normalMap = texture(uTexNormal, vTexCoord);
 
-     if(color.a < 0.5) discard; // Do not draw any fragments that are sufficiently transparent
+     if(color.a < 0.7) discard; // Do not draw any fragments that are sufficiently transparent
 
     // build local coordinate system
     vec3 L = normalize(uLightPos - vWorldPosition);

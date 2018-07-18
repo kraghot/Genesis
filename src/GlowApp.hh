@@ -38,7 +38,21 @@ private:
     glm::vec4 mMouseNDC;
 
     float mHeightBrushFactor = 10.f;
-    float mCircleRadius = 10.f;
+    float mCircleRadius = 20.f;
+
+    int firstRender = 0;
+    std::vector<std::vector<glm::mat4>> randomScalingMatrices;
+
+    virtual bool onMouseScroll(double sx, double sy) override{
+        if(mCircleRadius > 5){
+            mCircleRadius += sy;
+            if(mCircleRadius <= 5)
+                mCircleRadius = 6;
+            return true;
+        }
+
+        else return false;
+    }
 
 private:
     glow::SharedProgram mShaderOutput;

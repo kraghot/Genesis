@@ -41,6 +41,9 @@ GlowApp::GlowApp():
 
 }
 
+
+
+
 void GlowApp::addMesh(const std::string &name, const std::string &tex_path, const std::string &norm_path)
 {
     auto mesh = assimp::Importer().load("mesh/" + name + "/" + name + ".obj");
@@ -101,6 +104,8 @@ void GlowApp::init()
 
     mBrush.GenerateArc(mCircleRadius);
 
+    randomScalingMatrices.resize(6);
+
     //generate first random seed for terrain
     std::srand(std::time(0));
     seed = std::rand();
@@ -153,14 +158,16 @@ void GlowApp::init()
     mWaterTimeLoop[1] = 2.0f;
 
     //rainforest
+
     addMesh("jungle_tree1", "mesh/jungle_tree1/jungle_tree1.png", "mesh/jungle_tree1/jungle_tree1_normal.jpg");
-    addMesh("jungle_bush1", "mesh/jungle_bush1/jungle_bush1.png", "mesh/jungle_bush1/jungle_bush1_normal.png");
+    addMesh("jungle_bush", "mesh/jungle_bush/diffuse.tga", "mesh/jungle_bush/normal.tga");
+    //addMesh("jungle_plant", "mesh/jungle_plant/diffuse.tga", "mesh/jungle_bush1/jungle_bush1_normal.png");
     addMesh("lavender", "mesh/lavender/lavender.png", "mesh/lavender/lavender_normal.png");
 
     //forest
     addMesh("pinetree", "mesh/pinetree/pinetree.png", "mesh/pinetree/pinetree_normal.png");
-    addMesh("mushroom", "mesh/mushroom/mushroom.png", "mesh/rock/rock_normal.png");
-    addMesh("forest_bush", "mesh/forest_bush/forest_bush.png", "mesh/forest_bush/forest_bush_normal.png");
+    addMesh("forest_bush2", "mesh/forest_bush2/diffuse.tga", "mesh/forest_bush2/normal.tga");
+    addMesh("mushroom", "mesh/mushroom/mushroom.png", "mesh/mushroom/mushroom_normal.png");
 
 
     rainforest = getMeshPositions(true);
@@ -274,6 +281,8 @@ void GlowApp::render(float elapsedSeconds)
 
                 rainforest = getMeshPositions(true); //true = it's the first biome
                 forest = getMeshPositions(false); // false = it's not the first  biome
+
+                firstRender = 0;
             }
 
             if(GlfwApp::isMouseButtonPressed(mRightClick))
@@ -452,10 +461,10 @@ void GlowApp::InitTerrain(){
     mPerlinTest = mHeightmap.GenerateTerrain(properties, filters, heightMapDim, heightMapDim);
 
     //define textures for terrain
-    std::vector<std::string> terrainTextures = {"texture/01grass.jpg", "texture/04grass.jpg", "texture/rock007.jpg", "texture/beach.jpg", "texture/underwater.png"};
+    std::vector<std::string> terrainTextures = {"texture/91.png", "texture/04grass.jpg", "texture/rock007.jpg", "texture/beach.jpg", "texture/underwater.png"};
 
     //define normals of textures for terrain (in the same order as the textures)
-    std::vector<std::string> terrainNormals = {"texture/01grass.png", "texture/04grass.png", "texture/rock007_normal9.png", "texture/beach_normal.png", "texture/underwater_normal.png"};
+    std::vector<std::string> terrainNormals = {"texture/91_normal.png", "texture/04grass.png", "texture/rock007_normal9.png", "texture/beach_normal.png", "texture/underwater_normal.png"};
 
     //load textures for terrain
     mTexture = mHeightmap.LoadTexture(terrainTextures);
@@ -466,6 +475,8 @@ void GlowApp::InitTerrain(){
     RayIntersectionQuadtree_nodes = quadtree.ConstructQuadtree();
 
     mFlowMap.SetWindDirection(mBiomes.GetWindDirection());
+
+    firstRender = 0;
 
 }
 
@@ -524,24 +535,30 @@ void GlowApp::renderMesh(std::vector<std::vector<glm::vec3>> mesh_positions, glm
 
     for(unsigned int i = 0; i < mesh_positions.size(); i++){
 
-    mesh_shader.setTexture("uTexColor", mesh_textures[i + rainy_inc]);
-    mesh_shader.setTexture("uTexNormal", mesh_normals[i + rainy_inc]);
+        mesh_shader.setTexture("uTexColor", mesh_textures[i + rainy_inc]);
+        mesh_shader.setTexture("uTexNormal", mesh_normals[i + rainy_inc]);
 
-    auto temp = mMeshesArray[i + rainy_inc]->bind(); //MUST STAY
-    auto ab = glow::ArrayBuffer::create();
-    auto mesh_vao1 = mMeshesArray[i + rainy_inc]->getCurrentVAO();
+        auto temp = mMeshesArray[i + rainy_inc]->bind(); //MUST STAY
+        auto ab = glow::ArrayBuffer::create();
+        auto mesh_vao1 = mMeshesArray[i + rainy_inc]->getCurrentVAO();
 
-    std::vector<glm::mat4> scalingMatrices;
+        //std::vector<glm::mat4> scalingMatrices;
 
-    scalingMatrices = {glm::scale(glm::vec3(0.7f, 0.7f, 0.7f)), glm::scale(glm::vec3(1.f, 1.f, 1.f)), glm::scale(glm::vec3(0.003f, 0.003f, 0.003f)),glm::scale(glm::vec3(0.01f, 0.01f, 0.01f)), glm::scale(glm::vec3(2.0f, 2.0f, 2.0f)), glm::scale(glm::vec3(0.005f, 0.005f, 0.005f)) };
+        //scalingMatrices = {glm::scale(glm::vec3(0.8f, 0.8f, 0.8f)), glm::scale(glm::vec3(0.09f, 0.07f, 0.07f)), glm::scale(glm::vec3(0.006f, 0.006f, 0.006f)),glm::scale(glm::vec3(0.9f, 0.9f, 0.9f)), glm::scale(glm::vec3(0.07f, 0.07f, 0.07f)), glm::scale(glm::vec3(2.5f, 2.5f, 2.5f)) };
 
-    std::vector<std::vector<glm::vec4>> transformation_matrix;
+        std::vector<glm::vec3> tmp = {glm::vec3(0.7f, 0.7f, 0.7f), glm::vec3(0.07f, 0.07f, 0.07f), glm::vec3(0.003f, 0.003f, 0.003f), glm::vec3(0.01f, 0.01f, 0.01f), glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(2.f, 2.f, 2.f)};
 
-    transformation_matrix.resize(4);
-    transformation_matrix.at(0).resize(mesh_positions.at(i).size());
-    transformation_matrix.at(1).resize(mesh_positions.at(i).size());
-    transformation_matrix.at(2).resize(mesh_positions.at(i).size());
-    transformation_matrix.at(3).resize(mesh_positions.at(i).size());
+        std::vector<std::vector<glm::vec4>> transformation_matrix;
+
+        if(firstRender < 6)
+            randomScalingMatrices.at(i+ rainy_inc).resize(mesh_positions.at(i).size());
+
+        transformation_matrix.resize(4);
+        transformation_matrix.at(0).resize(mesh_positions.at(i).size());
+        transformation_matrix.at(1).resize(mesh_positions.at(i).size());
+        transformation_matrix.at(2).resize(mesh_positions.at(i).size());
+        transformation_matrix.at(3).resize(mesh_positions.at(i).size());
+
 
         int a = 0;
         std::vector<glow::SharedArrayBuffer> mAbs;
@@ -552,6 +569,13 @@ void GlowApp::renderMesh(std::vector<std::vector<glm::vec3>> mesh_positions, glm
             glm::mat4 mesh_model(1.0f);
             glm::mat4 rotMat;
 
+            int randNumber = rand() % 5;
+
+            float randomScalingFactor = 1.f - ((float)randNumber/10.f);
+
+            if(firstRender < 6)
+                randomScalingMatrices.at(i + rainy_inc).at(a) = glm::scale(glm::vec3(tmp.at(i + rainy_inc)[0] * randomScalingFactor, tmp.at(i + rainy_inc)[1] * randomScalingFactor, tmp.at(i + rainy_inc)[2] * randomScalingFactor));
+
             if(i == 0)
                 rotMat = mBrush.GetCircleRotation(glm::normalize(glm::vec3(mHeightmap.mNormalsFinal.at(localCoords.y * mHeightmap.mHeightmapDimensions.x + localCoords.x).x, mHeightmap.mNormalsFinal.at(localCoords.y * mHeightmap.mHeightmapDimensions.x + localCoords.x).y + 10, mHeightmap.mNormalsFinal.at(localCoords.y * mHeightmap.mHeightmapDimensions.x + localCoords.x).z)), {0, 0, 0}, {0, 1, 0});
             else
@@ -559,7 +583,7 @@ void GlowApp::renderMesh(std::vector<std::vector<glm::vec3>> mesh_positions, glm
 
             auto translMat = glm::translate(mesh_positions.at(i).at(a));
 
-            mesh_model = translMat * scalingMatrices[i + rainy_inc] * rotMat * mesh_model;
+            mesh_model = translMat * randomScalingMatrices.at(i + rainy_inc).at(a) * rotMat * mesh_model;
 
             transformation_matrix.at(0).at(a) = {mesh_model[0][0], mesh_model[0][1], mesh_model[0][2], mesh_model[0][3]};
             transformation_matrix.at(1).at(a) = {mesh_model[1][0], mesh_model[1][1], mesh_model[1][2], mesh_model[1][3]};
@@ -567,7 +591,9 @@ void GlowApp::renderMesh(std::vector<std::vector<glm::vec3>> mesh_positions, glm
             transformation_matrix.at(3).at(a) = {mesh_model[3][0], mesh_model[3][1], mesh_model[3][2], mesh_model[3][3]};
 
             a++;
+
         }
+
 
         ab = glow::ArrayBuffer::create();
         ab->defineAttribute<glm::vec4>("uM1");
@@ -600,7 +626,10 @@ void GlowApp::renderMesh(std::vector<std::vector<glm::vec3>> mesh_positions, glm
         mesh_vao1->attach(mAbs);
         mesh_vao1->draw(mesh_positions.at(i).size());
 
+        if(firstRender < 7)
+            firstRender++;
         }
+
 
 }
 
@@ -613,12 +642,12 @@ void GlowApp::renderMesh(std::vector<std::vector<glm::vec3>> mesh_positions, glm
      mesh_positions.resize(3);
 
      if(rainy){
-         plist.at(0) = mBiomes.poissonDiskSampling(4, 40, mBiomes.rain_start, mBiomes.rain_end, plist.at(0), true);
-         plist.at(1) = mBiomes.poissonDiskSampling(4, 80, mBiomes.rain_start, mBiomes.rain_end, plist.at(0), true);
+         plist.at(0) = mBiomes.poissonDiskSampling(7, 40, mBiomes.rain_start, mBiomes.rain_end, plist.at(0), true);
+         plist.at(1) = mBiomes.poissonDiskSampling(7, 80, mBiomes.rain_start, mBiomes.rain_end, plist.at(0), true);
          plist.at(2) = mBiomes.poissonDiskSampling(12 , 80, mBiomes.rain_start, mBiomes.rain_end, plist.at(1), true);
      }
          else{
-         plist.at(0) = mBiomes.poissonDiskSampling(5, 40, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(0), false);
+         plist.at(0) = mBiomes.poissonDiskSampling(4, 40, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(0), false);
          plist.at(1) = mBiomes.poissonDiskSampling(15, 80, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(0), false);
          plist.at(2) = mBiomes.poissonDiskSampling(7, 80, mBiomes.NoRain_start, mBiomes.NoRain_end, plist.at(1), false);
      }
