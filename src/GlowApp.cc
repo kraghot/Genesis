@@ -28,6 +28,7 @@ unsigned int seed;
 bool buttonTerrain;
 bool recalculateSplatmap = true;
 bool randomWind;
+bool windDirection;
 
 using namespace glow;
 const int heightMapDim = 512;
@@ -65,8 +66,8 @@ void GlowApp::init()
     // configure GlfwApp
     setTitle("Genesis");
 
-    TwEnumVal TextureChoices[] = { {TEXTURE_SNOW, "Snow"},{TEXTURE_GRASS, "Grass"}, {TEXTURE_ROCK, "Rock"} };
-    TwType TextureTwType = TwDefineEnum("TextureType", TextureChoices, 3);
+    TwEnumVal TextureChoices[] = { {TEXTURE_JUNGLE, "Jungle ground"},{TEXTURE_FOREST, "Forest ground"}, {TEXTURE_ROCK, "Rock"}, {TEXTURE_BEACH, "Beach sand"} };
+    TwType TextureTwType = TwDefineEnum("TextureType", TextureChoices, 4);
     TwAddVarRW(tweakbar(), "Texture Brush", TextureTwType, &m_selectedTexture, NULL);
 
     TwEnumVal BrushChoices[] = { {BRUSH_TEXTURE, "Texture Brush"}, {BRUSH_HEIGHT, "Height Brush"}};
@@ -91,11 +92,12 @@ void GlowApp::init()
     TwAddButton(tweakbar(), "Droplet Erode Terrain", GlowApp::dropletErode, this, "label='Droplet Erode Terrain' key=e");
     TwAddButton(tweakbar(), "Thermal Erode Terrain", GlowApp::thermalErode, this, "label='Thermal Erode Terrain' key=t");
     TwAddVarRW(tweakbar(), "Height Brush", TW_TYPE_FLOAT, &mHeightBrushFactor, "group=scene step=0.5");
-    TwAddVarRW(tweakbar(), "Circle radius", TW_TYPE_FLOAT, &mCircleRadius, "group=scene step=0.5");
+    //TwAddVarRW(tweakbar(), "Circle radius", TW_TYPE_FLOAT, &mCircleRadius, "group=scene step=0.5");
     TwAddVarRW(tweakbar(), "DebugFlow", TW_TYPE_BOOLCPP, &mDebugFlow, "group=scene key=o label='DebugFlow'");
     TwAddButton(tweakbar(), "splatmap", GlowApp::TweakSetSplatmap, NULL, " label='Recalculate textures '");
     TwAddButton(tweakbar(), "wind", GlowApp::TweakRandomWind, NULL, " label='Random wind direction '");
     TwAddVarRW(tweakbar(), "Edit mode", TW_TYPE_BOOLCPP, &mEditMode, "group=scene key=l label='Edit Mode'");
+    TwAddButton(tweakbar(), "wind direction", GlowApp::TweakSetWindDirection, NULL, " label='Set wind direction '");
 
     // load object
     mShaderObj = Program::createFromFile("shader/obj");
@@ -258,10 +260,11 @@ void GlowApp::render(float elapsedSeconds)
                 std::cout << std::flush;
             }
 
-            if(isKeyPressed(66)) //GLFW_KEY_B
+            if(windDirection) //GLFW_KEY_B
             {
                 mBiomes.generateRainMap(m_selectedWind);
                 mFlowMap.SetWindDirection(mBiomes.GetWindDirection());
+                windDirection = false;
             }
 
             if(recalculateSplatmap){
@@ -461,10 +464,10 @@ void GlowApp::InitTerrain(){
     mPerlinTest = mHeightmap.GenerateTerrain(properties, filters, heightMapDim, heightMapDim);
 
     //define textures for terrain
-    std::vector<std::string> terrainTextures = {"texture/91.png", "texture/04grass.jpg", "texture/rock007.jpg", "texture/beach.jpg", "texture/underwater.png"};
+    std::vector<std::string> terrainTextures = {"texture/91.png", "texture/04grass.jpg", "texture/beach.jpg", "texture/rock007.jpg", "texture/snow009.jpg"};
 
     //define normals of textures for terrain (in the same order as the textures)
-    std::vector<std::string> terrainNormals = {"texture/91_normal.png", "texture/04grass.png", "texture/rock007_normal9.png", "texture/beach_normal.png", "texture/underwater_normal.png"};
+    std::vector<std::string> terrainNormals = {"texture/91_normal.png", "texture/04grass.png", "texture/beach_normal.png", "texture/rock007_normal9.png", "texture/snow009_normal.png"};
 
     //load textures for terrain
     mTexture = mHeightmap.LoadTexture(terrainTextures);
@@ -512,6 +515,11 @@ void GlowApp::SetSplatmap(){
 void GlowApp::SetRandomWind(){
     randomWind = true;
 }
+
+void GlowApp::SetWindDirection(){
+    windDirection = true;
+}
+
 
 void GlowApp::renderMesh(std::vector<std::vector<glm::vec3>> mesh_positions, glm::mat4 view, glm::mat4 proj, bool rainy){
 

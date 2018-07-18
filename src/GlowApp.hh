@@ -44,10 +44,10 @@ private:
     std::vector<std::vector<glm::mat4>> randomScalingMatrices;
 
     virtual bool onMouseScroll(double sx, double sy) override{
-        if(mCircleRadius > 5){
+        if(mCircleRadius > 0){
             mCircleRadius += sy;
-            if(mCircleRadius <= 5)
-                mCircleRadius = 6;
+            if(mCircleRadius <= 0)
+                mCircleRadius = 1;
             return true;
         }
 
@@ -94,8 +94,8 @@ private:
     std::vector<quadtree_node> RayIntersectionQuadtree_nodes;
 
 
-    typedef enum { TEXTURE_SNOW, TEXTURE_GRASS, TEXTURE_ROCK} SelectedTexture;
-    SelectedTexture m_selectedTexture = TEXTURE_GRASS;
+    typedef enum { TEXTURE_JUNGLE, TEXTURE_FOREST, TEXTURE_ROCK, TEXTURE_BEACH} SelectedTexture;
+    SelectedTexture m_selectedTexture = TEXTURE_FOREST;
 
     typedef enum { BRUSH_TEXTURE, BRUSH_HEIGHT} SelectedBrush;
     SelectedBrush m_selectedBrush = BRUSH_TEXTURE;
@@ -161,6 +161,7 @@ public:
     void ThermalErosion();
     void SetSplatmap();
     void SetRandomWind();
+    void SetWindDirection();
 
     static void TW_CALL randomTerrain(void *clientData){
         static_cast<GlowApp *>(clientData)->SetSeed(std::rand());
@@ -180,6 +181,10 @@ public:
     }
     static void TW_CALL TweakSetSplatmap(void *clientData){
         static_cast<GlowApp *>(clientData)->SetSplatmap();
+    }
+
+    static void TW_CALL TweakSetWindDirection(void *clientData){
+        static_cast<GlowApp *>(clientData)->SetWindDirection();
     }
 
     static void TW_CALL TweakRandomWind(void *clientData){

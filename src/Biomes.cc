@@ -11,7 +11,7 @@ Biomes::Biomes(MultiLayeredHeightmap *h){
 
 void Biomes::CalculateBiomeAtLocation(size_t pos)
 {
-    mIndicesMap.at(pos) = {TextureIndices::LightGrass, TextureIndices::DarkGrass, TextureIndices::Rock, TextureIndices::Beach};
+    mIndicesMap.at(pos) = {TextureIndices::LightGrass, TextureIndices::DarkGrass, TextureIndices::Beach, TextureIndices::Rock};
     mBiomeMap.at(pos) = {mRainMap.at(pos).r, mRainMap.at(pos).g , mHeightmap->mSplatmap.at(pos).b * 5, mHeightmap->mSplatmap.at(pos).a * 8};
     float sum = mBiomeMap.at(pos).x + mBiomeMap.at(pos).y + mBiomeMap.at(pos).z + mBiomeMap.at(pos).w;
 
