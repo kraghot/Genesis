@@ -165,17 +165,17 @@ public:
      * @param pos position in local coordinates
      * @return height at positions
      */
-    float GetDisplacementAt(glm::uvec2 pos);
+    float GetDisplacementAt(glm::ivec2 pos);
     /**
      * @brief SetDisplacementAt sets the position at the local coordinates
      * @param pos is the local position on the heightmap
      * @param value is the value to set
      */
-    void SetDisplacementAt(glm::uvec2 pos, float value);
+    void SetDisplacementAt(glm::ivec2 pos, float value);
     /**
      * @brief AddDisplacementAt is the same as GetDisplacementAt() except that it adds to the height
      */
-    void AddDisplacementAt(glm::uvec2 pos, float addition);
+    void AddDisplacementAt(glm::ivec2 pos, float addition);
     /**
      * @brief AddClampedDisplacementAt adds displacement while clamping to the minimum
      * @param pos local position
@@ -296,7 +296,7 @@ public:
     /// @todo These members do not belong in public
     glow::SharedTexture2D mSplatmapTexture;
     // The dimensions of the heightmap texture
-    glm::uvec2 mHeightmapDimensions;
+    glm::ivec2 mHeightmapDimensions;
     std::vector<glm::vec4> mSplatmap;
 
     std::vector<glm::vec4> mTemperatureMap;

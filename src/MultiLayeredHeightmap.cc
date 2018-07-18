@@ -339,15 +339,15 @@ void MultiLayeredHeightmap::ComputeAmbientOcclusionMap()
 //        std::cout << std::endl;
 //    }
 
-    const glm::uvec2 max = mHeightmapDimensions - glm::uvec2(1, 1);
-    glm::uvec2 loc;
+    const glm::ivec2 max = mHeightmapDimensions - glm::ivec2(1, 1);
+    glm::ivec2 loc;
 
     for(loc.y = 0; loc.y < mHeightmapDimensions.y; loc.y++)
     {
         for(loc.x = 0; loc.x < mHeightmapDimensions.x; loc.x++)
         {
-            glm::uvec2 start = {loc.x - halfrad, loc.y - halfrad};
-            glm::uvec2 end = {loc.x + halfrad, loc.y + halfrad};
+            glm::ivec2 start = {loc.x - halfrad, loc.y - halfrad};
+            glm::ivec2 end = {loc.x + halfrad, loc.y + halfrad};
 
             // Ensure we are not out of bounds
             start = glm::clamp(start, {0, 0}, max);
@@ -700,18 +700,27 @@ float MultiLayeredHeightmap::getMfHeightScale() const
     return mfHeightScale;
 }
 
-float MultiLayeredHeightmap::GetDisplacementAt(glm::uvec2 pos)
+float MultiLayeredHeightmap::GetDisplacementAt(glm::ivec2 pos)
 {
-    return mDisplacement.at(LOC(pos.x, pos.y));
+    glm::ivec2 clampPos = glm::clamp(pos, glm::ivec2(0,0), mHeightmapDimensions);
+    return mDisplacement.at(LOCV(clampPos));
 }
 
-void MultiLayeredHeightmap::SetDisplacementAt(glm::uvec2 pos, float value)
+void MultiLayeredHeightmap::SetDisplacementAt(glm::ivec2 pos, float value)
 {
+    glm::ivec2 clampPos = glm::clamp(pos, glm::ivec2(0,0), mHeightmapDimensions);
+    if(clampPos != pos)
+        return;
+
     mDisplacement.at(LOC(pos.x, pos.y)) = value;
 }
 
-void MultiLayeredHeightmap::AddDisplacementAt(glm::uvec2 pos, float addition)
+void MultiLayeredHeightmap::AddDisplacementAt(glm::ivec2 pos, float addition)
 {
+    glm::ivec2 clampPos = glm::clamp(pos, glm::ivec2(0,0), mHeightmapDimensions);
+    if(clampPos != pos)
+        return;
+
     mDisplacement.at(LOC(pos.x, pos.y)) += addition;
 }
 
@@ -737,9 +746,9 @@ void MultiLayeredHeightmap::IterateDroplet(int num)
 
     for(auto i=0u; i < num; i++)
     {
-        glm::uvec2 coords;
-        coords.x = std::experimental::randint(0u, mHeightmapDimensions.x-1);
-        coords.y = std::experimental::randint(0u, mHeightmapDimensions.y-1);
+        glm::ivec2 coords;
+        coords.x = std::experimental::randint(0, mHeightmapDimensions.x-1);
+        coords.y = std::experimental::randint(0, mHeightmapDimensions.y-1);
         DropletErodeTerrain(coords);
     }
     MakeVertexArray();
