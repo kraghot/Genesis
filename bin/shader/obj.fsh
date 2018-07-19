@@ -1,9 +1,6 @@
 uniform vec3 uLightPos;
 uniform vec3 uCamPos;
 
-uniform sampler2D uTexColor;
-uniform sampler2D uTexNormal;
-
 uniform sampler2D uSplatmapTex;
 uniform sampler2D uAmbientOcclusionMap;
 
@@ -29,7 +26,6 @@ void main()
     vec4 SplatmapColor = texture(uSplatmapTex, vHeightCoord);
     vec4 indexMap = texture(uIndexMap, vHeightCoord);
     float weights[4] = {SplatmapColor.r, SplatmapColor.g, SplatmapColor.b, SplatmapColor.a};
-//    float indices[4] = {indexMap.r * 255, indexMap.g * 255, indexMap.b * 255, indexMap.a * 255};
     float indices[4] = {indexMap.r, indexMap.g, indexMap.b, indexMap.a};
 
     vec3 normalMap = {0, 0, 0};
@@ -47,12 +43,6 @@ void main()
         normalMap += texture(uTerrainNormal, vec3(vTexCoord, indices[i])).rgb * weights[i];
         vFinalTexColor += texture(uTerrainTex, vec3(vTexCoord, indices[i])) * weights[i];
     }
-//    vFinalTexColor = vec4(indices[0] / 3.0, indices[1] / 3.0, indices[2] / 3.0, 1.0);
-//    vFinalTexColor = SplatmapColor;
-
-//    vec3 normalMap = (texture(uTerrainNormal, vec3(vTexCoord, 0.0)) * SplatmapColor.r  + texture(uTerrainNormal, vec3(vTexCoord, 1.0)) * SplatmapColor.g + texture(uTerrainNormal, vec3(vTexCoord, 2.0)) * SplatmapColor.b + texture(uTerrainNormal, vec3(vTexCoord, 3.0)) * SplatmapColor.a).rgb;
-
-//    vec4 vFinalTexColor = texture(uTerrainTex, vec3(vTexCoord, 0.0)) * SplatmapColor.r + texture(uTerrainTex, vec3(vTexCoord, 1.0)) * SplatmapColor.g + texture(uTerrainTex, vec3(vTexCoord, 2.0)) * SplatmapColor.b + texture(uTerrainTex, vec3(vTexCoord, 3.0)) * SplatmapColor.a;
 
     if(uDrawDebugRain)
     {
@@ -68,10 +58,6 @@ void main()
     float ka = 0.1;
     float kd = 0.7;
     float ks = 0.3;
-
-    // read textures
-    vec3 color = texture(uTexColor, vTexCoord).rgb;
-    //vec3 normalMap = texture(uTexNormal, vTexCoord).rgb;
 
     // build local coordinate system
     vec3 L = normalize(uLightPos - vWorldPosition);
@@ -93,7 +79,6 @@ void main()
 
     float ambient = 0.1f * texture(uAmbientOcclusionMap, vHeightCoord).r;
 
-//    fColor = color * (albedo + diffuse + specular);
     fColor = pow(vFinalTexColor * (albedo + diffuse + specular + ambient), vec4(1/2.224));
 
     if(vWorldPosition.y < 8)

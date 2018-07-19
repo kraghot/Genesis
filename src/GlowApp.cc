@@ -66,43 +66,33 @@ void GlowApp::init()
     // configure GlfwApp
     setTitle("Genesis");
 
+    TwAddButton(tweakbar(), "terrain", GlowApp::randomTerrain, NULL, " label='Generate random terrain '");
+    TwAddVarCB(tweakbar(), "Seed", TW_TYPE_UINT16, GlowApp::setSeedTerrain, GlowApp::getSeedTerrain, &seed, "step=1");
+    TwAddVarRW(tweakbar(), "Edit mode", TW_TYPE_BOOLCPP, &mEditMode, "key=l label='Edit Mode'");
+
     TwEnumVal TextureChoices[] = { {TEXTURE_JUNGLE, "Jungle ground"},{TEXTURE_FOREST, "Forest ground"}, {TEXTURE_ROCK, "Rock"}, {TEXTURE_BEACH, "Beach sand"} };
     TwType TextureTwType = TwDefineEnum("TextureType", TextureChoices, 4);
-    TwAddVarRW(tweakbar(), "Texture Brush", TextureTwType, &m_selectedTexture, NULL);
+    TwAddVarRW(tweakbar(), "Texture Brush", TextureTwType, &m_selectedTexture, "group=Editing");
 
     TwEnumVal BrushChoices[] = { {BRUSH_TEXTURE, "Texture Brush"}, {BRUSH_HEIGHT, "Height Brush"}};
     TwType BrushTwType = TwDefineEnum("BrushType", BrushChoices, 2);
-    TwAddVarRW(tweakbar(), "Brush Type", BrushTwType, &m_selectedBrush, NULL);
-
-    TwEnumVal MapChoices[] = { {MAP_SPLAT, "Splatmap"}, {MAP_RAIN, "Rain map"}, {MAP_DROPLET, "Droplet Erode debug"}, {MAP_BIOMES, "Biomes Map"}, {MAP_OCCLUSION, "Amb. Occlusion"} };
-    TwType MapTwType = TwDefineEnum("MapType", MapChoices, 5);
-    TwAddVarRW(tweakbar(), "Map Type", MapTwType, &m_selectedMap, NULL);
+    TwAddVarRW(tweakbar(), "Brush Type", BrushTwType, &m_selectedBrush, "group=Editing");
+    TwAddVarRW(tweakbar(), "Height Brush", TW_TYPE_FLOAT, &mHeightBrushFactor, "group=Editing step=0.5");
+    TwAddButton(tweakbar(), "splatmap", GlowApp::TweakSetSplatmap, NULL, "group=Editing label='Recalculate textures '");
 
     TwEnumVal WindChoices[] = { {NS, "North -> South"}, {SN, "South -> North"}, {WE, "West -> East"}, {EW, "East -> West"}};
     TwType WindTwType = TwDefineEnum("WindType", WindChoices, 4);
-    TwAddVarRW(tweakbar(), "Wind direction", WindTwType, &m_selectedWind, NULL);
-
+    TwAddVarRW(tweakbar(), "Wind direction", WindTwType, &m_selectedWind, "group=Biomes");
+    TwAddButton(tweakbar(), "wind direction", GlowApp::TweakSetWindDirection, NULL, "group=Biomes label='Set wind direction '");
+    TwAddButton(tweakbar(), "wind", GlowApp::TweakRandomWind, NULL, "group=Biomes label='Random wind direction '");
 
     // set up tweakbar
-    //TwAddVarRW(tweakbar(), "light direction", TW_TYPE_DIR3F, &mLightDir, "group=scene");
-    TwAddVarRW(tweakbar(), "light distance", TW_TYPE_FLOAT, &mLightDis, "group=scene step=0.1 min=1 max=1000");
-    TwAddVarCB(tweakbar(), "seed", TW_TYPE_UINT16, GlowApp::setSeedTerrain, GlowApp::getSeedTerrain, &seed, "group=scene step=1");
-    TwAddButton(tweakbar(), "terrain", GlowApp::randomTerrain, NULL, " label='Generate random terrain '");
-    TwAddVarRW(tweakbar(), "Number of Iterations", TW_TYPE_UINT16, &mNumIterations, "group=scene step=1");
-    TwAddButton(tweakbar(), "Droplet Erode Terrain", GlowApp::dropletErode, this, "label='Droplet Erode Terrain' key=e");
-    TwAddButton(tweakbar(), "Thermal Erode Terrain", GlowApp::thermalErode, this, "label='Thermal Erode Terrain' key=t");
-    TwAddVarRW(tweakbar(), "Height Brush", TW_TYPE_FLOAT, &mHeightBrushFactor, "group=scene step=0.5");
-    //TwAddVarRW(tweakbar(), "Circle radius", TW_TYPE_FLOAT, &mCircleRadius, "group=scene step=0.5");
-    TwAddVarRW(tweakbar(), "DebugFlow", TW_TYPE_BOOLCPP, &mDebugFlow, "group=scene key=o label='DebugFlow'");
-    TwAddButton(tweakbar(), "splatmap", GlowApp::TweakSetSplatmap, NULL, " label='Recalculate textures '");
-    TwAddButton(tweakbar(), "wind", GlowApp::TweakRandomWind, NULL, " label='Random wind direction '");
-    TwAddVarRW(tweakbar(), "Edit mode", TW_TYPE_BOOLCPP, &mEditMode, "group=scene key=l label='Edit Mode'");
-    TwAddButton(tweakbar(), "wind direction", GlowApp::TweakSetWindDirection, NULL, " label='Set wind direction '");
+    TwAddButton(tweakbar(), "Droplet Erode Terrain", GlowApp::dropletErode, this, "group=Erosion label='Droplet Erode Terrain' key=e");
+    TwAddVarRW(tweakbar(), "Number of Iterations", TW_TYPE_UINT16, &mNumIterations, "group=Erosion step=1");
+    TwAddButton(tweakbar(), "Thermal Erode Terrain", GlowApp::thermalErode, this, "group=Erosion label='Thermal Erode Terrain' key=t");
 
     // load object
     mShaderObj = Program::createFromFile("shader/obj");
-    mTextureColor = Texture2D::createFromFile("texture/rock-albedo.png", ColorSpace::sRGB);
-    mTextureNormal = Texture2D::createFromFile("texture/rock-normal.png", ColorSpace::Linear);
 
     mBrush.GenerateArc(mCircleRadius);
 
@@ -163,7 +153,6 @@ void GlowApp::init()
 
     addMesh("jungle_tree1", "mesh/jungle_tree1/jungle_tree1.png", "mesh/jungle_tree1/jungle_tree1_normal.jpg");
     addMesh("jungle_bush", "mesh/jungle_bush/diffuse.tga", "mesh/jungle_bush/normal.tga");
-    //addMesh("jungle_plant", "mesh/jungle_plant/diffuse.tga", "mesh/jungle_bush1/jungle_bush1_normal.png");
     addMesh("lavender", "mesh/lavender/lavender.png", "mesh/lavender/lavender_normal.png");
 
     //forest
@@ -260,11 +249,19 @@ void GlowApp::render(float elapsedSeconds)
                 std::cout << std::flush;
             }
 
-            if(windDirection) //GLFW_KEY_B
+            if(windDirection)
             {
                 mBiomes.generateRainMap(m_selectedWind);
                 mFlowMap.SetWindDirection(mBiomes.GetWindDirection());
                 windDirection = false;
+
+                rainforest.clear();
+                forest.clear();
+
+                rainforest = getMeshPositions(true); //true = it's the first biome
+                forest = getMeshPositions(false); // false = it's not the first  biome
+
+                firstRender = 0;
             }
 
             if(recalculateSplatmap){
@@ -291,12 +288,10 @@ void GlowApp::render(float elapsedSeconds)
             if(GlfwApp::isMouseButtonPressed(mRightClick))
                 m_selectedBrush == 0? mBrush.SetTextureBrush(m_selectedTexture, mBiomes.mBiomeMap, mBiomes.getBiomesTexture()) : mBrush.SetHeightBrush(mHeightBrushFactor);
 
-            std::vector<glow::SharedTexture2D> selectedMap = {mHeightmap.GetSplatmapTexture(), mBiomes.getRainTexture(), mHeightmap.GetSplatmapTexture(), mBiomes.getBiomesTexture(), mHeightmap.mAmbientOcclusionMap};
-
             GLOW_SCOPED(enable, GL_BLEND);
             glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-            auto model = glm::mat4(1.f); // glm::translate(glm::mat4(1.f), glm::vec3(0, -50, 0));
+            auto model = glm::mat4(1.f);
             auto shader = mShaderObj->use();
             shader.setUniform("uView", view);
             shader.setUniform("uProj", proj);
@@ -305,10 +300,8 @@ void GlowApp::render(float elapsedSeconds)
             shader.setUniform("uLightPos", lightPos);
             shader.setUniform("uCamPos", camPos);
 
-            shader.setTexture("uTexColor", mTextureColor);
-            shader.setTexture("uTexNormal", mTextureNormal);
 
-            shader.setTexture("uSplatmapTex", selectedMap[m_selectedMap]);
+            shader.setTexture("uSplatmapTex", mBiomes.getBiomesTexture());
             shader.setTexture("uIndexMap", mBiomes.GetIndicesTexture());
             shader.setUniform("uDrawDebugRain", (m_selectedMap == MAP_DROPLET));
 
@@ -437,7 +430,7 @@ void GlowApp::InitTerrain(){
 
     PerlinNoiseGenerator perlinNoise(seed);
     DiamondSquareNoiseGenerator diamondNoise(heightMapDim, heightMapDim, 64);
-//    IslandMaskGenerator islandFilter(glm::vec2(heightMapDim - 100, heightMapDim - 100), glm::vec2(heightMapDim, heightMapDim), seed);
+
     CircularIslandMaskFilter islandFilter(0.65f, 0.95f, perlinNoise);
 
     std::vector<MultiLayeredHeightmap::GeneratorProperties> properties;
@@ -449,14 +442,6 @@ void GlowApp::InitTerrain(){
                             50.0f,
                             0.0f // unused
                             );
-
-//    properties.emplace_back(perlinNoise,
-//                            3,
-//                            1.0f,
-//                            0.5f,
-//                            30.0f,
-//                            0.5f
-//                            );
 
     std::vector<FilterGenerator*> filters;
     filters.push_back(&islandFilter);
@@ -550,10 +535,6 @@ void GlowApp::renderMesh(std::vector<std::vector<glm::vec3>> mesh_positions, glm
         auto ab = glow::ArrayBuffer::create();
         auto mesh_vao1 = mMeshesArray[i + rainy_inc]->getCurrentVAO();
 
-        //std::vector<glm::mat4> scalingMatrices;
-
-        //scalingMatrices = {glm::scale(glm::vec3(0.8f, 0.8f, 0.8f)), glm::scale(glm::vec3(0.09f, 0.07f, 0.07f)), glm::scale(glm::vec3(0.006f, 0.006f, 0.006f)),glm::scale(glm::vec3(0.9f, 0.9f, 0.9f)), glm::scale(glm::vec3(0.07f, 0.07f, 0.07f)), glm::scale(glm::vec3(2.5f, 2.5f, 2.5f)) };
-
         std::vector<glm::vec3> tmp = {glm::vec3(0.7f, 0.7f, 0.7f), glm::vec3(0.07f, 0.07f, 0.07f), glm::vec3(0.003f, 0.003f, 0.003f), glm::vec3(0.01f, 0.01f, 0.01f), glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(2.f, 2.f, 2.f)};
 
         std::vector<std::vector<glm::vec4>> transformation_matrix;
@@ -568,7 +549,7 @@ void GlowApp::renderMesh(std::vector<std::vector<glm::vec3>> mesh_positions, glm
         transformation_matrix.at(3).resize(mesh_positions.at(i).size());
 
 
-        int a = 0;
+        size_t a = 0;
         std::vector<glow::SharedArrayBuffer> mAbs;
 
         while(a < mesh_positions.at(i).size()){
@@ -642,7 +623,7 @@ void GlowApp::renderMesh(std::vector<std::vector<glm::vec3>> mesh_positions, glm
 }
 
  std::vector<std::vector<glm::vec3>> GlowApp::getMeshPositions(bool rainy){
-     int a = 0;
+     size_t a = 0;
      std::vector<std::vector<glm::vec2>> plist;
      std::vector<std::vector<glm::vec3>> mesh_positions;
 
