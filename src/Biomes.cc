@@ -24,7 +24,7 @@ void Biomes::CalculateBiomeAtLocation(size_t pos)
 void Biomes::generateRainMap(unsigned int randomWindDir){
 
     std::vector<std::vector<double>> rainAmount(mHeightmap->mHeightmapDimensions.x,std::vector<double>(mHeightmap->mHeightmapDimensions.y,0));
-    unsigned int x = 0, y = 0, i, j;
+    int x = 0, y = 0, i, j;
     bool firstIteration = true;
     float initRainValue = 0.f;
     std::vector<std::vector<double>> biomesMerge(mHeightmap->mHeightmapDimensions.x,std::vector<double>(mHeightmap->mHeightmapDimensions.y,0));
@@ -424,8 +424,8 @@ glow::SharedTexture2D Biomes::GetIndicesTexture() const
 void Biomes::LoadBiomesMap()
 {
 
-    for (unsigned int i = 0; i < mHeightmap->mHeightmapDimensions.y; i++){
-        for (unsigned int j = 0; j < mHeightmap->mHeightmapDimensions.x; j++){
+    for (int i = 0; i < mHeightmap->mHeightmapDimensions.y; i++){
+        for (int j = 0; j < mHeightmap->mHeightmapDimensions.x; j++){
             CalculateBiomeAtLocation(LOC);
         }
     }
