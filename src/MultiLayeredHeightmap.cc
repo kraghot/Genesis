@@ -245,22 +245,22 @@ glow::SharedTexture2D MultiLayeredHeightmap::GetDisplacementTexture() const
     return mDisplacementTexture;
 }
 
-std::vector<glm::uvec2> MultiLayeredHeightmap::GetNeighborhood(unsigned int i, unsigned int j)
+std::vector<glm::ivec2> MultiLayeredHeightmap::GetNeighborhood(int i, int j)
 {
-    std::vector<glm::uvec2> ret;
-    ret.push_back(glm::uvec2((i - 1) % mHeightmapDimensions.x, j));
-    ret.push_back(glm::uvec2((i + 1) % mHeightmapDimensions.x, j));
-    ret.push_back(glm::uvec2(i, (j - 1) % mHeightmapDimensions.y));
-    ret.push_back(glm::uvec2(i, (j + 1) % mHeightmapDimensions.y));
+    std::vector<glm::ivec2> ret;
+    ret.push_back(glm::ivec2((i - 1) % mHeightmapDimensions.x, j));
+    ret.push_back(glm::ivec2((i + 1) % mHeightmapDimensions.x, j));
+    ret.push_back(glm::ivec2(i, (j - 1) % mHeightmapDimensions.y));
+    ret.push_back(glm::ivec2(i, (j + 1) % mHeightmapDimensions.y));
     return ret;
 }
 
-std::vector<glm::uvec2> MultiLayeredHeightmap::GetNeighborhood(glm::uvec2 coord)
+std::vector<glm::ivec2> MultiLayeredHeightmap::GetNeighborhood(glm::ivec2 coord)
 {
     return GetNeighborhood(coord.x, coord.y);
 }
 
-std::vector<glm::uvec2> MultiLayeredHeightmap::GetMooreNeighborhood(glm::uvec2 coord)
+std::vector<glm::ivec2> MultiLayeredHeightmap::GetMooreNeighborhood(glm::ivec2 coord)
 {
     // Get Von-Neumann
     auto ret = GetNeighborhood(coord);
@@ -276,12 +276,12 @@ std::vector<glm::uvec2> MultiLayeredHeightmap::GetMooreNeighborhood(glm::uvec2 c
     return ret;
 }
 
-glm::uvec2 MultiLayeredHeightmap::GetLowestNeigh(std::vector<glm::uvec2> &neigh)
+glm::ivec2 MultiLayeredHeightmap::GetLowestNeigh(std::vector<glm::ivec2> &neigh)
 {
-    unsigned int lowestIndex = -1;
+    int lowestIndex = -1;
     float lowestDepth = std::numeric_limits<float>::max();
 
-    for(auto i = 0u; i < neigh.size(); i++)
+    for(size_t i = 0; i < neigh.size(); i++)
     {
         auto currDepth = GetDisplacementAt(neigh.at(i));
         if (currDepth < lowestDepth)
@@ -294,14 +294,14 @@ glm::uvec2 MultiLayeredHeightmap::GetLowestNeigh(std::vector<glm::uvec2> &neigh)
     return neigh.at(lowestIndex);
 }
 
-glm::uvec2 MultiLayeredHeightmap::WorldToLocalCoordinates(glm::vec2 position)
+glm::ivec2 MultiLayeredHeightmap::WorldToLocalCoordinates(glm::vec2 position)
 {
     position /= mfBlockScale;
     position += glm::vec2(mHeightmapDimensions.x / 2.0, mHeightmapDimensions.y / 2.0);
     return round(position);
 }
 
-glm::vec3 MultiLayeredHeightmap::LocalToWorldCoordinates(glm::uvec2 position)
+glm::vec3 MultiLayeredHeightmap::LocalToWorldCoordinates(glm::ivec2 position)
 {
     glm::ivec2 iPos = position;
     iPos -= (glm::ivec2(mHeightmapDimensions)/2.0);
@@ -312,12 +312,12 @@ glm::vec3 MultiLayeredHeightmap::LocalToWorldCoordinates(glm::uvec2 position)
 
 glm::vec3 MultiLayeredHeightmap::LocalToWorldCoordinates(glm::vec3 pos)
 {
-    glm::uvec2 lPos = {pos.x, pos.z};
+    glm::ivec2 lPos = {pos.x, pos.z};
     auto world = LocalToWorldCoordinates(lPos);
     return {world.x, pos.y, world.z};
 }
 
-bool MultiLayeredHeightmap::IsWaterMass(glm::uvec2 pos)
+bool MultiLayeredHeightmap::IsWaterMass(glm::ivec2 pos)
 {
     return mRainFlowMap[LOCV(pos)] >= 0.98;
 }
@@ -390,9 +390,9 @@ void MultiLayeredHeightmap::ThermalErodeTerrain()
     float T = 8.0f / (float) mHeightmapDimensions.x;
     int counter = 0;
 
-    for(auto j = 0u; j < mHeightmapDimensions.y; j++)
+    for(auto j = 0; j < mHeightmapDimensions.y; j++)
     {
-        for(auto i = 0u; i < mHeightmapDimensions.x; i++)
+        for(auto i = 0; i < mHeightmapDimensions.x; i++)
         {
             float dMax = 0;
             glm::vec2 l;
@@ -428,9 +428,9 @@ void MultiLayeredHeightmap::HydraulicErodeTerrain()
     const float rainfall = 0.01f;
     const float sediment = 0.01f * mfHeightScale;
 
-    for(auto i = 0u; i < mHeightmapDimensions.y; i++)
+    for(auto i = 0; i < mHeightmapDimensions.y; i++)
     {
-        for(auto j = 0u; j < mHeightmapDimensions.x; j++)
+        for(auto j = 0; j < mHeightmapDimensions.x; j++)
         {
             mWaterLevel.at(LOC(j, i)) += rainfall;
             float a = mDisplacement.at(LOC(j, i)) + mWaterLevel.at(LOC(j, i));
@@ -481,7 +481,7 @@ void MultiLayeredHeightmap::DropletErodeTerrain(glm::vec2 coordinates, float str
     // Sediment, velocity, water
     float s=0, v=0, w=strength;
 
-    glm::uvec2 currPos = coordinates;
+    glm::ivec2 currPos = coordinates;
     for(auto i=0u; i < maxPathLength; i++)
     {
         auto neigh = GetNeighborhood(currPos);
@@ -724,14 +724,14 @@ void MultiLayeredHeightmap::AddDisplacementAt(glm::ivec2 pos, float addition)
     mDisplacement.at(LOC(pos.x, pos.y)) += addition;
 }
 
-void MultiLayeredHeightmap::AddClampedDisplacementAt(glm::uvec2 pos, float addition, float min)
+void MultiLayeredHeightmap::AddClampedDisplacementAt(glm::ivec2 pos, float addition, float min)
 {
     float potentialHeight = GetDisplacementAt(pos) + addition;
     float heightToSet = glm::max(min, potentialHeight);
     SetDisplacementAt(pos, heightToSet);
 }
 
-void MultiLayeredHeightmap::AddSoftDisplacement(glm::uvec2 pos, float addition)
+void MultiLayeredHeightmap::AddSoftDisplacement(glm::ivec2 pos, float addition)
 {
     float scaledAddition = addition /2.0f;
     AddDisplacementAt(pos, scaledAddition);
@@ -744,7 +744,7 @@ void MultiLayeredHeightmap::AddSoftDisplacement(glm::uvec2 pos, float addition)
 void MultiLayeredHeightmap::IterateDroplet(int num)
 {
 
-    for(auto i=0u; i < num; i++)
+    for(auto i=0; i < num; i++)
     {
         glm::ivec2 coords;
         coords.x = std::experimental::randint(0, mHeightmapDimensions.x-1);
@@ -752,6 +752,9 @@ void MultiLayeredHeightmap::IterateDroplet(int num)
         DropletErodeTerrain(coords);
     }
     MakeVertexArray();
+
+    CalculateNormalsTangents({0, 0}, {mHeightmapDimensions.x - 1, mHeightmapDimensions.y - 1});
+
     mSplatmapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RGBA);
     mSplatmapTexture->bind().setData(GL_RGBA, mHeightmapDimensions.x, mHeightmapDimensions.y, mSplatmap);
     mSplatmapTexture->bind().generateMipmaps();
@@ -964,17 +967,6 @@ void MultiLayeredHeightmap::LoadSplatmap(){
         mTemperatureMap.at(i) = CalculateRGBA(fRange1_height, fRange2_height, fRange3_height, fRange4_height, fScale_height);
         mSlopeMap.at(i) = CalculateRGBA(fRange1_slope, fRange2_slope, fRange3_slope, fRange4_slope, fScale_slope);
 
-        //underwater
-    //    if(mPositions.at(i).y <= 9.5f){
-    //        a = 1.f;
-    //        r = 0.f;
-    //        g = 0.f;
-    //        b = 0.f;
-
-    //        mTemperatureMap.at(i) = {r, g, b, a};
-    //        mSlopeMap.at(i) = {r, g, b, a};
-    //    }
-
         //beach
         if (mDisplacement.at(i) < 13 && fScale_slope <= fRange4_slope){
             a = 1.f;
@@ -986,26 +978,6 @@ void MultiLayeredHeightmap::LoadSplatmap(){
             mSlopeMap.at(i) = {r, g, b, a};
         }
 
-    //    else if (mPositions.at(i).y >= 11 && mPositions.at(i).y < 14 && fScale_slope <= fRange4_slope){
-    //        a = 0.002;
-    //        r *= 0.888f;
-    //        g *= 0.888f;
-    //        b *= 0.888f;
-
-    //        mTemperatureMap.at(i) = {r, g, b, a};
-    //        mSlopeMap.at(i) = {r, g, b, a};
-    //    }
-
-    //    else if (mPositions.at(i).y >= 14 && mPositions.at(i).y < 16 && fScale_slope <= fRange4_slope){
-    //        a = 0.0001f;
-    //        r *= 0.9999f;
-    //        g *= 0.9999f;
-    //        b *= 0.9999f;
-
-    //        mTemperatureMap.at(i) = {r, g, b, a};
-    //        mSlopeMap.at(i) = {r, g, b, a};
-    //    }
-
         mSplatmap.at(i) = {mTemperatureMap.at(i).x, mTemperatureMap.at(i).y, mSlopeMap.at(i).z + mTemperatureMap.at(i).z, mTemperatureMap.at(i).w};
 
         sum = mSplatmap.at(i).x + mSplatmap.at(i).y + mSplatmap.at(i).z + mSplatmap.at(i).w;
@@ -1015,8 +987,6 @@ void MultiLayeredHeightmap::LoadSplatmap(){
         mSplatmap.at(i).z /= sum;
         mSplatmap.at(i).w /= sum;
 
-
-        //std::cout << "RGBA: {" << mSplatmap.at(i).x << "," << mSplatmap.at(i).y << "," << mSplatmap.at(i).z << "," << mSplatmap.at(i).w << "}" << std::endl;
     }
 
     mSplatmapTexture = glow::Texture2D::create(mHeightmapDimensions.x, mHeightmapDimensions.y, GL_RGBA);

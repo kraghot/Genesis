@@ -66,17 +66,17 @@ void DiamondSquareNoiseGenerator::DiamondSquare(int stepsize, double scale)
 
     int halfstep = stepsize / 2;
 
-    for (int y = halfstep; y < mDimY + halfstep; y += stepsize)
+    for (int y = halfstep; y < static_cast<int>(mDimY) + halfstep; y += stepsize)
     {
-        for (int x = halfstep; x < mDimX + halfstep; x += stepsize)
+        for (int x = halfstep; x < static_cast<int>(mDimX) + halfstep; x += stepsize)
         {
             SquareStep(x, y, stepsize, fRand() * scale);
         }
     }
 
-    for (int y = 0; y < mDimY; y += stepsize)
+    for (int y = 0; y < static_cast<int>(mDimY); y += stepsize)
     {
-        for (int x = 0; x < mDimX; x += stepsize)
+        for (int x = 0; x < static_cast<int>(mDimX); x += stepsize)
         {
             DiamondStep(x + halfstep, y, stepsize, fRand() * scale);
             DiamondStep(x, y + halfstep, stepsize, fRand() * scale);

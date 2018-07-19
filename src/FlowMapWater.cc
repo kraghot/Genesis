@@ -23,6 +23,8 @@ void FlowMapWater::SetWindDirection(glm::vec2 windDirection)
     GenerateFlowTexture();
     return;
 
+#ifdef GENESIS_BUILD_ALTERNATIVE_FLOWMAP
+
     int frontArrayBegin, frontArrayEnd, particleBegin, particleEnd, variableCoordinate;
 
     if(mWindDirection == glm::vec2(0, -1))
@@ -66,6 +68,8 @@ void FlowMapWater::SetWindDirection(glm::vec2 windDirection)
     }
 
     GenerateFlowTexture();
+
+#endif
 }
 
 void FlowMapWater::SpawnRiver(glm::vec3 worldCoordinates, float flowVolume)
@@ -210,9 +214,9 @@ float FlowMapWater::GetTriangleArea(glm::vec3 A, glm::vec3 B, glm::vec3 C)
 
 void FlowMapWater::InitializeOcean(glm::vec2 value)
 {
-    for(auto i = 0; i < mWidth; i++)
+    for(auto i = 0u; i < mWidth; i++)
     {
-        for(auto j = 0; j < mHeight; j++)
+        for(auto j = 0u; j < mHeight; j++)
         {
             glm::vec2 flowPos = {i, j};
             if(IsInBounds(flowPos))

@@ -182,13 +182,13 @@ public:
      * @param addition how much to add
      * @param min is the value to clamp against
      */
-    void AddClampedDisplacementAt(glm::uvec2 pos, float addition, float min);
+    void AddClampedDisplacementAt(glm::ivec2 pos, float addition, float min);
     /**
      * @brief AddSoftDisplacement applies displacement to the given local position and the Von-Neumann neighborhood
      * @param pos position in local coordinates
      * @param addition how much height to add
      */
-    void AddSoftDisplacement(glm::uvec2 pos, float addition);
+    void AddSoftDisplacement(glm::ivec2 pos, float addition);
     /**
      * @brief IterateDroplet applies droplet erosion num times at random positions on the terrain
      * @param num
@@ -205,42 +205,42 @@ public:
      * @param coord is the point for which to generate neighbours
      * @return list of neighbours
      */
-    std::vector<glm::uvec2> GetNeighborhood(glm::uvec2 coord);
-    std::vector<glm::uvec2> GetNeighborhood(unsigned int i, unsigned int j);
+    std::vector<glm::ivec2> GetNeighborhood(glm::ivec2 coord);
+    std::vector<glm::ivec2> GetNeighborhood(int i, int j);
 
     /**
      * @brief GetMooreNeighborhood returns the Moore neighborhood of a given point
      * @param coord is the point for which to generate neighbours
      * @return list of neighbours
      */
-    std::vector<glm::uvec2> GetMooreNeighborhood(glm::uvec2 coord);
+    std::vector<glm::ivec2> GetMooreNeighborhood(glm::ivec2 coord);
 
     /**
      * @brief GetLowestNeigh returns the point with the lowest height
      * @param neigh is a list of of points which to check
      * @return the coordinates of the lowest point
      */
-    glm::uvec2 GetLowestNeigh(std::vector<glm::uvec2>& neigh);
+    glm::ivec2 GetLowestNeigh(std::vector<glm::ivec2> &neigh);
 
     /**
      * @brief WorldToLocalCoordinates calculates the local position on the heightmap from world coords
      * @param position are the XZ world coords
      * @return coords on the heightmap
      */
-    glm::uvec2 WorldToLocalCoordinates(glm::vec2 position);
+    glm::ivec2 WorldToLocalCoordinates(glm::vec2 position);
 
     /**
      * @brief LocalToWorldCoordinates calculates the world coordinates from local coordinates
      * @param position is the XZ local coord
      * @return XZ world coords
      */
-    glm::vec3 LocalToWorldCoordinates(glm::uvec2 position);
+    glm::vec3 LocalToWorldCoordinates(glm::ivec2 position);
     glm::vec3 LocalToWorldCoordinates(glm::vec3 pos);
 
     /**
      * @brief IsWaterMass checks if the coordinate is a river of a lake
      */
-    bool IsWaterMass(glm::uvec2 pos);
+    bool IsWaterMass(glm::ivec2 pos);
 
     /**
      * @brief ComputeAmbientOcclusionMap baked an ambient occlusion map using gaussian averages
