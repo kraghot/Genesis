@@ -17,7 +17,7 @@ void main()
     vLightViewPos = uView * vec4(uLightPos, 1.0f);
     vTexCoords = aHeightCoord;
 
-    float displacement;
+    float displacement = 0;
     for(int i = 0; i < 4; i++)
         for(int j = 0; j < 4; j++)
         {
