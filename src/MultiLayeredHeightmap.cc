@@ -109,6 +109,7 @@ void MultiLayeredHeightmap::DumpSplatmapToFile()
 void MultiLayeredHeightmap::MakeVertexArray()
 {
     mAbs.clear();
+    mVao.reset();
 
     auto ab = glow::ArrayBuffer::create();
     ab->defineAttribute<glm::vec3>("aPosition");

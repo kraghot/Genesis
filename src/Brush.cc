@@ -30,39 +30,39 @@ void Brush::SetTextureBrush(int seletedTexture, std::vector<glm::vec4> &biomesMa
 
     float Radius2 = mIntersectionRadius * mIntersectionRadius;
 
-        for (unsigned int j = mIntersectionHeight - mIntersectionRadius; j < mIntersectionHeight + mIntersectionRadius; j++){
+    for (int j = mIntersectionHeight - mIntersectionRadius; j < mIntersectionHeight + mIntersectionRadius; j++){
 
-            for (unsigned int i = mIntersectionWidth - mIntersectionRadius; i < mIntersectionWidth + mIntersectionRadius; i++){
+        for (int i = mIntersectionWidth - mIntersectionRadius; i < mIntersectionWidth + mIntersectionRadius; i++){
 
-                if(j < 0 || j >= mHeightmap->mHeightmapDimensions.x || i < 0 || i >= mHeightmap->mHeightmapDimensions.x)
-                    continue;
+            if(j < 0 || j >= static_cast<int>(mHeightmap->mHeightmapDimensions.x) || i < 0 || i >= static_cast<int>(mHeightmap->mHeightmapDimensions.x))
+                continue;
 
 
-                float pointPositionx = glm::pow(mHeightmap->mPositions.at((j * mHeightmap->mHeightmapDimensions.x) + i).x - mHeightmap->mPositions.at((mIntersectionHeight * mHeightmap->mHeightmapDimensions.x) + mIntersectionWidth).x,2);
-                float pointPositiony  = glm::pow(mHeightmap->mPositions.at((j * mHeightmap->mHeightmapDimensions.x) + i).y -mHeightmap->mPositions.at((mIntersectionHeight * mHeightmap->mHeightmapDimensions.x) + mIntersectionWidth).y,2);
-                float pointPositionz = glm::pow(mHeightmap->mPositions.at((j * mHeightmap->mHeightmapDimensions.x) + i).z -mHeightmap->mPositions.at((mIntersectionHeight * mHeightmap->mHeightmapDimensions.x) + mIntersectionWidth).z,2);
+            float pointPositionx = glm::pow(mHeightmap->mPositions.at((j * mHeightmap->mHeightmapDimensions.x) + i).x - mHeightmap->mPositions.at((mIntersectionHeight * mHeightmap->mHeightmapDimensions.x) + mIntersectionWidth).x,2);
+            float pointPositiony  = glm::pow(mHeightmap->mPositions.at((j * mHeightmap->mHeightmapDimensions.x) + i).y -mHeightmap->mPositions.at((mIntersectionHeight * mHeightmap->mHeightmapDimensions.x) + mIntersectionWidth).y,2);
+            float pointPositionz = glm::pow(mHeightmap->mPositions.at((j * mHeightmap->mHeightmapDimensions.x) + i).z -mHeightmap->mPositions.at((mIntersectionHeight * mHeightmap->mHeightmapDimensions.x) + mIntersectionWidth).z,2);
 
-                float distance = pointPositionx + pointPositiony + pointPositionz;
+            float distance = pointPositionx + pointPositiony + pointPositionz;
 
-                    if(distance < Radius2 && distance > (0.7 * Radius2)){
-                        biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i)[seletedTexture] += 0.2;
-                    }
-
-                    else if(distance < (0.7 * Radius2) && distance > (0.5 * Radius2)){
-                        biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i)[seletedTexture] += 0.4;
-                    }
-                    else if(distance < (0.5 * Radius2)){
-                        biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i)[seletedTexture] += 0.8;
-                    }
-
-                    sum = biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).x + biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).y + biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).z + biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).w;
-                    biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).y /= sum;
-                    biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).x /= sum;
-                    biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).z /= sum;
-                    biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).w /= sum;
-
+                if(distance < Radius2 && distance > (0.7 * Radius2)){
+                    biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i)[seletedTexture] += 0.2;
                 }
+
+                else if(distance < (0.7 * Radius2) && distance > (0.5 * Radius2)){
+                    biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i)[seletedTexture] += 0.4;
+                }
+                else if(distance < (0.5 * Radius2)){
+                    biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i)[seletedTexture] += 0.8;
+                }
+
+                sum = biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).x + biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).y + biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).z + biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).w;
+                biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).y /= sum;
+                biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).x /= sum;
+                biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).z /= sum;
+                biomesMap.at(j*mHeightmap->mHeightmapDimensions.x + i).w /= sum;
+
             }
+        }
 
         mBiomesTexture->bind().setData(GL_RGBA, mHeightmap->mHeightmapDimensions.x, mHeightmap->mHeightmapDimensions.y, biomesMap);
         mBiomesTexture->bind().generateMipmaps();
@@ -77,13 +77,9 @@ void Brush::SetHeightBrush(float factor){
     int istart = clamp(mIntersectionWidth  - mIntersectionRadius, 0.0f, static_cast<float>(mHeightmap->mHeightmapDimensions.x-1));
     int iend   = clamp(mIntersectionWidth  + mIntersectionRadius, 0.0f, static_cast<float>(mHeightmap->mHeightmapDimensions.x-1));
 
-    for (unsigned int j = jstart; j < jend; j++){
+    for (int j = jstart; j < jend; j++){
 
-        for (unsigned int i = istart; i < iend; i++){
-
-            if(j < 0 || j >= mHeightmap->mHeightmapDimensions.x || i < 0 || i >= mHeightmap->mHeightmapDimensions.x)
-                continue;
-
+        for (int i = istart; i < iend; i++){
 
             float pointPositionx = glm::pow(mHeightmap->mPositions.at((j * mHeightmap->mHeightmapDimensions.x) + i).x - mHeightmap->mPositions.at((mIntersectionHeight * mHeightmap->mHeightmapDimensions.x) + mIntersectionWidth).x,2);
             float pointPositiony  = glm::pow(mHeightmap->mPositions.at((j * mHeightmap->mHeightmapDimensions.x) + i).y -mHeightmap->mPositions.at((mIntersectionHeight * mHeightmap->mHeightmapDimensions.x) + mIntersectionWidth).y,2);
@@ -91,16 +87,6 @@ void Brush::SetHeightBrush(float factor){
 
             float distance = pointPositionx + pointPositiony + pointPositionz;
 
-//                if(distance < Radius2 && distance > (0.7 * Radius2)){
-//                    mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i) += factor < (100 * 0.002f)? (100 * 0.002f) : factor - (100 * 0.004f);
-//                }
-
-//                else if(distance < (0.7 * Radius2) && distance > (0.5 * Radius2)){
-//                    mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i) += factor < (100 * 0.004f)? (100 * 0.001f) : factor - (100 * 0.002f);
-//                }
-//                else if(distance < (0.5 * Radius2)){
-//                     mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i) += factor;
-//                }
             if(distance < Radius2)
                 mHeightmap->mDisplacement.at(j*mHeightmap->mHeightmapDimensions.x + i) += factor * glm::smoothstep(Radius2, 0.f, distance);
 
