@@ -72,10 +72,10 @@ void Brush::SetHeightBrush(float factor){
     float Radius2 = mIntersectionRadius * mIntersectionRadius;
     factor /= 10;
 
-    int jstart = clamp(mIntersectionHeight - mIntersectionRadius, 0.0f, static_cast<float>(mHeightmap->mHeightmapDimensions.y));
-    int jend   = clamp(mIntersectionHeight + mIntersectionRadius, 0.0f, static_cast<float>(mHeightmap->mHeightmapDimensions.y));
-    int istart = clamp(mIntersectionWidth  - mIntersectionRadius, 0.0f, static_cast<float>(mHeightmap->mHeightmapDimensions.x));
-    int iend   = clamp(mIntersectionWidth  + mIntersectionRadius, 0.0f, static_cast<float>(mHeightmap->mHeightmapDimensions.x));
+    int jstart = clamp(mIntersectionHeight - mIntersectionRadius, 0.0f, static_cast<float>(mHeightmap->mHeightmapDimensions.y-1));
+    int jend   = clamp(mIntersectionHeight + mIntersectionRadius, 0.0f, static_cast<float>(mHeightmap->mHeightmapDimensions.y-1));
+    int istart = clamp(mIntersectionWidth  - mIntersectionRadius, 0.0f, static_cast<float>(mHeightmap->mHeightmapDimensions.x-1));
+    int iend   = clamp(mIntersectionWidth  + mIntersectionRadius, 0.0f, static_cast<float>(mHeightmap->mHeightmapDimensions.x-1));
 
     for (unsigned int j = jstart; j < jend; j++){
 
