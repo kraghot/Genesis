@@ -303,7 +303,7 @@ std::vector<glm::vec2> Biomes::poissonDiskSampling(float radius, int k, glm::vec
         p0 = {rand() % (unsigned int)start_end.x, rand() % (unsigned int)start_end.y};
         p0 = {startpos.x + p0.x, startpos.y + p0.y};
         attempts++;
-    }while((mHeightmap->mDisplacement.at(p0.y * mHeightmap->mHeightmapDimensions.x + p0.x) > 23 || mHeightmap->mDisplacement.at(p0.y * mHeightmap->mHeightmapDimensions.x + p0.x) <= 14) && attempts <= k);
+    }while((mHeightmap->mDisplacement.at(p0.y * mHeightmap->mHeightmapDimensions.x + p0.x) > 23 || mHeightmap->mDisplacement.at(p0.y * mHeightmap->mHeightmapDimensions.x + p0.x) <= 14 || mHeightmap->IsWaterMass(p0) ) && attempts <= k);
 
     if(attempts >= k)
         return takenPoints;
@@ -373,7 +373,7 @@ bool Biomes::isValidPoint(std::vector<std::vector<glm::vec2>>& grid, float cells
     if (p.x < startpos.x || p.x >= endpos.x || p.y < startpos.y || p.y >= endpos.y)
         return false;
 
-    else if (mHeightmap->mDisplacement.at((int)p.y * mHeightmap->mHeightmapDimensions.x + (int)p.x) > 23 || mHeightmap->mDisplacement.at((int)p.y * mHeightmap->mHeightmapDimensions.x + (int)p.x) <= 14)
+    else if (mHeightmap->mDisplacement.at((int)p.y * mHeightmap->mHeightmapDimensions.x + (int)p.x) > 23 || mHeightmap->mDisplacement.at((int)p.y * mHeightmap->mHeightmapDimensions.x + (int)p.x) <= 14 || mHeightmap->IsWaterMass(p))
         return false;
 
     if(rainy){

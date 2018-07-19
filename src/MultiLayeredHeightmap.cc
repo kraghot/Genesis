@@ -320,7 +320,7 @@ glm::vec3 MultiLayeredHeightmap::LocalToWorldCoordinates(glm::vec3 pos)
 
 bool MultiLayeredHeightmap::IsWaterMass(glm::ivec2 pos)
 {
-    return mRainFlowMap[LOCV(pos)] >= 0.98;
+    return mRainFlowMap[LOC(pos.x, pos.y)] > 0.8;
 }
 
 void MultiLayeredHeightmap::ComputeAmbientOcclusionMap()
