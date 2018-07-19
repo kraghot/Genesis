@@ -535,6 +535,8 @@ void GlowApp::renderMesh(std::vector<std::vector<glm::vec3>> mesh_positions, glm
         auto ab = glow::ArrayBuffer::create();
         auto mesh_vao1 = mMeshesArray[i + rainy_inc]->getCurrentVAO();
 
+
+        // Default scaling factors
         std::vector<glm::vec3> tmp = {glm::vec3(0.7f, 0.7f, 0.7f), glm::vec3(0.07f, 0.07f, 0.07f), glm::vec3(0.003f, 0.003f, 0.003f), glm::vec3(0.01f, 0.01f, 0.01f), glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(2.f, 2.f, 2.f)};
 
         std::vector<std::vector<glm::vec4>> transformation_matrix;
