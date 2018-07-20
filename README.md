@@ -36,6 +36,7 @@ Behind the scenes:
  - Multiple noise generators can be mixed together with different properties
  - Perlin noise and DiamondSquare noise are already implemented
  - In the master branch only the DiamondSquare is used as it is enough to get a realistic looking terrain
+ - Ambient occlusion map is automatically generated for the terrain
 
 As a result, you will get a realistic looking island terrain which is round-shaped and without remaining square-shaped heightmap leftovers.
  - Multiple filters can also be used to process the terrain after it has been generated
