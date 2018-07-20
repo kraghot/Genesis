@@ -67,7 +67,7 @@ void GlowApp::init()
     setTitle("Genesis");
 
     TwAddButton(tweakbar(), "terrain", GlowApp::randomTerrain, NULL, " label='Generate random terrain '");
-    TwAddVarCB(tweakbar(), "Seed", TW_TYPE_UINT16, GlowApp::setSeedTerrain, GlowApp::getSeedTerrain, &seed, "step=1");
+//    TwAddVarCB(tweakbar(), "Seed", TW_TYPE_UINT16, GlowApp::setSeedTerrain, GlowApp::getSeedTerrain, &seed, "step=1");
     TwAddVarRW(tweakbar(), "Edit mode", TW_TYPE_BOOLCPP, &mEditMode, "key=l label='Edit Mode'");
 
     TwEnumVal TextureChoices[] = { {TEXTURE_JUNGLE, "Jungle ground"},{TEXTURE_FOREST, "Forest ground"}, {TEXTURE_ROCK, "Rock"}, {TEXTURE_BEACH, "Beach sand"} };
