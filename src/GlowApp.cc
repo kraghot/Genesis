@@ -115,7 +115,7 @@ void GlowApp::init()
     mFramebuffer = Framebuffer::create("fColor", mTargetColor, mTargetDepth);
 
     //setup background
-    auto pbt = util::pathOf(__FILE__) + "/../bin/cubemap/sea/";
+    std::string pbt = "cubemap/sea/";
     mBackgroundTexture = glow::TextureCubeMap::createFromData(
                 glow::TextureData::createFromFileCube(pbt + "posx.jpg",
                                                       pbt + "negx.jpg",
