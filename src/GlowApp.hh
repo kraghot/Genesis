@@ -107,11 +107,18 @@ private:
     typedef enum { NS, SN, WE, EW} SelectedWind;
     SelectedWind m_selectedWind = NS;
 
-    void renderMesh(std::vector<std::vector<glm::vec3>> mesh_positions, glm::mat4 view, glm::mat4 proj, bool rainy);
+    void renderMesh(glow::SharedProgram shader, std::vector<std::vector<glm::vec3>> mesh_positions, glm::mat4 view, glm::mat4 proj, bool rainy);
     std::vector<std::vector<glm::vec3>> getMeshPositions(bool rainy);
 
     std::vector<std::vector<glm::vec3>> rainforest;
     std::vector<std::vector<glm::vec3>> forest;
+
+    //shadow map
+    void createShadowMap();
+    glow::SharedTextureRectangle mShadowMap;
+    glow::SharedFramebuffer mShadowFramebuffer;
+
+    glow::SharedProgram mShadowShader;
 
 
 public:

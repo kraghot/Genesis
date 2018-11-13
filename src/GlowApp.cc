@@ -163,6 +163,17 @@ void GlowApp::init()
 
     rainforest = getMeshPositions(true);
     forest = getMeshPositions(false);
+
+    //shadow map
+    mShadowShader = glow::Program::createFromFiles({"shader/mesh.vsh", "shader/shadow.fsh"});
+    createShadowMap();
+}
+
+void GlowApp::createShadowMap(){
+    mShadowMap = glow::TextureRectangle::create(512, 512, GL_DEPTH_COMPONENT32);
+    mShadowMap->bind().setWrap(GL_CLAMP_TO_EDGE, GL_DEPTH_COMPONENT32);
+
+    mShadowFramebuffer = glow::Framebuffer::createDepthOnly(mShadowMap);
 }
 
 void GlowApp::onResize(int w, int h)
@@ -206,6 +217,24 @@ void GlowApp::render(float elapsedSeconds)
     auto camPos = cam->getPosition();
 
     auto lightPos = normalize(mLightDir) * mLightDis;
+
+    // Compute shadow matrices
+     glm::mat4 shadowProjMatrix = glm::ortho<float>(-100,100,-100,100,-100,500);
+     glm::mat4 shadowViewMatrix = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0, 1, 0));
+     glm::mat4 shadowViewProjMatrix = shadowProjMatrix * shadowViewMatrix;
+
+
+    {
+        auto fb = mShadowFramebuffer->bind();
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+            if(!mEditMode){
+                if(!rainforest.empty())
+                    renderMesh(mShadowShader, rainforest, shadowViewMatrix, shadowProjMatrix, true);
+                if(!forest.empty())
+                    renderMesh(mShadowShader, forest, shadowViewMatrix, shadowProjMatrix, false);
+            }
+    }
 
     {
         GLOW_SCOPED(enable, GL_PRIMITIVE_RESTART);
@@ -415,9 +444,9 @@ void GlowApp::render(float elapsedSeconds)
         {
             if(!mEditMode){
                 if(!rainforest.empty())
-                    renderMesh(rainforest, view, proj, true);
+                    renderMesh(meshShader, rainforest, view, proj, true);
                 if(!forest.empty())
-                    renderMesh(forest, view, proj, false);
+                    renderMesh(meshShader, forest, view, proj, false);
             }
         }
 
@@ -506,13 +535,13 @@ void GlowApp::SetWindDirection(){
 }
 
 
-void GlowApp::renderMesh(std::vector<std::vector<glm::vec3>> mesh_positions, glm::mat4 view, glm::mat4 proj, bool rainy){
+void GlowApp::renderMesh(glow::SharedProgram shader, std::vector<std::vector<glm::vec3>> mesh_positions, glm::mat4 view, glm::mat4 proj, bool rainy){
 
     auto cam = getCamera();
     auto lightPos = normalize(mLightDir) * mLightDis;
     auto camPos = cam->getPosition();
 
-    auto mesh_shader = meshShader->use();
+    auto mesh_shader = shader->use();
     mesh_shader.setUniform("uView", view);
     mesh_shader.setUniform("uProj", proj);
     mesh_shader.setUniform("uLightPos", lightPos);
