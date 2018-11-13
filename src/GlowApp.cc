@@ -170,8 +170,8 @@ void GlowApp::init()
 }
 
 void GlowApp::createShadowMap(){
-    mShadowMap = glow::TextureRectangle::create(512, 512, GL_DEPTH_COMPONENT32);
-    mShadowMap->bind().setWrap(GL_CLAMP_TO_EDGE, GL_DEPTH_COMPONENT32);
+    mShadowMap = glow::TextureRectangle::create(4096, 4096, GL_DEPTH_COMPONENT32);
+    mShadowMap->bind().setWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
     mShadowFramebuffer = glow::Framebuffer::createDepthOnly(mShadowMap);
 }
@@ -219,10 +219,9 @@ void GlowApp::render(float elapsedSeconds)
     auto lightPos = normalize(mLightDir) * mLightDis;
 
     // Compute shadow matrices
-     glm::mat4 shadowProjMatrix = glm::ortho<float>(-100,100,-100,100,-100,500);
+     glm::mat4 shadowProjMatrix = glm::ortho<float>(-500,500,-500,500,-500,500);
      glm::mat4 shadowViewMatrix = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0, 1, 0));
-     glm::mat4 shadowViewProjMatrix = shadowProjMatrix * shadowViewMatrix;
-
+     glm::mat4 shadowViewProjMatrix = shadowProjMatrix * shadowViewMatrix; //glm::inverse(shadowViewMatrix)
 
     {
         auto fb = mShadowFramebuffer->bind();
@@ -341,6 +340,9 @@ void GlowApp::render(float elapsedSeconds)
             shader.setTexture("uAmbientOcclusionMap", mHeightmap.mAmbientOcclusionMap);
 
             shader.setUniform("fRenderHeight", mHeightmap.getMfHeightScale());
+
+            shader.setTexture("uShadowMap", mShadowMap);
+            shader.setUniform("uShadowViewProjMatrix", shadowViewProjMatrix);
 
             mHeightmap.GetVao()->bind().draw();
         }

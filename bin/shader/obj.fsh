@@ -11,6 +11,11 @@ uniform sampler2D uIndexMap;
 uniform float fRenderHeight;
 uniform bool uDrawDebugRain;
 
+uniform sampler2DRect uShadowMap;
+uniform mat4 uShadowViewProjMatrix;
+uniform mat4 uBiasMatrix;
+
+
 in vec3 vWorldPosition;
 in vec3 vNormal;
 in vec4 vColor;
@@ -22,7 +27,15 @@ in vec2 vHeightCoord;
 out vec4 fColor;
 
 void main()
+
 {
+    vec2 poissonDisk[4] = vec2[](
+      vec2( -0.94201624, -0.39906216 ),
+      vec2( 0.94558609, -0.76890725 ),
+      vec2( -0.094184101, -0.92938870 ),
+      vec2( 0.34495938, 0.29387760 )
+    );
+
     vec4 SplatmapColor = texture(uSplatmapTex, vHeightCoord);
     vec4 indexMap = texture(uIndexMap, vHeightCoord);
     float weights[4] = {SplatmapColor.r, SplatmapColor.g, SplatmapColor.b, SplatmapColor.a};
@@ -79,7 +92,36 @@ void main()
 
     float ambient = 0.1f * texture(uAmbientOcclusionMap, vHeightCoord).r;
 
-    fColor = pow(vFinalTexColor * (albedo + diffuse + specular + ambient), vec4(1/2.224));
+    //mat4 depthBiasMVP = uBiasMatrix * uShadowViewProjMatrix;
+
+    float visibility = 1.0f;
+
+    float bias = 0.005*tan(acos(dot(N, L))); // cosTheta is dot( n,l ), clamped between 0 and 1
+    bias = clamp(bias, 0.f, 0.01f);
+
+    vec4 shadowPos = uShadowViewProjMatrix * vec4(vWorldPosition, 1.0);
+    shadowPos.xyz /= shadowPos.w;
+    float shadowDepth = texture(uShadowMap, (shadowPos.xy * .5 + .5) * 4096.f).r;
+    float refDepth = shadowPos.z * .5 + .5;
+    //float inShadow = refDepth > shadowDepth? 1.0f : 0.0f;
+    float shadowFactor = float(refDepth <= shadowDepth + 0);
+
+    for (int i=0;i<4;i++){
+      if ( texture(uShadowMap, ((shadowPos.xy * .5 + .5) * 4096.f) + poissonDisk[i]/700.0 ).r  <  refDepth - bias ){
+        visibility-=0.2;
+      }
+    }
+
+//    if (shadowPos.w < 0.0f) // fix "behind-the-light"
+//        shadowFactor = 1;
+
+//    float visibility = 1.0f;
+//    if(texture(uShadowMap, shadowPos.xy).z < shadowPos.z)
+//        visibility = 0.f;
+
+
+
+    fColor = pow(vFinalTexColor * (albedo + (diffuse * visibility) + (specular * visibility) + ambient), vec4(1/2.224));
 
     if(vWorldPosition.y < 8)
     {
